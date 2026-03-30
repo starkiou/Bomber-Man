@@ -9,6 +9,10 @@ public class ClientHandler extends Thread {
 		this.socket=socket;
 	}
 	
+	public synchronized void send(String message) {
+		//TODO
+	}
+	
 	public void run() {
 		
 	}
