@@ -7,7 +7,6 @@
     <list default="true" id="ee2e9d6c-a439-4ef6-a465-aec82e937054" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/MenuController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/MenuController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/lobby-list.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/lobby-list.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
