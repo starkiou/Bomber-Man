@@ -1,4 +1,4 @@
-package org.example.clientside;
+package clientside.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

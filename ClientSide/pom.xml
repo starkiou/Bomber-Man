@@ -37,7 +37,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>org.example.clientside.Bomberman</mainClass>
+                    <mainClass>clientside.Bomberman</mainClass>
                 </configuration>
             </plugin>
         </plugins>

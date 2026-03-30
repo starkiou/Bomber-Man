@@ -1,4 +1,4 @@
-package org.example.clientside;
+package clientside;
 
 import javafx.application.Application;
 

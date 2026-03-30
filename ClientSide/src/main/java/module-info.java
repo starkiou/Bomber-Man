@@ -3,6 +3,10 @@ module org.example.clientside {
     requires javafx.fxml;
 
 
-    opens org.example.clientside to javafx.fxml;
-    exports org.example.clientside;
+    opens clientside to javafx.fxml;
+    exports clientside;
+    exports clientside.network;
+    opens clientside.network to javafx.fxml;
+    exports clientside.controllers;
+    opens clientside.controllers to javafx.fxml;
 }
