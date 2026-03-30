@@ -5,31 +5,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ee2e9d6c-a439-4ef6-a465-aec82e937054" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientSide/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientSide/src/main/java/module-info.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Common/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Common/src/main/java/org/example/Main.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ServerSide/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/sae_s4_groupe_b/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/HelloApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/sae_s4_groupe_b/HelloController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/HelloController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/sae_s4_groupe_b/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/Launcher.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/org/example/sae_s4_groupe_b/hello-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/org/example/clientside/hello-view.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/org/example/Main.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="package-info" />
+        <option value="Enum" />
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -41,6 +33,10 @@
       </MavenGeneralSettings>
     </option>
   </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -51,13 +47,14 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Application.HelloApplication.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "development",
+    "git-widget-placeholder": "common-logger",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/milos/Desktop/SAE/sae_s4_groupe_b",
@@ -74,24 +71,10 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
-    <configuration default="true" type="JetRunConfigurationType">
-      <module name="sae_s4_groupe_b" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <module name="sae_s4_groupe_b" />
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
-  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.27397.103" />
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
       </set>
     </attachedChunks>
   </component>
