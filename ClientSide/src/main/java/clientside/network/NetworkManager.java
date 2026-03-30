@@ -1,4 +1,4 @@
-package org.example.clientside;
+package clientside.network;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -22,7 +22,7 @@ public class NetworkManager {
         this.out = new ObjectOutputStream(socket.getOutputStream());
 
         // Lancer le thread qui écoute le serveur ici
-        new Thread(new NetworkListener(socket)).start();
+        //new Thread(new NetworkListener(socket)).start();
     }
 
     public void sendMessage(Object msg) {
@@ -32,5 +32,15 @@ public class NetworkManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+
+    public String getNickname() {
+        return this.nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 }
