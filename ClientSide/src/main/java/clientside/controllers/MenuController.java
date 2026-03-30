@@ -37,10 +37,6 @@ public class MenuController {
             showError("Erreur", e.getMessage());
             e.printStackTrace();
         }
-
-
-
-
     }
 
     private void showError(String title, String message) {
