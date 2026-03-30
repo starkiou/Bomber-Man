@@ -299,3 +299,15 @@ Message de commit pour ajouter ce fichier :
 ```
 docs: ajout guide Git pour l'équipe
 ```
+
+## Conventions de nommage Java — obligatoires
+
+Le Checkstyle bloque la MR si ces règles ne sont pas respectées.
+
+| Ce que c'est | Format | Exemple |
+|---|---|---|
+| Classe, Interface, Enum | `PascalCase` | `ClientHandler`, `MazeFactory` |
+| Méthode | `camelCase` | `sendMessage()`, `getPlayerById()` |
+| Variable | `camelCase` | `playerList`, `bombRadius` |
+| Constante (`static final`) | `UPPER_SNAKE_CASE` | `MAX_BOMBS`, `DEFAULT_DELAY` |
+| Package | tout en minuscules | `common.network`, `server.lobby` |
