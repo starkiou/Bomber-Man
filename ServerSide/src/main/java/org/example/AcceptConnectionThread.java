@@ -13,9 +13,7 @@ public class AcceptConnectionThread extends Thread {
 	
 	
 	
-	public void stopAccept() {
-		this.mustContinueAccept = false;
-	}
+	
 	
 	public AcceptConnectionThread(ServerManager serverMain, ServerSocket serverSocket) {
 		this.serverSocket=serverSocket;

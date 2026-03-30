@@ -9,12 +9,17 @@ public class ServerManager {
 	private List<ClientHandler> listClient = Collections.synchronizedList(new ArrayList<ClientHandler>());
 	private AcceptConnectionThread acceptConnectionThread;
 	
-    public ServerManager() {
-    	acceptConnectionThread = new AcceptConnectionThread(this, 0);
+	
+	
+    public ServerManager(int port) {
+    	acceptConnectionThread = new AcceptConnectionThread(this, port);
+    	acceptConnectionThread.start();
         
     }
     
     public synchronized void addClientWithSocket(Socket socket) {
-    	listClient.add(new ClientHandler(socket));
+    	ClientHandler clientHandler = new ClientHandler(socket);
+    	listClient.add(clientHandler);
+    	clientHandler.start();
     }
 }
