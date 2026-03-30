@@ -1,7 +1,7 @@
 module org.example.clientside {
     requires javafx.controls;
     requires javafx.fxml;
-
+    requires Common;
 
     opens clientside to javafx.fxml;
     exports clientside;

@@ -14,15 +14,17 @@ public class ConnectionChoiceController {
 
     @FXML
     public void initialize() {
-        // Au chargement, on vérifie la variable statique du premier controller
+        // Sécurité pour éviter le crash si les ID FXML sont manquants
+        if (statusLabel == null || onlineButton == null) return;
+
         if (MenuController.isConnected) {
             statusLabel.setText("Connected to server");
             statusLabel.setTextFill(Color.GREEN);
-            onlineButton.setDisable(false); // Bouton cliquable
+            onlineButton.setDisable(false);
         } else {
             statusLabel.setText("Not connected");
             statusLabel.setTextFill(Color.RED);
-            onlineButton.setDisable(true);  // Bouton grisé
+            onlineButton.setDisable(true);
         }
     }
 
@@ -33,6 +35,8 @@ public class ConnectionChoiceController {
 
     @FXML
     public void onOfflineClick(ActionEvent event) {
+        // Cette ligne charge la vue du plateau de jeu
+        // C'est le GameBoardController qui dessinera le terrain au lancement
         SceneManager.getInstance().loadScene("game-board.fxml");
     }
 }
