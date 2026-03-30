@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ee2e9d6c-a439-4ef6-a465-aec82e937054" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/SceneManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/Bomberman.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/Bomberman.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/Launcher.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/MenuController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/MenuController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,6 +42,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Application.AppClient.executor": "Run",
     "Application.Bomberman.executor": "Run",
     "Application.HelloApplication.executor": "Run",
     "Application.Launcher.executor": "Run",
@@ -67,6 +68,15 @@
   }
 }]]></component>
   <component name="RunManager">
+    <configuration name="AppClient" type="Application" factoryName="Application">
+      <option name="ALTERNATIVE_JRE_PATH" value="openjdk-25" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="MAIN_CLASS_NAME" value="clientside.Launcher" />
+      <module name="ClientSide" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="JetRunConfigurationType">
       <module name="sae_s4_groupe_b" />
       <method v="2">
