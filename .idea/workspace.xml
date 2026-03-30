@@ -5,16 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ee2e9d6c-a439-4ef6-a465-aec82e937054" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/org/example/clientside/game-view.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/org/example/clientside/lobby-list.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/org/example/clientside/login-view.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/org/example/clientside/room-view.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/Bomberman.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/HelloController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/MenuController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/Launcher.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/org/example/clientside/hello-view.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/NetworkManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/org/example/clientside/NetworkManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,7 +47,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "interface",
+    "git-widget-placeholder": "client/interface",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/milos/Desktop/SAE/sae_s4_groupe_b",
@@ -102,7 +94,7 @@
       <updated>1774867472048</updated>
       <workItem from="1774867473213" duration="56000" />
       <workItem from="1774867576868" duration="1352000" />
-      <workItem from="1774868954858" duration="2808000" />
+      <workItem from="1774868954858" duration="3152000" />
     </task>
     <servers />
   </component>
