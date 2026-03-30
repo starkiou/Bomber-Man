@@ -2,49 +2,69 @@ package clientside.controllers;
 
 import clientside.SceneManager;
 import clientside.network.NetworkManager;
+import javafx.animation.PauseTransition;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 public class MenuController {
+    // Variable simple et fondamentale pour stocker l'état
+    public static boolean isConnected = false;
 
-    public TextField usernameField;
+    private static final int MAX_USERNAME_LENGTH = 30;
+    private static final int RETRY_DURATION_MS = 3000;
+    private static final int SLEEP_BETWEEN_RETRY = 500;
+    private static final double REDIRECT_DELAY = 1.0;
 
-    @FXML
-    private Label debugText;
+    @FXML public TextField usernameField;
+    @FXML private Label debugText;
 
     @FXML
     public void onConnectButtonClick(ActionEvent actionEvent) {
-        debugText.setText("Connexion in progress...");
-        debugText.setTextFill(Color.RED);
-
         String username = usernameField.getText();
-        if (username.isBlank() || username.equals("")) {
-            showError("Erreur", "Username can't be blank !");
-            return;
-        } else if (username.length() >= 30) {
-            showError("Erreur", "Username too long");
+        if (username == null || username.isBlank()) {
+            updateDebugStatus("Username can't be blank!", Color.RED);
             return;
         }
 
-        try{
-            NetworkManager.getInstance().connect("127.0.0.1", 12345, username);
-            SceneManager.getInstance().loadScene("lobby-list.fxml");
-        }catch(Exception e){
-            showError("Erreur", e.getMessage());
-            e.printStackTrace();
-        }
+        updateDebugStatus("Connecting...", Color.BLUE);
+
+        Task<Boolean> connectionTask = new Task<>() {
+            @Override
+            protected Boolean call() {
+                long startTime = System.currentTimeMillis();
+                while (System.currentTimeMillis() - startTime < RETRY_DURATION_MS) {
+                    try {
+                        NetworkManager.getInstance().connect("127.0.0.1", 12345, username);
+                        return true;
+                    } catch (Exception e) {
+                        try { Thread.sleep(SLEEP_BETWEEN_RETRY); } catch (InterruptedException ie) { return false; }
+                    }
+                }
+                return false;
+            }
+        };
+
+        connectionTask.setOnSucceeded(e -> {
+            isConnected = connectionTask.getValue(); // On stocke le résultat ici
+            if (isConnected) {
+                SceneManager.getInstance().loadScene("connection-choice.fxml");
+            } else {
+                updateDebugStatus("Connection failed. Entering anyway...", Color.RED);
+                PauseTransition delay = new PauseTransition(Duration.seconds(REDIRECT_DELAY));
+                delay.setOnFinished(event -> SceneManager.getInstance().loadScene("connection-choice.fxml"));
+                delay.play();
+            }
+        });
+        new Thread(connectionTask).start();
     }
 
-    private void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private void updateDebugStatus(String message, Color color) {
+        debugText.setText(message);
+        debugText.setTextFill(color);
     }
-
 }
