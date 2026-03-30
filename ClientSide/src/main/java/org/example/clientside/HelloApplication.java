@@ -1,4 +1,4 @@
-package org.example.sae_s4_groupe_b;
+package org.example.clientside;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

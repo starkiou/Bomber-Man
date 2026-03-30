@@ -1,4 +1,4 @@
-package org.example.sae_s4_groupe_b;
+package org.example.clientside;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
