@@ -8,7 +8,9 @@ public class NetworkManager {
     private static NetworkManager instance;
     private Socket socket;
     private ObjectOutputStream out;
+
     private String nickname;
+    private boolean connected;
 
     // Singleton : une seule instance pour toute l'appli
     public static NetworkManager getInstance() {
@@ -34,13 +36,19 @@ public class NetworkManager {
         }
     }
 
-
-
     public String getNickname() {
         return this.nickname;
     }
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public boolean isConnected() {
+        return this.connected;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
     }
 }

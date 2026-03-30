@@ -5,6 +5,7 @@ import clientside.network.NetworkManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
@@ -12,6 +13,7 @@ import javafx.scene.paint.Color;
 public class MenuController {
 
     public TextField usernameField;
+    public Button playOnlineButton;
 
     @FXML
     private Label debugText;
@@ -47,4 +49,16 @@ public class MenuController {
         alert.showAndWait();
     }
 
+    public void onSkipConnectClick(ActionEvent actionEvent) {
+        NetworkManager.getInstance().setNickname("Guest");
+        SceneManager.getInstance().loadScene("gamemode-view.fxml");
+    }
+
+    public void onPlayOnlineClick(ActionEvent actionEvent) {
+        //TODO
+    }
+
+    public void onPlayOfflineClick(ActionEvent actionEvent) {
+        //TODO
+    }
 }

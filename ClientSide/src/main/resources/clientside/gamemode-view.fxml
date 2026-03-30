@@ -8,16 +8,14 @@
 <?import javafx.scene.control.TextField?>
 <VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="clientside.controllers.MenuController">
-  <padding>
-    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-  </padding>
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
 
-    <Label text="Bomberman" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+    <Label text="Select a gamemode" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
 
-    <TextField fx:id="usernameField" prefWidth="100.0" maxWidth="150.0" promptText="Enter your name..."/>
-
-    <Button text="Se connecter" onAction="#onConnectButtonClick"/>
-    <Button text="Jouer en Local" onAction="#onSkipConnectClick" />
+    <Button fx:id="playOfflineButton" text="Play offline" onAction="#onPlayOfflineClick"/>
+    <Button fx:id="playOnlineButton" text="Play Online" onAction="#onPlayOnlineClick" disable="true" />
 
     <Label fx:id="debugText" text="debug"/>
 </VBox>
