@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+  "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+  "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+  <property name="severity" value="error"/>
+  <property name="fileExtensions" value="java"/>
+
+  <!-- Pas de tabulations, uniquement des espaces -->
+  <module name="FileTabCharacter"/>
+
+  <module name="TreeWalker">
+
+    <!-- ─── Nommage ─────────────────────────────────────── -->
+    <!-- Classes en PascalCase -->
+    <module name="TypeName"/>
+    <!-- Méthodes et variables en camelCase -->
+    <module name="MethodName"/>
+    <module name="LocalVariableName"/>
+    <!-- Constantes en UPPER_SNAKE_CASE -->
+    <module name="ConstantName"/>
+
+    <!-- ─── Structure ────────────────────────────────────── -->
+    <!-- Accolades obligatoires partout -->
+    <module name="NeedBraces"/>
+    <!-- Blocs vides interdits (catch vide etc.) -->
+    <module name="EmptyBlock">
+      <property name="option" value="text"/>
+    </module>
+    <!-- Méthodes max 60 lignes -->
+    <module name="MethodLength">
+      <property name="max" value="60"/>
+    </module>
+    <!-- Classes max 300 lignes -->
+    <module name="FileLength">
+      <property name="max" value="300"/>
+    </module>
+    <!-- Max 4 paramètres par méthode -->
+    <module name="ParameterNumber">
+      <property name="max" value="4"/>
+    </module>
+
+    <!-- ─── Bonnes pratiques ─────────────────────────────── -->
+    <!-- Pas de nombres magiques (sauf 0, 1, -1) -->
+    <module name="MagicNumber">
+      <property name="ignoreNumbers" value="0, 1, -1, 2"/>
+    </module>
+    <!-- Attributs de classe privés obligatoires -->
+    <module name="VisibilityModifier">
+      <property name="packageAllowed" value="false"/>
+      <property name="protectedAllowed" value="true"/>
+    </module>
+    <!-- Pas de star imports (import java.util.*) -->
+    <module name="AvoidStarImport"/>
+    <!-- Imports inutilisés interdits -->
+    <module name="UnusedImports"/>
+    <!-- equals() sans hashCode() interdit -->
+    <module name="EqualsHashCode"/>
+    <!-- Switch sans default interdit -->
+    <module name="MissingSwitchDefault"/>
+
+    <!-- ─── Espacement ───────────────────────────────────── -->
+    <module name="WhitespaceAround"/>
+    <module name="NoWhitespaceAtEndOfLine"/>
+
+  </module>
+</module>
