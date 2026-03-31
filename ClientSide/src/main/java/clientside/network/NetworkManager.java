@@ -22,7 +22,7 @@ public class NetworkManager {
         this.out = new ObjectOutputStream(socket.getOutputStream());
 
         // Lancer le thread qui écoute le serveur ici
-        //new Thread(new NetworkListener(socket)).start();
+        new Thread(new NetworkListener(socket)).start();
     }
 
     public void sendMessage(Object msg) {
