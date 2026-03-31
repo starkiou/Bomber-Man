@@ -1,4 +1,4 @@
-package main.java.model.entity;
+package model.entity;
 
 public enum Direction {
     UP,

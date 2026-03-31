@@ -1,8 +1,8 @@
-package main.java.model.entity;
+package model.entity;
 
 import model.maze.CellType;
 
-public class Player extends Entity{
+public class Player extends Entity {
     private int hp;
     private double speed;
     private int maxBombs;
@@ -11,16 +11,34 @@ public class Player extends Entity{
     private long lastBombRegenTime;
     private static final long REGEN_TIME_MS = 5000;
 
-    public Player(int ID, int x, int y, boolean isSolid, int hp, double speed, int maxBombs, int currentBombs) {
-        super(ID, x, y, isSolid);
+    public Player(int id, int x, int y, int hp, double speed, int maxBombs) {
+        super(id, x, y, false);
         this.hp = hp;
         this.speed = speed;
         this.maxBombs = maxBombs;
-        this.currentBombs = currentBombs;
+        this.currentBombs = maxBombs;
         this.lastBombRegenTime = System.currentTimeMillis();
     }
 
-    // ─── movement ──────────────────────────────────────────────────────────
+    // ─── Getters ─────────────────────────────────────────────────────────────
+
+    public int getHp() {
+        return hp;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public int getMaxBombs() {
+        return maxBombs;
+    }
+
+    public int getCurrentBombs() {
+        return currentBombs;
+    }
+
+    // ─── Movement ────────────────────────────────────────────────────────────
 
     public void deplacement(CellType[][] grid, Direction dir) {
         int nextX = this.x;
@@ -44,7 +62,7 @@ public class Player extends Entity{
         }
     }
 
-    // ─── life ──────────────────────────────────────────────────────────
+    // ─── Life ────────────────────────────────────────────────────────────────
 
     public void takeDamage(int amount) {
         this.hp = Math.max(0, this.hp - amount);
@@ -77,12 +95,11 @@ public class Player extends Entity{
         if (currentTime - lastBombRegenTime >= REGEN_TIME_MS) {
             currentBombs++;
             System.out.println("Bombe récupérée ! Total : " + currentBombs);
-
             lastBombRegenTime = currentTime;
         }
     }
 
-    // ─── Logic ──────────────────────────────────────────────────────────────
+    // ─── Logic ───────────────────────────────────────────────────────────────
 
     // à mettre dans la boucle de gameplay
     public void update() {

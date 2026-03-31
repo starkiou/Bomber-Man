@@ -1,23 +1,25 @@
-package main.java.model.entity;
+package model.entity;
 
-import  model.maze.CellType;
+import model.maze.CellType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Bomb extends Entity{
+public class Bomb extends Entity {
     private int ownerID;
     private int radius;
     private long placedTime;
     private int explosionDelay;
     private boolean exploded = false;
 
-    public Bomb(int ID, int x, int y, boolean isSolid, int ownerID, int radius, int explosionDelay) {
-        super(ID, x, y, isSolid);
+    public Bomb(int id, int x, int y, int ownerID, int radius, int explosionDelay) {
+        super(id, x, y, true);
         this.ownerID = ownerID;
         this.radius = radius;
         this.explosionDelay = explosionDelay;
         this.placedTime = System.currentTimeMillis();
     }
+
+    // ─── Getters ─────────────────────────────────────────────────────────────
 
     public boolean isExploded() {
         return exploded;
@@ -31,7 +33,7 @@ public class Bomb extends Entity{
         return ownerID;
     }
 
-    // ─── Logic ──────────────────────────────────────────────────────────────
+    // ─── Logic ───────────────────────────────────────────────────────────────
 
     // à mettre dans la boucle de gameplay
     public void update() {
@@ -49,7 +51,7 @@ public class Bomb extends Entity{
         System.out.println("BOOM ! La bombe " + id + " explose avec un rayon de " + radius);
     }
 
-    // ─── Explosion Logic ──────────────────────────────────────────────────────────────
+    // ─── Explosion Logic ──────────────────────────────────────────────────────
 
     public List<int[]> getExplosionArea(CellType[][] grid) {
         List<int[]> affectedCells = new ArrayList<>();
