@@ -1,14 +1,21 @@
 package clientside.network;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
+
+import network.message.ConnectionMessage;
+import network.message.Message;
+import network.message.MessageSerializer;
 
 public class NetworkManager {
     private static NetworkManager instance;
     private Socket socket;
-    private ObjectOutputStream out;
+    private OutputStream out;
     private String nickname;
+    
+    private final MessageSerializer serializer = new MessageSerializer();
+   
 
     // Singleton : une seule instance pour toute l'appli
     public static NetworkManager getInstance() {
@@ -19,15 +26,17 @@ public class NetworkManager {
     public void connect(String host, int port, String user) throws IOException {
         this.nickname = user;
         this.socket = new Socket(host, port);
-        this.out = new ObjectOutputStream(socket.getOutputStream());
+        this.out = socket.getOutputStream();
 
         // Lancer le thread qui écoute le serveur ici
         new Thread(new NetworkListener(socket)).start();
+        this.sendMessage(new ConnectionMessage(this.nickname));
     }
 
-    public void sendMessage(Object msg) {
+    public void sendMessage(Message message) {
         try {
-            out.writeObject(msg);
+        	byte[] data = serializer.serialize(message);
+        	out.write(data);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -42,5 +51,16 @@ public class NetworkManager {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+    
+    public void disconnect() {
+        try {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+            out = null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

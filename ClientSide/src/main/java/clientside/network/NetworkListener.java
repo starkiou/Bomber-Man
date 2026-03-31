@@ -1,11 +1,17 @@
 package clientside.network;
 
-import java.io.ObjectInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+
+import network.message.Message;
+import network.message.MessageSerializer;
 
 public class NetworkListener implements Runnable {
     private final Socket socket;
     private boolean running = true;
+    private final MessageSerializer serializer = new MessageSerializer();
 
     public NetworkListener(Socket socket) {
         this.socket = socket;
@@ -13,16 +19,33 @@ public class NetworkListener implements Runnable {
 
     @Override
     public void run() {
-        try (ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
+        try (InputStream in = socket.getInputStream()) {
             while (running) {
                 // On attend un message du serveur (bloquant)
-                Object message = in.readObject();
-
-                handleMessage(message); //On traite le mess dedans
+                int type = in.read();
+                byte[] lengthBytes = in.readNBytes(4);
+                if (lengthBytes.length < 4) break;
+                int length = ByteBuffer.wrap(lengthBytes).getInt();
+                
+                byte[] dataBytes = in.readNBytes(length);
+                if (dataBytes.length < length) break;
+                
+                ByteBuffer buffer = ByteBuffer.allocate(1 + 4 + length);
+                buffer.put((byte) type);
+                buffer.putInt(length);
+                buffer.put(dataBytes);
+                
+                Message message = serializer.deserialize(buffer.array());
+                
+                if (message != null) {
+                    handleMessage(message); //On traite le mess dedans
+                } 
             }
         } catch (Exception e) {
             System.err.println("Connexion perdue avec le serveur.");
             e.printStackTrace();
+        } finally {
+            stop();
         }
     }
 
@@ -34,5 +57,14 @@ public class NetworkListener implements Runnable {
 
     public void stop() {
         this.running = false;
+        try {
+            if (!socket.isClosed()) socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+    
+    
+    
+    
 }
