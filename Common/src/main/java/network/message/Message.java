@@ -3,7 +3,7 @@ import org.json.JSONObject;
 
 public interface Message {
 	
-	public String getData();
+	public JSONObject getData();
 	
 	public MessageType getMessageType();
 }
