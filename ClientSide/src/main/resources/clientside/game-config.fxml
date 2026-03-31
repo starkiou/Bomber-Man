@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="clientside.controllers.GameConfigController">
+    <Label text="Game Settings" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+    <GridPane alignment="CENTER" hgap="10" vgap="10">
+        <Label text="Maze Size:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <ComboBox fx:id="sizePresetCombo" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Lives:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="livesField" text="3" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Bombs per Player:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField fx:id="bombsField" text="1" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Label text="Game Timer (sec):" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <TextField fx:id="timerField" text="180" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+    </GridPane>
+
+    <Button text="Start Game" onAction="#onStartGameClick" style="-fx-base: #2ecc71; -fx-text-fill: white;"/>
+</VBox>
