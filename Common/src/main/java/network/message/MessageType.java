@@ -6,7 +6,11 @@ public enum MessageType {
     MOVE(3),
     BOMB_PLACE(4),
     GAME_STATE(5),
-    LOBBY_UPDATE(6);
+    GET_ROOM_UPDATE_REQUEST(6),
+    ROOM_LIST_UPDATE(7),
+	GET_ROOM_LIST_UPDATE(8),
+	READY_UPDATE(9),
+	ROOM_CREATION(10);
 
     private final byte id;
 

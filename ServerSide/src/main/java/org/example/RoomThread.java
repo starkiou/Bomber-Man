@@ -15,9 +15,24 @@ public class RoomThread extends Thread {
 	
 	private boolean readyToLaunch = false;
 	
+	private boolean inGame = false;
+	
+	private int maxPlayer;
+	
+	
+	
+	public RoomThread(int maxPlayer) {
+		this.maxPlayer=maxPlayer;
+	}
+	
+	
+	
+	
+	
 	public void addClient(ClientHandler clientHandler) {
 		listClient.add(clientHandler);
 	}
+	
 	
 
 	@Override
@@ -43,10 +58,40 @@ public class RoomThread extends Thread {
 		}
 	}
 	
-	private void broadcast() {
+	public synchronized void broadcast(Message message) {
 		for(ClientHandler client : listClient) {
-//			client.send();
+			client.addMessage(message);
 		}
+	}
+
+
+
+	public boolean isInGame() {
+		return inGame;
+	}
+
+
+
+	public void setInGame(boolean inGame) {
+		this.inGame = inGame;
+	}
+
+
+
+	public int getMaxPlayers() {
+		return maxPlayer;
+	}
+
+
+
+	public void setMaxPlayer(int maxPlayer) {
+		this.maxPlayer = maxPlayer;
+	}
+
+
+
+	public int getPlayerCount() {
+		return this.listClient.size();
 	}
 	
 	

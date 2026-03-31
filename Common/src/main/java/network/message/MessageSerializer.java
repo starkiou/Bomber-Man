@@ -35,6 +35,13 @@ public class MessageSerializer {
         switch(type) {
             case CONNECTION:
                 return new ConnectionMessage(dataJson);
+                
+            case GET_ROOM_LIST_UPDATE:
+                return new GetRoomMessage();
+                
+            case ROOM_CREATION:
+            	return new RoomCreationMessage(dataJson);
+                
             case CHAT:
             	break;
 
@@ -47,7 +54,7 @@ public class MessageSerializer {
             case GAME_STATE:
             	break;
 
-            case LOBBY_UPDATE:
+            case ROOM_LIST_UPDATE:
             	break;
 
             default:
