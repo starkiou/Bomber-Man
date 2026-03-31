@@ -21,4 +21,9 @@ public class ConnectionMessage implements Message {
 		return MessageType.CONNECTION;N
 	}
 
+	@Override
+	public String getData() {
+		return "Pseudo: "+this.getPseudo();
+	}
+
 }
