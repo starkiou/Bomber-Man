@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="clientside.controllers.ConnectionChoiceController">
+    <children>
+        <Label fx:id="statusLabel" text="Checking status..." style="-fx-font-size: 18px;"/>
+
+        <Label text="Select Game Mode" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+        <Button fx:id="onlineButton" text="Play Online" prefWidth="150.0" onAction="#onOnlineClick"/>
+        <Button text="Play Offline" prefWidth="150.0" onAction="#onOfflineClick"/>
+    </children>
+</VBox>
