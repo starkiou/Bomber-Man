@@ -1,5 +1,7 @@
 package network.message;
 
+import org.json.JSONObject;
+
 public class ConnectionMessage implements Message {
 	
 	private String pseudo;
@@ -8,6 +10,10 @@ public class ConnectionMessage implements Message {
 		this.pseudo=pseudo;
 	}
 	
+	public ConnectionMessage(JSONObject dataJson) {
+		this.pseudo = dataJson.getString("pseudo");
+	}
+
 	public void setPseudo(String pseudo) {
 		this.pseudo = pseudo;
 	}
@@ -22,13 +28,11 @@ public class ConnectionMessage implements Message {
 	}
 
 	@Override
-	public String getData() {
-		return "Pseudo: "+this.getPseudo();
+	public JSONObject getData() {
+		JSONObject obj = new JSONObject();
+	    obj.put("pseudo", this.getPseudo());
+	    return obj;
 	}
 
-	@Override
-	public String getData() {
-		return "Pseudo: "+this.getPseudo();
-	}
 
 }
