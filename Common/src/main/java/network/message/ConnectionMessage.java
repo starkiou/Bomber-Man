@@ -18,7 +18,12 @@ public class ConnectionMessage implements Message {
 
 	@Override
 	public MessageType getMessageType() {
-		return MessageType.CONNECTION;N
+		return MessageType.CONNECTION;
+	}
+
+	@Override
+	public String getData() {
+		return "Pseudo: "+this.getPseudo();
 	}
 
 }
