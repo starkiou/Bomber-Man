@@ -26,7 +26,7 @@ public class ServerMessageHandler {
 			List<RoomInfoDTO> roomInfos = new ArrayList<>();
 		    for (RoomThread room : serverManager.getRooms()) {
 		        roomInfos.add(new RoomInfoDTO(
-		            room.getName(),
+		            room.getRoomId(),
 		            room.getPlayerCount(),
 		            room.getMaxPlayers(),
 		            room.isInGame()
@@ -46,6 +46,10 @@ public class ServerMessageHandler {
 		case MOVE:
 			break;
 		case READY_UPDATE:
+			break;
+		case GET_ROOM_UPDATE:
+			break;
+		default:
 			break;
 		
 		}

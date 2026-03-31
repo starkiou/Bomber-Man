@@ -1,23 +1,22 @@
-// RoomInfoDTO.java
 package network.message;
 
 import org.json.JSONObject;
 
 public class RoomInfoDTO {
-    private String name;
+    private int id;
     private int currentPlayers;
     private int maxPlayers;
     private boolean inGame;
 
-    public RoomInfoDTO(String name, int currentPlayers, int maxPlayers, boolean inGame) {
-        this.name = name;
+    public RoomInfoDTO(int id, int currentPlayers, int maxPlayers, boolean inGame) {
+        this.id = id;
         this.currentPlayers = currentPlayers;
         this.maxPlayers = maxPlayers;
         this.inGame = inGame;
     }
 
     public RoomInfoDTO(JSONObject json) {
-        this.name = json.getString("name");
+        this.id = json.getInt("id");
         this.currentPlayers = json.getInt("currentPlayers");
         this.maxPlayers = json.getInt("maxPlayers");
         this.inGame = json.getBoolean("inGame");
@@ -25,15 +24,15 @@ public class RoomInfoDTO {
 
     public JSONObject toJson() {
         JSONObject obj = new JSONObject();
-        obj.put("name", this.name);
+        obj.put("id", this.id);
         obj.put("currentPlayers", this.currentPlayers);
         obj.put("maxPlayers", this.maxPlayers);
         obj.put("inGame", this.inGame);
         return obj;
     }
 
-    public String getName() {
-    	return name;
+    public int getRoomId() {
+    	return id;
     }
     public int getCurrentPlayers() {
     	return currentPlayers;

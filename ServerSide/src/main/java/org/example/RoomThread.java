@@ -11,6 +11,8 @@ public class RoomThread extends Thread {
 
 	public boolean isLooping = true;
 	
+	public final int id;
+	
 	private static final int waitingPlayerTime = 1000;
 	
 	private boolean readyToLaunch = false;
@@ -21,8 +23,13 @@ public class RoomThread extends Thread {
 	
 	
 	
-	public RoomThread(int maxPlayer) {
+	public RoomThread(int maxPlayer, int id) {
 		this.maxPlayer=maxPlayer;
+		this.id = id;
+	}
+	
+	public int getRoomId() {
+		return this.id;
 	}
 	
 	

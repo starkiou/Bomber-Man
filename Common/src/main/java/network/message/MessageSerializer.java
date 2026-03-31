@@ -37,7 +37,7 @@ public class MessageSerializer {
                 return new ConnectionMessage(dataJson);
                 
             case GET_ROOM_LIST_UPDATE:
-                return new GetRoomMessage();
+                return new GetRoomListMessage();
                 
             case ROOM_CREATION:
             	return new RoomCreationMessage(dataJson);
@@ -55,10 +55,20 @@ public class MessageSerializer {
             	break;
 
             case ROOM_LIST_UPDATE:
-            	break;
-
+                return new RoomListUpdateMessage(dataJson);
+    			
+    		case READY_UPDATE:
+    			break;
+    			
+    		case ROOM_JOIN:
+    			return new RoomJoiningMessage(dataJson);
+    			
+    		case GET_ROOM_UPDATE:
+    			break;
+                
             default:
                 throw new RuntimeException("Type de message inconnu : " + type);
+		
         }
 		return null;
     

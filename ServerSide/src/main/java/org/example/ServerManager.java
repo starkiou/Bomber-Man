@@ -1,5 +1,6 @@
 package org.example;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,9 +22,19 @@ public class ServerManager {
 	
 	
     public ServerManager(int port) {
-    	acceptConnectionThread = new AcceptConnectionThread(this, port);
-    	acceptConnectionThread.start();
-    	this.setServerMessageHandler(new ServerMessageHandler(this));
+    	System.out.println("Lancement d'un serveur sur le port : "+port);
+    	try {
+			acceptConnectionThread = new AcceptConnectionThread(this, port);
+			acceptConnectionThread.start();
+	    	this.setServerMessageHandler(new ServerMessageHandler(this));
+	        System.out.println("Serveur lancé sur le port : "+port);
+		} catch (IOException e) {
+			e.printStackTrace();
+	        System.out.println("Echec de lancement de serveur sur le port : "+port);
+
+		}
+    	
+
         
     }
     
@@ -34,7 +45,7 @@ public class ServerManager {
     }
     
     public synchronized void createRoomAsClient(ClientHandler client, int nbMaxPlayers) {
-    	RoomThread newRoom = new RoomThread(nbMaxPlayers);
+    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId);
     	this.roomMap.put(Integer.valueOf(nextRoomId), newRoom);
     	this.nextRoomId++;
     	newRoom.start();
@@ -42,7 +53,7 @@ public class ServerManager {
     }
     
     public synchronized void createRoom(int nbMaxPlayers) {
-    	RoomThread newRoom = new RoomThread(nbMaxPlayers);
+    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId);
     	this.roomMap.put(Integer.valueOf(nextRoomId), newRoom);
     	this.nextRoomId++;
     	newRoom.start();
