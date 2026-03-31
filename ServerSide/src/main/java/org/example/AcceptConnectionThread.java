@@ -1,38 +1,35 @@
 package org.example;
 
+import model.logger.LogManager;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class AcceptConnectionThread extends Thread {
 
-
 	private boolean mustContinueAccept = true;
-	private ServerManager serverMain; 
+	private ServerManager serverMain;
 	private ServerSocket serverSocket;
-	
-	
-	
-	
-	
+
 	public AcceptConnectionThread(ServerManager serverMain, ServerSocket serverSocket) {
 		this.serverSocket=serverSocket;
 		this.serverMain=serverMain;
 	}
-	
+
 	public AcceptConnectionThread(ServerManager serverMain, int port) {
 		try {
 			this.serverSocket=new ServerSocket(port);
+			LogManager.getInstance().info("Serveur en écoute sur le port " + port);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LogManager.getInstance().error("Impossible de démarrer le serveur sur le port " + port + " : " + e.getMessage());
 		}
 		this.serverMain=serverMain;
 	}
-	
+
 	public void stopAcceptation() {
 		this.mustContinueAccept=false;
 	}
-	
+
 	public void run() {
 		try {
 			while(mustContinueAccept) {
@@ -40,10 +37,8 @@ public class AcceptConnectionThread extends Thread {
 				this.serverMain.addClientWithSocket(socket);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			LogManager.getInstance().error("Erreur d'acceptation de connexion : " + e.getMessage());
 		}
 	}
-	
-	
-	
+
 }
