@@ -5,7 +5,7 @@ stages:
 # ─── Job 1 : Compilation + Checkstyle ───────────────────────────────────────
 build-and-check:
   stage: build
-  image: maven:3.9-eclipse-temurin-21
+  image: maven:3.9-eclipse-temurin-25
   cache:
     paths:
       - .m2/repository
