@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="clientside.controllers.MenuController">
+  <padding>
+    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+  </padding>
+
+    <Label text="Bomberman" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+    <TextField fx:id="usernameField" prefWidth="150.0" maxWidth="200.0" promptText="Entrez votre pseudo..."/>
+
+    <TextField fx:id="ipAddressField" prefWidth="100.0" maxWidth="150.0" promptText="Ip du serveur"/>
+    <TextField fx:id="serverPortField" prefWidth="50.0" maxWidth="50.0" promptText="Port"/>
+
+    <Button text="Se connecter" onAction="#onConnectButtonClick"/>
+
+    <Label fx:id="debugText" text="debug"/>
+</VBox>
