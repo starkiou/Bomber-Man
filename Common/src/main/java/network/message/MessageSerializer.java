@@ -55,6 +55,7 @@ public class MessageSerializer {
             default:
                 throw new RuntimeException("Type de message inconnu : " + type);
         }
+		return null;
     
 		
 	};
