@@ -3,6 +3,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .kotlin
+.ai/
+.idea/
+
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -37,4 +40,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/.metadata/
+
 /.metadata/
