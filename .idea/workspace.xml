@@ -5,11 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ee2e9d6c-a439-4ef6-a465-aec82e937054" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/Launcher.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/MenuController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/MenuController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/network/NetworkListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/network/NetworkListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/login-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/login-view.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/model/entity/Bomb.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/model/entity/Bomb.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/model/entity/Direction.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/model/entity/Direction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/model/entity/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/model/entity/Entity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/model/entity/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/model/entity/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/module-info.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,10 +39,6 @@
       </MavenGeneralSettings>
     </option>
   </component>
-  <component name="McpProjectServerCommands">
-    <commands />
-    <urls />
-  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -66,8 +62,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "development",
-    "ignore.virus.scanning.warn.message": "true",
+    "git-widget-placeholder": "common-game-mechs",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/milos/Desktop/SAE/sae_s4_groupe_b",
@@ -98,8 +93,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.27397.103" />
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.25410.129" />
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-IU-251.25410.129" />
       </set>
     </attachedChunks>
   </component>
@@ -114,7 +109,7 @@
       <workItem from="1774867576868" duration="1352000" />
       <workItem from="1774868954858" duration="3152000" />
       <workItem from="1774944228440" duration="822000" />
-      <workItem from="1774948913138" duration="561000" />
+      <workItem from="1774970354750" duration="753000" />
     </task>
     <servers />
   </component>
@@ -132,8 +127,12 @@
       </map>
     </option>
   </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix(core): add log folder to gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix(core): add log folder to gitignore" />
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
 </project>
