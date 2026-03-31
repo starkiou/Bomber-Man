@@ -1,13 +1,20 @@
+<<<<<<< HEAD
 package model.entity;
 
 import model.maze.CellType;
 
 public class Player extends Entity {
+=======
+package main.java.model.entity;
+
+public class Player extends Entity{
+>>>>>>> 4aa410e (feat(game-mechanics): create classes skeleton)
     private int hp;
     private double speed;
     private int maxBombs;
     private int currentBombs;
 
+<<<<<<< HEAD
     private long lastBombRegenTime;
     private static final long REGEN_TIME_MS = 5000;
 
@@ -106,4 +113,13 @@ public class Player extends Entity {
         regenBombs();
     }
 
+=======
+    public Player(int ID, double x, double y, boolean isSolid, int hp, double speed, int maxBombs, int currentBombs) {
+        super(ID, x, y, isSolid);
+        this.hp = hp;
+        this.speed = speed;
+        this.maxBombs = maxBombs;
+        this.currentBombs = currentBombs;
+    }
+>>>>>>> 4aa410e (feat(game-mechanics): create classes skeleton)
 }
