@@ -41,7 +41,7 @@ public class RoomThread extends Thread {
 		}
 	}
 	
-	private void broadcast(Message message) {
+	private void broadcast() {
 		for(ClientHandler client : listClient) {
 //			client.send();
 		}
