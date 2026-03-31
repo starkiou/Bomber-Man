@@ -1,7 +1,7 @@
 package network.message;
 
 public enum MessageType {
-	CONNECT,
+	CONNECTION,
 	CHAT,
 	MOVE,
 	BOMB_PLACE,
