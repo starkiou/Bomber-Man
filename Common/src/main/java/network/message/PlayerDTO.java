@@ -16,7 +16,7 @@ public class PlayerDTO {
 	
 	public PlayerDTO(JSONObject datajason) {
 		this.id = datajason.getInt("id");
-		this.y = datajason.getInt("y");
+		this.y = datajason.getDouble("y");
 		this.x = datajason.getDouble("x");
 		this.isDead = datajason.getBoolean("isDead");
 	}

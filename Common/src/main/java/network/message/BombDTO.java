@@ -14,11 +14,11 @@ public class BombDTO {
 		this.timeRemaining = timeRemaining;
 	}
 	
-	public BombDTO(JSONObject datajason) {
-		this.id = datajason.getInt("id");
-		this.y = datajason.getInt("y");
-		this.x = datajason.getDouble("x");
-		this.timeRemaining = datajason.getInt("timeRemaining");
+	public BombDTO(JSONObject datajson) {
+		this.id = datajson.getInt("id");
+		this.y = datajson.getDouble("y");
+		this.x = datajson.getDouble("x");
+		this.timeRemaining = datajson.getInt("timeRemaining");
 	}
 
 	public int getId() {
