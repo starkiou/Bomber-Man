@@ -3,4 +3,6 @@ module Common {
 
     exports model.maze;
     exports model.entity;
+    exports network.message;
+    exports model.logger;
 }
