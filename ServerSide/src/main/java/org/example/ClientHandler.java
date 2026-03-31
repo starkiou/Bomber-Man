@@ -1,22 +1,18 @@
 package org.example;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import network.message.Message;
 import network.message.MessageSerializer;
 
 public class ClientHandler extends Thread {
 	private Socket socket;
+	
+	private final MessageSerializer serializer = new MessageSerializer();
 	
 	private final Queue<Message> messageQueue = new LinkedList<>();
     
@@ -36,18 +32,12 @@ public class ClientHandler extends Thread {
 		
 	}
 	
-	public synchronized void send(Message message) throws IOException {
-		MessageSerializer serializer = new MessageSerializer();
-		byte[] serializedMessage = serializer.serialize(message);
-		out.write(serializedMessage);
-		out.flush();
-	}
 	
 	public void run() {
 		try {
 			in = socket.getInputStream();
 	        out = this.socket.getOutputStream();
-
+	        startListeningThread();
 	        startSendingThread();
 	    } catch (IOException e) {
 	        System.out.println("Client a l'adresse " + socket.getInetAddress() + " deconnecte.");
@@ -94,12 +84,13 @@ public class ClientHandler extends Thread {
 	}
 	
 	public void addMessage(Message message) {
-		this.messageQueue.add(message);
+	    synchronized (messageQueue) {
+	        messageQueue.add(message);
+	    }
 	}
 	
 	private void startSendingThread() {
 		new Thread(() -> {
-			MessageSerializer serializer = new MessageSerializer();
             while (mustContinueListen) {
                 Message message = null;
                 synchronized (messageQueue) {
@@ -118,6 +109,41 @@ public class ClientHandler extends Thread {
                 }
             }
         }).start();
+	}
+	
+	private void startListeningThread() {
+	    new Thread(() -> {
+	        try {
+	            while (mustContinueListen) {
+
+	                int type = in.read();
+	                if (type == -1) break;
+
+	                byte[] lengthBytes = in.readNBytes(4);
+	                if (lengthBytes.length < 4) break;
+
+	                int length = java.nio.ByteBuffer.wrap(lengthBytes).getInt();
+
+	                byte[] dataBytes = in.readNBytes(length);
+	                if (dataBytes.length < length) break;
+
+	                java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocate(1 + 4 + length);
+	                buffer.put((byte) type);
+	                buffer.putInt(length);
+	                buffer.put(dataBytes);
+
+	                Message message = this.serializer.deserialize(buffer.array());
+
+	                if (message != null) {
+	                    System.out.println("Reçu: " + message.getMessageType());
+	                }
+	            }
+	        } catch (IOException e) {
+	            if (mustContinueListen) e.printStackTrace();
+	        } finally {
+	            closeConnection();
+	        }
+	    }).start();
 	}
 
 

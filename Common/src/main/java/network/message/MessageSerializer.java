@@ -9,8 +9,6 @@ public class MessageSerializer {
 	public byte[] serialize(Message message) {
 		byte typeByte = message.getMessageType().getId();
 
-		String stringMessage = message.getMessageType().name() + "|" + message.getData().toString();
-
 		byte[] dataBytes = message.getData().toString().getBytes(StandardCharsets.UTF_8);
 		
 		ByteBuffer buffer = ByteBuffer.allocate(1 + 4 + dataBytes.length);
@@ -25,11 +23,11 @@ public class MessageSerializer {
 	public Message deserialize(byte[] byteObject) {
 		ByteBuffer buffer = ByteBuffer.wrap(byteObject);
 
-        byte typeByte = buffer.get();   // lit l'ID
-        int length = buffer.getInt();   // lit la longueur du payload
+        byte typeByte = buffer.get();
+        int length = buffer.getInt();
 
         byte[] dataBytes = new byte[length];
-        buffer.get(dataBytes);          // lit les données
+        buffer.get(dataBytes);
 
         JSONObject dataJson = new JSONObject(new String(dataBytes, StandardCharsets.UTF_8));
         MessageType type = MessageType.fromId(typeByte);
