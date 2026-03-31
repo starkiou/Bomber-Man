@@ -186,6 +186,7 @@ def call_openrouter(prompt: str) -> str:
                     "role": "system",
                     "content": "Tu es un architecte logiciel senior spécialisé Java. "
                                "Tu fais des audits de code complets, concis et actionnables. "
+                               "Tu dois impérativement te baser sur le fichier SUJET.md fourni pour comprendre le contexte métier. "
                                "✅ = bien, ⚠️ = à améliorer, ❌ = problème critique."
                 },
                 {
@@ -205,6 +206,15 @@ def call_openrouter(prompt: str) -> str:
 def main():
     print("=== Full review du projet ===")
 
+    # Récupération du fichier SUJET.md
+    print("Récupération de SUJET.md...")
+    sujet_content = get_file_content("SUJET.md")
+    sujet_section = ""
+    if sujet_content:
+        sujet_section = f"\n─── CONTEXTE GLOBAL (SUJET.md) ──────────────────────────────\n{sujet_content}\n"
+    else:
+        print("⚠️ Attention : SUJET.md introuvable à la racine.")
+
     java_files = get_all_java_files()
     print(f"{len(java_files)} fichiers Java/Kotlin trouvés")
 
@@ -216,11 +226,13 @@ def main():
 
     prompt = f"""
 {PROJECT_CONTEXT}
-
+{sujet_section}
 ─── ÉTAT ACTUEL DU CODEBASE (branche development) ──────────
 {codebase}
 
 ─── CONSIGNES D'AUDIT ───────────────────────────────────────
+Avant de commencer, lis attentivement la section CONTEXTE GLOBAL (SUJET.md) pour avoir tout le contexte de l'application en tête.
+
 Fais un audit global du projet en 5 sections :
 
 1. **Patterns manquants ou mal implémentés**
@@ -236,7 +248,7 @@ Fais un audit global du projet en 5 sections :
    Code dupliqué, classes trop longues, méthodes trop complexes.
 
 5. **Priorités pour la suite**
-   Les 3 choses les plus importantes à corriger ou implémenter en premier.
+   Les 3 choses les plus importantes à corriger ou implémenter en premier par rapport aux attentes du SUJET.md.
 
 Sois direct. Max 30 lignes au total.
 """
