@@ -21,13 +21,23 @@ public class MenuController {
     private static final double REDIRECT_DELAY = 1.0;
 
     @FXML public TextField usernameField;
+    @FXML public TextField ipAddressField;
+    @FXML public TextField serverPortField;
     @FXML private Label debugText;
 
     @FXML
     public void onConnectButtonClick(ActionEvent actionEvent) {
         String username = usernameField.getText();
+        String ipAddress = ipAddressField.getText();
+        Integer port = Integer.parseInt(serverPortField.getText());
+
         if (username == null || username.isBlank()) {
             updateDebugStatus("Username can't be blank!", Color.RED);
+            return;
+        }
+
+        if (ipAddress == null || ipAddress.isBlank()) {
+            updateDebugStatus("IP address can't be blank!", Color.RED);
             return;
         }
 
@@ -39,7 +49,7 @@ public class MenuController {
                 long startTime = System.currentTimeMillis();
                 while (System.currentTimeMillis() - startTime < RETRY_DURATION_MS) {
                     try {
-                        NetworkManager.getInstance().connect("127.0.0.1", 12345, username);
+                        NetworkManager.getInstance().connect(ipAddress, 12345, username);
                         return true;
                     } catch (Exception e) {
                         try { Thread.sleep(SLEEP_BETWEEN_RETRY); } catch (InterruptedException ie) { return false; }
