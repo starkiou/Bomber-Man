@@ -37,8 +37,9 @@ public class ClientHandler extends Thread {
 		try {
 			in = socket.getInputStream();
 	        out = this.socket.getOutputStream();
-	        startListeningThread();
-	        startSendingThread();
+	        startSendingInAnotherThread();
+	        startListening();
+
 	    } catch (IOException e) {
 	        System.out.println("Client a l'adresse " + socket.getInetAddress() + " deconnecte.");
 	    } finally {
@@ -89,7 +90,7 @@ public class ClientHandler extends Thread {
 	    }
 	}
 	
-	private void startSendingThread() {
+	private void startSendingInAnotherThread() {
 		new Thread(() -> {
             while (mustContinueListen) {
                 Message message = null;
@@ -111,39 +112,37 @@ public class ClientHandler extends Thread {
         }).start();
 	}
 	
-	private void startListeningThread() {
-	    new Thread(() -> {
-	        try {
-	            while (mustContinueListen) {
+	private void startListening() {
+	    try {
+	        while (mustContinueListen) {
 
-	                int type = in.read();
-	                if (type == -1) break;
+	            int type = in.read();
+	            if (type == -1) break;
 
-	                byte[] lengthBytes = in.readNBytes(4);
-	                if (lengthBytes.length < 4) break;
+	            byte[] lengthBytes = in.readNBytes(4);
+	            if (lengthBytes.length < 4) break;
 
-	                int length = java.nio.ByteBuffer.wrap(lengthBytes).getInt();
+	            int length = java.nio.ByteBuffer.wrap(lengthBytes).getInt();
 
-	                byte[] dataBytes = in.readNBytes(length);
-	                if (dataBytes.length < length) break;
+	            byte[] dataBytes = in.readNBytes(length);
+	            if (dataBytes.length < length) break;
 
-	                java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocate(1 + 4 + length);
-	                buffer.put((byte) type);
-	                buffer.putInt(length);
-	                buffer.put(dataBytes);
+	            java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocate(1 + 4 + length);
+	            buffer.put((byte) type);
+	            buffer.putInt(length);
+	            buffer.put(dataBytes);
 
-	                Message message = this.serializer.deserialize(buffer.array());
+	            Message message = this.serializer.deserialize(buffer.array());
 
-	                if (message != null) {
-	                    System.out.println("Reçu: " + message.getMessageType());
-	                }
+	            if (message != null) {
+	                System.out.println("Reçu: " + message.getMessageType());
 	            }
-	        } catch (IOException e) {
-	            if (mustContinueListen) e.printStackTrace();
-	        } finally {
-	            closeConnection();
 	        }
-	    }).start();
+	    } catch (IOException e) {
+	        if (mustContinueListen) e.printStackTrace();
+	    } finally {
+	        closeConnection();
+	    }
 	}
 
 
