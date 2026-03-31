@@ -1,6 +1,6 @@
-package main.java.model.entity;
+package model.entity;
 
-public  abstract class Entity {
+public abstract class Entity {
     protected int id;
     protected int x;
     protected int y;
@@ -13,5 +13,20 @@ public  abstract class Entity {
         this.isSolid = isSolid;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public boolean isSolid() {
+        return isSolid;
+    }
 
 }
