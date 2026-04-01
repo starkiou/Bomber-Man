@@ -20,6 +20,7 @@ public class AIFactory {
                 ai.setMoveCooldownMs(200);
                 yield ai;
             }
+        };
     }
 
 }
