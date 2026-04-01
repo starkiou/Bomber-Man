@@ -85,7 +85,7 @@ public class LoginController {
         String username = usernameField.getText().isBlank() ? "Player1" : usernameField.getText();
         NetworkManager.getInstance().setNickname(username);
 
-        SceneManager.getInstance().loadScene("game-board.fxml");
+        SceneManager.getInstance().loadScene("game-config.fxml");
     }
 
     @FXML

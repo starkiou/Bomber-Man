@@ -41,7 +41,7 @@ public class NetworkManager {
         listenerThread.setDaemon(true); // Important : s'arrête quand l'appli ferme
         listenerThread.start();
 
-        this.sendMessage(new ConnectionMessage(this.nickname));
+        this.sendMessage(new ConnectionMessage(this.nickname, selectedCharacterId));
     }
 
     public void sendMessage(Message message) {
