@@ -13,6 +13,7 @@ import network.message.MessageSerializer;
 import network.message.MessageType;
 import network.message.RoomCreationMessage;
 import network.message.RoomInfoDTO;
+import network.message.RoomJoiningMessage;
 import network.message.RoomListUpdateMessage;
 
 /**
@@ -90,21 +91,62 @@ public class TestServer {
                 for (RoomInfoDTO room : listMsg.getRooms()) {
                     String statut = room.isInGame()  ? "EN COURS" :
                                     room.isFull()    ? "PLEIN"    : "EN ATTENTE";
-                    System.out.printf("  %-15s  %d/%d joueurs  [%s]%n",
-                    	room.getRoomName(),
+                    System.out.printf("  %s %s %d/%d joueurs  [%s]%n",
                         room.getRoomId(),
+                        room.getRoomName(),
                         room.getCurrentPlayers(),
                         room.getMaxPlayers(),
                         statut);
                 }
 
-                System.out.println("\n=== TEST RÉUSSI ===");
 
             } catch (java.net.SocketTimeoutException e) {
                 System.out.println("ERREUR : timeout — le serveur n'a pas répondu dans les " + TIMEOUT + "ms.");
                 System.out.println("Vérifie que le case GET_ROOM_LIST_UPDATE dans ServerMessageHandler envoie bien un RoomListUpdateMessage.");
             }
         }
+        
+        try (Socket socket = new Socket(HOST, PORT)) {
+            OutputStream out = socket.getOutputStream();
+            InputStream  in  = socket.getInputStream();
+            MessageSerializer serializer = new MessageSerializer();
+
+            // ----------------------------------------------------------------
+            // ÉTAPE 6 : connexion a une room pseudo
+            // ----------------------------------------------------------------
+            System.out.println("[6] Envoi ConnectionMessage (pseudo='TestBot2')...");
+            send(out, serializer, new ConnectionMessage("TestBot2"));
+            sleep(200);
+            
+            System.out.println("[7] Envoi RoomJoiningMessage (roomId=1)...");
+            send(out, serializer, new RoomJoiningMessage(1));
+            sleep(300);
+            
+         // ----------------------------------------------------------------
+            // ÉTAPE 7 : affichage des salons
+            // ----------------------------------------------------------------
+            send(out, serializer, new GetRoomListUpdateMessage());
+            Message response = readOneMessage(in, serializer);
+            RoomListUpdateMessage listMsg = (RoomListUpdateMessage) response;
+            System.out.println("✅ Liste des salons reçue (" + listMsg.getRooms().size() + " salon(s)) :\n");
+
+            for (RoomInfoDTO room : listMsg.getRooms()) {
+                String statut = room.isInGame()  ? "EN COURS" :
+                                room.isFull()    ? "PLEIN"    : "EN ATTENTE";
+                System.out.printf("  %s %s %d/%d joueurs  [%s]%n",
+                    room.getRoomId(),
+                    room.getRoomName(),
+                    room.getCurrentPlayers(),
+                    room.getMaxPlayers(),
+                    statut);
+            }
+
+            } catch (java.net.SocketTimeoutException e) {
+                System.out.println("ERREUR : timeout — le serveur n'a pas répondu dans les " + TIMEOUT + "ms.");
+                System.out.println("Vérifie que le case GET_ROOM_LIST_UPDATE dans ServerMessageHandler envoie bien un RoomListUpdateMessage.");
+            }
+        
+    
     }
 
     // -------------------------------------------------------------------------

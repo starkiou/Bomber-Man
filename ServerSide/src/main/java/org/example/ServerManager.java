@@ -62,6 +62,11 @@ public class ServerManager {
     public synchronized Collection<RoomThread> getRooms() {
         return roomMap.values();
     }
+    
+    public RoomThread getRoomsById(int id) {
+        return roomMap.get(id);
+    }
+    
 
 	public ServerClientMessageHandler getServerMessageHandler() {
 		return serverMessageHandler;
