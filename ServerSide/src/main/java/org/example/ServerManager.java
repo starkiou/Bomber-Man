@@ -1,6 +1,10 @@
 package org.example;
 
+<<<<<<< HEAD
 import java.io.IOException;
+=======
+import model.logger.LogManager;
+>>>>>>> development
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +22,7 @@ import network.message.MessageType;
 import network.message.RoomInfoDTO;
 
 public class ServerManager {
+
 	private List<ClientHandler> listClient = Collections.synchronizedList(new ArrayList<ClientHandler>());
 	private Map<Integer, RoomThread> roomMap = Collections.synchronizedMap(new HashMap<>());
 	public MessageFactory factory = new MessageFactory();
@@ -46,15 +51,14 @@ public class ServerManager {
 
 		}
     	
-
-        
     }
-    
+
     public synchronized void addClientWithSocket(Socket socket) {
     	ClientHandler clientHandler = new ClientHandler(socket, this, nextClientId);
     	nextClientId++;
     	listClient.add(clientHandler);
     	clientHandler.start();
+    	LogManager.getInstance().info("Client connecté : " + socket.getInetAddress() + ":" + socket.getPort());
     }
     
     public synchronized void createRoomAsClient(ClientHandler client, int nbMaxPlayers, String name) {
