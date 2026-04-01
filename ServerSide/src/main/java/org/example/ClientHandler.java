@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import network.message.Message;
 import network.message.MessageSerializer;
+import network.message.RoomQuitMessage;
+
 import java.nio.ByteBuffer;
 
 public class ClientHandler extends Thread {
@@ -163,6 +165,7 @@ public class ClientHandler extends Thread {
 	        if (mustContinueListen) e.printStackTrace();
 	    } finally {
 	        closeConnection();
+	        this.serverManager.getServerMessageHandler().handle(this, new RoomQuitMessage());
 	        serverManager.removeClient(this);
 	    }
 	}

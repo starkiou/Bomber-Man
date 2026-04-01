@@ -145,6 +145,10 @@ public class RoomThread extends Thread {
 		return (this.getPlayerCount()>=this.maxPlayer);
 	}
 	
+	public void removeClient(ClientHandler client) {
+		this.listClient.remove(client);
+	}
+	
 	
 	
 }

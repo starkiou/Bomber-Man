@@ -14,6 +14,7 @@ import network.message.Message;
 import network.message.MessageFactory;
 import network.message.MessageType;
 import network.message.RoomAcceptedCreationMessage;
+import network.message.RoomCorrectQuitMessage;
 import network.message.RoomInfoDTO;
 import network.message.RoomJoiningMessage;
 
@@ -75,6 +76,10 @@ public class ServerClientMessageHandler {
 				this.roomJoin(sender,message);
 				break;
 			case ROOM_UPDATE:
+				break;
+			case ROOM_QUIT:
+				sender.getRoom().removeClient(sender);
+				sender.addMessage(new RoomCorrectQuitMessage());
 				break;
 			default:
 				break;
