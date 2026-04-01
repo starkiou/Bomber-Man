@@ -8,20 +8,19 @@ public class HomeController {
 
     @FXML
     private void onPlayClick() {
-        // Renvoie vers ton écran de connexion/config
         SceneManager.getInstance().loadScene("login-view.fxml");
     }
 
     @FXML
     private void onSettingsClick() {
-        // À créer plus tard
+        // TODO CONFIG DU JEU
         System.out.println("Ouverture des paramètres...");
         // SceneManager.getInstance().loadScene("settings-view.fxml");
     }
 
     @FXML
     private void onExitClick() {
-        // Ferme proprement l'application JavaFX
+        // Ferme l'app
         Platform.exit();
         System.exit(0);
     }

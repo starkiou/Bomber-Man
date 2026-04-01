@@ -7,13 +7,16 @@ import java.net.Socket;
 import network.message.ConnectionMessage;
 import network.message.Message;
 import network.message.MessageSerializer;
+import java.util.function.Consumer;
 
 public class NetworkManager {
     private static NetworkManager instance;
     private Socket socket;
     private OutputStream out;
     private String nickname;
-    private boolean connected = false; // <-- L'indicateur d'état
+    private boolean connected = false;
+
+    private Consumer<Message> currentMessageHandler;
 
     private final MessageSerializer serializer = new MessageSerializer();
 
@@ -79,5 +82,13 @@ public class NetworkManager {
             out = null;
             socket = null;
         }
+    }
+
+    public void setMessageHandler(Consumer<Message> handler) {
+        this.currentMessageHandler = handler;
+    }
+
+    public Consumer<Message> getMessageHandler() {
+        return this.currentMessageHandler;
     }
 }
