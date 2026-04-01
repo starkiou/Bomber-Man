@@ -9,9 +9,11 @@ import org.json.JSONObject;
 import network.message.ConnectionMessage;
 import network.message.RoomCreationMessage;
 import network.message.RoomListUpdateMessage;
+import network.message.RoomRefusedCreationMessage;
 import network.message.Message;
 import network.message.MessageFactory;
 import network.message.MessageType;
+import network.message.RoomAcceptedCreationMessage;
 import network.message.RoomInfoDTO;
 import network.message.RoomJoiningMessage;
 
@@ -54,7 +56,12 @@ public class ServerClientMessageHandler {
 				break;
 			case ROOM_CREATION:
 				RoomCreationMessage messageLobbyCreation = (RoomCreationMessage) message;
-				this.serverManager.createRoomAsClient(sender, messageLobbyCreation.getMaxPlayer(), messageLobbyCreation.getName());
+				if(sender.getRoom()!=null) {
+					sender.addMessage(new RoomRefusedCreationMessage("Client already in a room."));
+				} else {
+					this.serverManager.createRoomAsClient(sender, messageLobbyCreation.getMaxPlayer(), messageLobbyCreation.getName());
+					sender.addMessage(new RoomAcceptedCreationMessage(sender.getRoom().getRoomId()));
+				}
 				
 				break;
 			case ROOM_LIST_UPDATE:
@@ -62,8 +69,6 @@ public class ServerClientMessageHandler {
 			case MOVE:
 				break;
 			case READY_UPDATE:
-				break;
-			case GET_ROOM_UPDATE: 
 				break;
 			case ROOM_JOIN:
 				this.roomJoin(sender,message);
