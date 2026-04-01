@@ -36,8 +36,12 @@ public class MessageFactory {
 
 		case ROOM_UPDATE:
 			break;
+		case REFUSED_ROOM_JOIN:
+			return new RoomRefusedJoinMessage(jsonObject);
+
 		default:
 			break;
+		
 		
 		}
 		

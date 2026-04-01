@@ -66,9 +66,7 @@ public class ServerClientMessageHandler {
 			case GET_ROOM_UPDATE:
 				break;
 			case ROOM_JOIN:
-				RoomJoiningMessage messageRoomJoining = (RoomJoiningMessage) message;
-				int roomId = messageRoomJoining.getIdRoom();
-				this.serverManager.getRoomsById(roomId).addClient(sender);
+				this.roomJoin(sender,message);
 				break;
 			case ROOM_UPDATE:
 				break;
@@ -77,6 +75,19 @@ public class ServerClientMessageHandler {
 				
 			
 			}
+	}
+	
+	private synchronized void roomJoin(ClientHandler sender, Message message) {
+		RoomJoiningMessage messageRoomJoining = (RoomJoiningMessage) message;
+		int roomId = messageRoomJoining.getIdRoom();
+		RoomThread room = this.serverManager.getRoomsById(roomId);
+		if(room.isInGame() || room.isFull()) {
+			JSONObject json = new JSONObject();
+			json.put("roomId", room.getRoomId());
+			sender.addMessage(factory.make(MessageType.REFUSED_ROOM_JOIN, json));
+		} else {
+			this.serverManager.getRoomsById(roomId).addClient(sender);
+		}
 	}
 	
 	public ServerClientMessageHandler(ServerManager serverManager) {
