@@ -12,6 +12,8 @@ public class AcceptConnectionThread extends Thread {
 	private ServerSocket serverSocket;
 	
 	
+	
+	
 	public AcceptConnectionThread(ServerManager serverMain, ServerSocket serverSocket) {
 		this.serverSocket=serverSocket;
 		this.serverMain=serverMain;

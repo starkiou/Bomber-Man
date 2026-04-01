@@ -18,9 +18,7 @@ public class MessageFactory {
 			return new GetRoomListUpdateMessage();
 
 			
-		case GET_ROOM_UPDATE:
-			
-			break;
+		
 		case MOVE:
 			break;
 		case READY_UPDATE:
@@ -38,9 +36,18 @@ public class MessageFactory {
 			break;
 		case REFUSED_ROOM_JOIN:
 			return new RoomRefusedJoinMessage(jsonObject);
-
+		case ACCEPTED_ROOM_JOIN:
+			return new RoomAcceptedJoinMessage(jsonObject);
+		case ROOM_STATUS_UPDATE:
+			return new RoomStatusMessage(jsonObject);
+		case REFUSED_ROOM_CREATION:
+			return new RoomRefusedCreationMessage(jsonObject);
+		case ACCEPTED_ROOM_CREATION:
+			return new RoomAcceptedJoinMessage(jsonObject);
 		default:
 			break;
+
+		
 		
 		
 		}
