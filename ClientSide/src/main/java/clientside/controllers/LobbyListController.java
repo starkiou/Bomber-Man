@@ -5,10 +5,7 @@ import clientside.network.NetworkManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-import network.message.GetRoomListUpdateMessage;
-import network.message.RoomListUpdateMessage;
-import network.message.RoomInfoDTO;
-import network.message.Message;
+import network.message.*;
 
 public class LobbyListController {
 
@@ -51,7 +48,9 @@ public class LobbyListController {
 
     @FXML
     private void onCreateRoomClick() {
-        System.out.println("Aller vers création de room...");
+        System.out.println("Creation room ");
+        NetworkManager.getInstance().sendMessage(new RoomCreationMessage(4,"Roomtest"));
+        onRefreshClick();
     }
 
     @FXML
