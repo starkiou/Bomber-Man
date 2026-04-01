@@ -185,23 +185,32 @@ public class Game implements Runnable {
      * Ticks each bomb. When a bomb's timer fires, calls {@link #processExplosion(Bomb)}
      * then removes it from the active list.
      */
-    private void updateBombs() {
-        List<Bomb> toExplode = new ArrayList<>();
-
+    private void updateBots() {
+        List<Player> playerList = new ArrayList<>(players.values());
+        List<Bomb>   bombList;
         synchronized (activeBombs) {
-            for (Bomb b : activeBombs) {
-                b.update();
-                if (b.isExploded()) toExplode.add(b);
+            bombList = new ArrayList<>(activeBombs);
+        }
+
+        for (AIPlayer bot : bots.values()) {
+            if (bot.isDead()) continue;
+
+            boolean moveReady = bot.canMove();
+            boolean bombReady = bot.canBomb();
+            if (!moveReady && !bombReady) continue;
+
+            AIPlayer.AIAction action = bot.computeAction(grid, playerList, bombList);
+
+            synchronized (stateLock) {
+                if (action.move() != null && moveReady) {
+                    processMovement(bot, action.move());
+                    bot.onMoveDone();
+                }
+                if (action.placeBomb() && bombReady) {
+                    placeBomb(bot);
+                    bot.onBombDone();
+                }
             }
-        }
-
-        // Process explosions outside the synchronized block to avoid lock contention
-        for (Bomb b : toExplode) {
-            processExplosion(b);
-        }
-
-        synchronized (activeBombs) {
-            activeBombs.removeIf(Bomb::isExploded);
         }
     }
 
