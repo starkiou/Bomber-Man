@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import network.message.ConnectionMessage;
-import network.message.GetRoomListMessage;
+import network.message.GetRoomListUpdateMessage;
 import network.message.Message;
 import network.message.MessageSerializer;
 import network.message.MessageType;
@@ -29,9 +29,11 @@ public class TestServer {
 
     private static final String HOST    = "localhost";
     private static final int    PORT    = 3000;
-    private static final int    TIMEOUT = 3000; // ms d'attente pour la réponse
+    private static final int    TIMEOUT = 3000;
 
     public static void main(String[] args) throws Exception {
+    	System.out.println("=== LANCEMENT SERVEUR ===\n");
+    	Main.main(args);
 
         System.out.println("=== TEST CLIENT BOMBERMAN ===\n");
 
@@ -58,7 +60,7 @@ public class TestServer {
             // ÉTAPE 3 : demande de la liste des salons
             // ----------------------------------------------------------------
             System.out.println("[3] Envoi GetRoomMessage...");
-            send(out, serializer, new GetRoomListMessage());
+            send(out, serializer, new GetRoomListUpdateMessage());
 
             // ----------------------------------------------------------------
             // ÉTAPE 4 : lecture de la réponse

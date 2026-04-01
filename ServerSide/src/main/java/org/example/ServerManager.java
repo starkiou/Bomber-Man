@@ -13,7 +13,7 @@ public class ServerManager {
 	private List<ClientHandler> listClient = Collections.synchronizedList(new ArrayList<ClientHandler>());
 	private Map<Integer, RoomThread> roomMap = Collections.synchronizedMap(new HashMap<>());
 	
-	private ServerMessageHandler serverMessageHandler;
+	private ServerClientMessageHandler serverMessageHandler;
 	
 	private AcceptConnectionThread acceptConnectionThread;
 	
@@ -26,7 +26,7 @@ public class ServerManager {
     	try {
 			acceptConnectionThread = new AcceptConnectionThread(this, port);
 			acceptConnectionThread.start();
-	    	this.setServerMessageHandler(new ServerMessageHandler(this));
+	    	this.setServerMessageHandler(new ServerClientMessageHandler(this));
 	        System.out.println("Serveur lancé sur le port : "+port);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -63,11 +63,11 @@ public class ServerManager {
         return roomMap.values();
     }
 
-	public ServerMessageHandler getServerMessageHandler() {
+	public ServerClientMessageHandler getServerMessageHandler() {
 		return serverMessageHandler;
 	}
 
-	public void setServerMessageHandler(ServerMessageHandler serverMessageHandler) {
+	public void setServerMessageHandler(ServerClientMessageHandler serverMessageHandler) {
 		this.serverMessageHandler = serverMessageHandler;
 	}
 	

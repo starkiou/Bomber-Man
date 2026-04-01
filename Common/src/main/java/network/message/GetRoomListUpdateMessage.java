@@ -6,7 +6,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class GetRoomListMessage implements Message {
+public class GetRoomListUpdateMessage implements Message {
 	
 	
 

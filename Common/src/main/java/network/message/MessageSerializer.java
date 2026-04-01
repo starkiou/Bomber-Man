@@ -37,7 +37,7 @@ public class MessageSerializer {
                 return new ConnectionMessage(dataJson);
                 
             case GET_ROOM_LIST_UPDATE:
-                return new GetRoomListMessage();
+                return new GetRoomListUpdateMessage();
                 
             case ROOM_CREATION:
             	return new RoomCreationMessage(dataJson);
