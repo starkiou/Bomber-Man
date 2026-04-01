@@ -30,7 +30,9 @@ public class ClientHandler extends Thread {
     
 	private boolean isReady = false; //maybe need to be moved into roomThread
 	
-	private String pseudo; 
+	private String pseudo;
+
+	private int skinId; 
 
 	
 	public ClientHandler(Socket socket, ServerManager serverManager, int clientId){
@@ -163,6 +165,11 @@ public class ClientHandler extends Thread {
 	        closeConnection();
 	        serverManager.removeClient(this);
 	    }
+	}
+
+
+	public void setSkinId(int skinId) {
+		this.skinId=skinId;
 	}
 
 

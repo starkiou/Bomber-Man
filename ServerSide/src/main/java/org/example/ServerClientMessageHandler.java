@@ -31,6 +31,7 @@ public class ServerClientMessageHandler {
 			case CONNECTION:
 				ConnectionMessage messageConnection = (ConnectionMessage) message;
 				sender.setPseudo(messageConnection.getPseudo());
+				sender.setSkinId(messageConnection.getSkinId());
 				break;
 			case GET_ROOM_LIST_UPDATE:
 				List<RoomInfoDTO> roomInfos = new ArrayList<>();
