@@ -1,10 +1,6 @@
 package org.example;
 
-<<<<<<< HEAD
-=======
-import model.logger.LogManager;
-import java.io.BufferedReader;
->>>>>>> development
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,7 +15,7 @@ import java.nio.ByteBuffer;
 
 public class ClientHandler extends Thread {
 	private Socket socket;
-<<<<<<< HEAD
+
 	
 	private ServerManager serverManager;
 	
@@ -36,11 +32,7 @@ public class ClientHandler extends Thread {
     public InputStream in;
     public OutputStream out;
     
-=======
-	private BufferedReader in;
-    private PrintWriter out;
 
->>>>>>> development
 	private boolean isReady = false; //maybe need to be moved into roomThread
 	
 	private String pseudo;

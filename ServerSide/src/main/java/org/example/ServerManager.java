@@ -1,10 +1,8 @@
 package org.example;
 
-<<<<<<< HEAD
+
 import java.io.IOException;
-=======
 import model.logger.LogManager;
->>>>>>> development
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,16 +38,10 @@ public class ServerManager {
 	
     public ServerManager(int port) {
     	System.out.println("Lancement d'un serveur sur le port : "+port);
-    	try {
-			acceptConnectionThread = new AcceptConnectionThread(this, port);
-			acceptConnectionThread.start();
-	    	this.setServerMessageHandler(new ServerClientMessageHandler(this));
-	        System.out.println("Serveur lancé sur le port : "+port);
-		} catch (IOException e) {
-			e.printStackTrace();
-	        System.out.println("Echec de lancement de serveur sur le port : "+port);
-
-		}
+    	acceptConnectionThread = new AcceptConnectionThread(this, port);
+		acceptConnectionThread.start();
+		this.setServerMessageHandler(new ServerClientMessageHandler(this));
+		System.out.println("Serveur lancé sur le port : "+port);
     	
     }
 

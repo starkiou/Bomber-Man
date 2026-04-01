@@ -10,14 +10,7 @@ public class AcceptConnectionThread extends Thread {
 	private boolean mustContinueAccept = true;
 	private ServerManager serverMain;
 	private ServerSocket serverSocket;
-<<<<<<< HEAD
-	
-	
-	
-	
-=======
 
->>>>>>> development
 	public AcceptConnectionThread(ServerManager serverMain, ServerSocket serverSocket) {
 		this.serverSocket=serverSocket;
 		this.serverMain=serverMain;
