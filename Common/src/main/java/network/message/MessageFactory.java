@@ -8,7 +8,7 @@ public class MessageFactory {
 		case BOMB_PLACE:
 			break;
 		case CHAT:
-			break;
+			return new ChatMessage(jsonObject);
 		case CONNECTION:
 			return new ConnectionMessage(jsonObject);
 			

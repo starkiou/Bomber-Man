@@ -19,8 +19,15 @@ public class ChatController {
         String text = inputField.getText().trim();
         if (!text.isEmpty()) {
             JSONObject data = new JSONObject();
+
+            // 1. On récupère le pseudo via le NetworkManager
+            String myPseudo = NetworkManager.getInstance().getNickname();
+
+            // 2. On ajoute les DEUX clés attendues par le constructeur de ChatMessage
+            data.put("sender", myPseudo); // Ajout indispensable
             data.put("content", text);
 
+            // 3. Création et envoi
             Message msg = new MessageFactory().make(MessageType.CHAT, data);
             NetworkManager.getInstance().sendMessage(msg);
 
