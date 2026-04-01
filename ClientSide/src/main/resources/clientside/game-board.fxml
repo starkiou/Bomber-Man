@@ -2,10 +2,18 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 
-<VBox alignment="CENTER" spacing="10" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<VBox alignment="CENTER" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10;"
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="clientside.controllers.GameBoardController">
-    <Label fx:id="modeLabel" text="Offline Mode - Procedural Map" style="-fx-font-weight: bold;"/>
-    <ScrollPane fitToHeight="true" fitToWidth="true">
-        <GridPane fx:id="gameGrid" alignment="CENTER" style="-fx-background-color: #222;" />
-    </ScrollPane>
+
+    <Label fx:id="modeLabel" text="Bomberman - Online Session"
+           style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 16px;"/>
+
+    <HBox spacing="15" alignment="CENTER" VBox.vgrow="ALWAYS">
+        <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #222;">
+            <GridPane fx:id="gameGrid" alignment="CENTER" style="-fx-background-color: #222;" />
+        </ScrollPane>
+
+        <fx:include fx:id="chatComponent" source="chat.fxml" />
+    </HBox>
 </VBox>

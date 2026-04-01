@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 
 import network.message.Message;
 import network.message.MessageSerializer;
+import network.message.MessageType;
+import org.json.JSONObject;
 
 public class NetworkListener implements Runnable {
     private final Socket socket;
@@ -49,10 +51,19 @@ public class NetworkListener implements Runnable {
         }
     }
 
-    private void handleMessage(Object msg) {
-        //TODO logique de redirection vers les controleurs pour l'affichage des infos recues
+    private void handleMessage(Message message) {
+        if (message.getMessageType() == MessageType.CHAT) {
+            JSONObject data = (JSONObject) message.getData();
+            String content = data.getString("content");
 
-        System.out.println("Message reçu du serveur : " + msg);
+            // TODO: Il faudra une méthode pour récupérer l'instance
+            // actuelle du ChatController.
+            // Pour l'instant, on imprime en console pour vérifier
+            System.out.println("CHAT REÇU : " + content);
+
+            // Si tu as une référence vers ton controller (via SceneManager par exemple) :
+            // sceneManager.getChatController().appendMessage(content);
+        }
     }
 
     public void stop() {
