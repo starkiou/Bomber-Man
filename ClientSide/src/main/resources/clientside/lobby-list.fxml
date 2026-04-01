@@ -20,5 +20,9 @@
 
     <ListView fx:id="roomListView" prefHeight="400.0" prefWidth="600.0" />
 
-    <Button text="Retour" onAction="#onBackClick" style="-fx-text-fill: red;"/>
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Rejoindre la partie" onAction="#onJoinRoomClick"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        <Button text="Retour" onAction="#onBackClick" style="-fx-text-fill: #000000;"/>
+    </HBox>
 </VBox>
