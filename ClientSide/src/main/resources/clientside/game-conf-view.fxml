@@ -6,7 +6,7 @@
 
 <VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="clientside.controllers.GameConfController"
+      fx:controller="clientside.controllers.GameConfigController"
       prefHeight="600.0" prefWidth="800.0">
 
     <padding>
@@ -35,9 +35,9 @@
         <ComboBox fx:id="mapSelector" prefWidth="150"/>
     </HBox>
 
-    <Button text="Lancer la partie" onAction="#onStartGameClick"
+    <Button text="Lancer la partie" onAction="#onStartButtonClick"
             style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px;"/>
 
-    <Button text="Retour" onAction="#onBackClick"/>
+    <Button text="Retour" onAction="#onBackButtonClick"/>
 
 </VBox>
