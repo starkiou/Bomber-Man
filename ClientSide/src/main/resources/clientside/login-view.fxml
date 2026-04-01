@@ -6,7 +6,7 @@
 
 <GridPane alignment="CENTER" hgap="30.0" vgap="20.0" xmlns="http://javafx.com/javafx"
           xmlns:fx="http://javafx.com/fxml"
-          fx:controller="clientside.controllers.MenuController"
+          fx:controller="clientside.controllers.LoginController"
           prefHeight="600.0" prefWidth="800.0">
 
     <padding>
@@ -28,12 +28,7 @@
 
     <VBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="1">
         <Label text="Sélection perso :" />
-        <TilePane fx:id="spriteContainer" hgap="10" vgap="10" prefColumns="4">
-            <Button text="S1" prefWidth="40" prefHeight="40"/>
-            <Button text="S2" prefWidth="40" prefHeight="40"/>
-            <Button text="S3" prefWidth="40" prefHeight="40"/>
-            <Button text="S4" prefWidth="40" prefHeight="40"/>
-        </TilePane>
+        <fx:include source="character-selection.fxml" />
     </VBox>
 
     <HBox alignment="BOTTOM_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="2">

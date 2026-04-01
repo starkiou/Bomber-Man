@@ -13,8 +13,10 @@ public class NetworkManager {
     private static NetworkManager instance;
     private Socket socket;
     private OutputStream out;
-    private String nickname;
     private boolean connected = false;
+
+    private String nickname;
+    private int selectedCharacterId = 0;
 
     private Consumer<Message> currentMessageHandler;
 
@@ -90,5 +92,13 @@ public class NetworkManager {
 
     public Consumer<Message> getMessageHandler() {
         return this.currentMessageHandler;
+    }
+
+    public int getSelectedCharacterId() {
+        return selectedCharacterId;
+    }
+
+    public void setSelectedCharacterId(int id) {
+        this.selectedCharacterId = id;
     }
 }

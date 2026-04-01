@@ -6,11 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="c83188f1-a693-4da3-a589-f803193e0ece" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/HomeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/HomeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/LobbyListController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/LobbyListController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/network/NetworkListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/network/NetworkListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/MenuController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/LoginController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/network/NetworkManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/network/NetworkManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/lobby-list.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/lobby-list.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/module-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/gamemode-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/gamemode-view.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/login-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/login-view.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/sprites/block_04.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/sprites/block_07.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/sprites/block_08.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/sprites/ground_02.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/sprites/ground_06.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,23 +25,23 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="FxmlFile" />
+        <option value="Class" />
       </list>
     </option>
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Launcher.executor": "Run",
-    "Application.Main.executor": "Run",
-    "Application.TestServer.executor": "Run",
-    "git-widget-placeholder": "client-interface-nav",
-    "node.js.selected.package.tslint": "(autodetect)"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Launcher.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Application.TestServer.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;client-interface-nav&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <servers />
   </component>

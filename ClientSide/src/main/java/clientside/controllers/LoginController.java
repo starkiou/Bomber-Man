@@ -9,8 +9,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.TilePane;
 import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.Node;
 
-public class MenuController {
+public class LoginController {
 
     @FXML private TextField usernameField;
     @FXML private TextField ipAddressField;
@@ -26,7 +29,6 @@ public class MenuController {
         ipAddressField.setText("");
         serverPortField.setText("3000");
 
-        // Sécurité : Si on revient sur le menu alors qu'on est déjà connecté
         if (NetworkManager.getInstance().isConnected()) {
             playOnlineButton.setDisable(false);
             updateDebugStatus("Déjà connecté !", Color.GREEN);
