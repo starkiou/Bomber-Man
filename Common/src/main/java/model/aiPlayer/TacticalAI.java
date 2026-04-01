@@ -112,7 +112,7 @@ public class TacticalAI extends AIPlayer{
     // ─── Repositioned ────────────────────────────────────────────────────
 
     private Direction repositionForBomb(CellType[][] grid, List<Bomb> bombs, Set<String> dangerZone, Player enemy) {
-        int w = grid.length, h = grid[0].length;
+        int w = grid[0].length, h = grid.length;
         int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
         Direction[] dirEnum = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
 
@@ -123,7 +123,7 @@ public class TacticalAI extends AIPlayer{
             int nx = getX() + dirs[d][0];
             int ny = getY() + dirs[d][1];
             if (!inBounds(nx, ny, w, h)) continue;
-            if (grid[nx][ny] != CellType.EMPTY) continue;
+            if (grid[ny][nx] != CellType.EMPTY) continue;
             if (isInDanger(nx, ny, dangerZone)) continue;
 
             Set<String> futureZone = dangerIfBombAt(nx, ny, DEFAULT_BOMB_RADIUS, grid, bombs);
@@ -141,7 +141,7 @@ public class TacticalAI extends AIPlayer{
     // ─── BFS with avoiding danger ────────────────────────────────────────
 
     private Direction bfsTowardAvoidingDanger(int startX, int startY, int targetX, int targetY, CellType[][] grid, Set<String> dangerZone) {
-        int w = grid.length, h = grid[0].length;
+        int w = grid[0].length, h = grid.length;
         boolean[][] visited = new boolean[w][h];
         Queue<int[]> queue = new LinkedList<>();
         int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
@@ -152,7 +152,7 @@ public class TacticalAI extends AIPlayer{
             int nx = startX + dirs[d][0];
             int ny = startY + dirs[d][1];
             if (!inBounds(nx, ny, w, h)) continue;
-            if (grid[nx][ny] != CellType.EMPTY) continue;
+            if (grid[ny][nx] != CellType.EMPTY) continue;
             if (isInDanger(nx, ny, dangerZone)) continue;
             if (!visited[nx][ny]) {
                 visited[nx][ny] = true;
@@ -166,7 +166,7 @@ public class TacticalAI extends AIPlayer{
                 int nx = cur[0] + d[0];
                 int ny = cur[1] + d[1];
                 if (!inBounds(nx, ny, w, h)) continue;
-                if (grid[nx][ny] != CellType.EMPTY) continue;
+                if (grid[ny][nx] != CellType.EMPTY) continue;
                 if (isInDanger(nx, ny, dangerZone)) continue;
                 if (!visited[nx][ny]) {
                     visited[nx][ny] = true;
@@ -180,13 +180,13 @@ public class TacticalAI extends AIPlayer{
     // ─── utilities ─────────────────────────────────────────────────────────
 
     private int[] findNearestBrick(CellType[][] grid) {
-        int w = grid.length, h = grid[0].length;
+        int w = grid[0].length, h = grid.length;
         int bestDist = Integer.MAX_VALUE;
         int[] best = null;
 
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
-                if (grid[x][y] == CellType.BRICK) {
+                if (grid[y][x] == CellType.BRICK) {
                     int d = manhattan(getX(), getY(), x, y);
                     if (d < bestDist) {
                         bestDist = d;

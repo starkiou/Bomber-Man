@@ -27,8 +27,8 @@ public abstract class AIPlayer extends Player {
     protected Direction bfsToward(int startX, int startY, int targetX, int targetY, CellType[][] grid) {
         if (startX == targetX && startY == targetY) return null;
 
-        int h = grid[0].length;
-        int w = grid.length;
+        int h = grid.length;
+        int w = grid[0].length;
         boolean[][] visited = new boolean[w][h];
         Queue<int[]> queue = new LinkedList<>();
 
@@ -39,7 +39,7 @@ public abstract class AIPlayer extends Player {
         for (int d = 0; d < 4; d++) {
             int nx = startX + dirs[d][0];
             int ny = startY + dirs[d][1];
-            if (inBounds(nx, ny, w, h) && grid[nx][ny] == CellType.EMPTY && !visited[nx][ny]) {
+            if (inBounds(nx, ny, w, h) && grid[ny][nx] == CellType.EMPTY && !visited[nx][ny]) {
                 visited[nx][ny] = true;
                 queue.add(new int[]{nx, ny, d});
             }
@@ -52,7 +52,7 @@ public abstract class AIPlayer extends Player {
             for (int[] d : dirs) {
                 int nx = cx + d[0];
                 int ny = cy + d[1];
-                if (inBounds(nx, ny, w, h) && grid[nx][ny] == CellType.EMPTY && !visited[nx][ny]) {
+                if (inBounds(nx, ny, w, h) && grid[ny][nx] == CellType.EMPTY && !visited[nx][ny]) {
                     visited[nx][ny] = true;
                     queue.add(new int[]{nx, ny, firstDir});
                 }
@@ -64,8 +64,8 @@ public abstract class AIPlayer extends Player {
     protected Direction bfsTowardBrick(int startX, int startY, int targetX, int targetY, CellType[][] grid) {
         if (startX == targetX && startY == targetY) return null;
 
-        int h = grid[0].length;
-        int w = grid.length;
+        int h = grid.length;
+        int w = grid[0].length;
         boolean[][] visited = new boolean[w][h];
         Queue<int[]> queue = new LinkedList<>();
 
@@ -77,7 +77,7 @@ public abstract class AIPlayer extends Player {
             int nx = startX + dirs[d][0];
             int ny = startY + dirs[d][1];
             if (!inBounds(nx, ny, w, h) || visited[nx][ny]) continue;
-            CellType cell = grid[nx][ny];
+            CellType cell = grid[ny][nx];
             if (cell == CellType.WALL) continue;
             visited[nx][ny] = true;
             if (nx == targetX && ny == targetY) return dirEnum[d];
@@ -91,7 +91,7 @@ public abstract class AIPlayer extends Player {
                 int nx = cx + dirs[d][0];
                 int ny = cy + dirs[d][1];
                 if (!inBounds(nx, ny, w, h) || visited[nx][ny]) continue;
-                CellType cell = grid[nx][ny];
+                CellType cell = grid[ny][nx];
                 if (cell == CellType.WALL) continue;
                 visited[nx][ny] = true;
                 if (nx == targetX && ny == targetY) return dirEnum[firstDir];
@@ -123,8 +123,8 @@ public abstract class AIPlayer extends Player {
             return null;
         }
 
-        int h = grid[0].length;
-        int w = grid.length;
+        int h = grid.length;
+        int w = grid[0].length;
         boolean[][] visited = new boolean[w][h];
         Queue<int[]> queue = new LinkedList<>();
 
@@ -136,7 +136,7 @@ public abstract class AIPlayer extends Player {
         for (int d = 0; d < 4; d++) {
             int nx = startX + dirs[d][0];
             int ny = startY + dirs[d][1];
-            if (inBounds(nx, ny, w, h) && grid[nx][ny] == CellType.EMPTY && !visited[nx][ny]) {
+            if (inBounds(nx, ny, w, h) && grid[ny][nx] == CellType.EMPTY && !visited[nx][ny]) {
                 visited[nx][ny] = true;
                 queue.add(new int[]{nx, ny, d});
             }
@@ -151,7 +151,7 @@ public abstract class AIPlayer extends Player {
             for (int[] d : dirs) {
                 int nx = cx + d[0];
                 int ny = cy + d[1];
-                if (inBounds(nx, ny, w, h) && grid[nx][ny] == CellType.EMPTY && !visited[nx][ny]) {
+                if (inBounds(nx, ny, w, h) && grid[ny][nx] == CellType.EMPTY && !visited[nx][ny]) {
                     visited[nx][ny] = true;
                     queue.add(new int[]{nx, ny, firstDir});
                 }
@@ -161,8 +161,8 @@ public abstract class AIPlayer extends Player {
     }
 
     protected boolean hasEscapeRoute(int x, int y, CellType[][] grid, Set<String> futureDanger) {
-        int h = grid[0].length;
-        int w = grid.length;
+        int h = grid.length;
+        int w = grid[0].length;
         int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
         boolean[][] visited = new boolean[w][h];
         Queue<int[]> queue = new LinkedList<>();
@@ -177,7 +177,7 @@ public abstract class AIPlayer extends Player {
             for (int[] d : dirs) {
                 int nx = cur[0] + d[0];
                 int ny = cur[1] + d[1];
-                if (inBounds(nx, ny, w, h) && grid[nx][ny] == CellType.EMPTY && !visited[nx][ny]) {
+                if (inBounds(nx, ny, w, h) && grid[ny][nx] == CellType.EMPTY && !visited[nx][ny]) {
                     visited[nx][ny] = true;
                     queue.add(new int[]{nx, ny});
                 }
@@ -218,7 +218,7 @@ public abstract class AIPlayer extends Player {
             int minY = Math.min(ay, ty);
             int maxY = Math.max(ay, ty);
             for (int y = minY; y <= maxY; y++) {
-                if (grid[ax][y] == CellType.WALL){
+                if (grid[y][ax] == CellType.WALL){
                     return false;
                 }
             }
@@ -228,7 +228,7 @@ public abstract class AIPlayer extends Player {
             int minX = Math.min(ax, tx);
             int maxX = Math.max(ax, tx);
             for (int x = minX; x <= maxX; x++) {
-                if (grid[x][ay] == CellType.WALL){
+                if (grid[ay][x] == CellType.WALL){
                     return false;
                 }
             }

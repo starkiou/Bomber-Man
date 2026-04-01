@@ -87,7 +87,7 @@ public class SurvivalistAI extends AIPlayer{
     // ─── movement utilities ──────────────────────────────────────────
 
     private Direction bfsAwayFrom(int fx, int fy, CellType[][] grid, Set<String> dangerZone) {
-        int w = grid.length, h = grid[0].length;
+        int w = grid[0].length, h = grid.length;
         int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
         Direction[] dirEnum = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
 
@@ -98,7 +98,7 @@ public class SurvivalistAI extends AIPlayer{
             int nx = getX() + dirs[d][0];
             int ny = getY() + dirs[d][1];
             if (!inBounds(nx, ny, w, h)) continue;
-            if (grid[nx][ny] != CellType.EMPTY) continue;
+            if (grid[ny][nx] != CellType.EMPTY) continue;
             if (isInDanger(nx, ny, dangerZone)) continue;
             int dist = manhattan(nx, ny, fx, fy);
             if (dist > bestDist) {
@@ -110,7 +110,7 @@ public class SurvivalistAI extends AIPlayer{
     }
 
     private Direction bfsTowardSafe(int startX, int startY, int targetX, int targetY, CellType[][] grid, Set<String> dangerZone) {
-        int w = grid.length, h = grid[0].length;
+        int w = grid[0].length, h = grid.length;
         boolean[][] visited = new boolean[w][h];
         java.util.Queue<int[]> queue = new java.util.LinkedList<>();
         int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
@@ -121,7 +121,7 @@ public class SurvivalistAI extends AIPlayer{
             int nx = startX + dirs[d][0];
             int ny = startY + dirs[d][1];
             if (!inBounds(nx, ny, w, h)) continue;
-            if (grid[nx][ny] != CellType.EMPTY) continue;
+            if (grid[ny][nx] != CellType.EMPTY) continue;
             if (isInDanger(nx, ny, dangerZone)) continue;
             if (!visited[nx][ny]) {
                 visited[nx][ny] = true;
@@ -136,7 +136,7 @@ public class SurvivalistAI extends AIPlayer{
                 int nx = cx + d[0];
                 int ny = cy + d[1];
                 if (!inBounds(nx, ny, w, h)) continue;
-                if (grid[nx][ny] != CellType.EMPTY) continue;
+                if (grid[ny][nx] != CellType.EMPTY) continue;
                 if (isInDanger(nx, ny, dangerZone)) continue;
                 if (!visited[nx][ny]) {
                     visited[nx][ny] = true;

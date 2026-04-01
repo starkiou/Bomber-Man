@@ -22,8 +22,8 @@ public class RandomFusionGenerator implements MazeGenerator {
 
     @Override
     public CellType[][] generate(int width, int height) {
-        CellType[][] grid = new CellType[width][height];
-        for (int i = 0; i < width; i++) Arrays.fill(grid[i], CellType.WALL);
+        CellType[][] grid = new CellType[height][width];
+        for (int i = 0; i < height; i++) Arrays.fill(grid[i], CellType.WALL);
 
         List<int[]> walls = new ArrayList<>();
         SetCell[][] sets = new SetCell[width][height];
@@ -31,7 +31,7 @@ public class RandomFusionGenerator implements MazeGenerator {
         // On initialise les cellules de passage (coordonnées impaires)
         for (int x = 1; x < width; x += 2) {
             for (int y = 1; y < height; y += 2) {
-                grid[x][y] = CellType.EMPTY;
+                grid[y][x] = CellType.EMPTY;
                 sets[x][y] = new SetCell(x, y);
                 // On ajoute les murs potentiellement cassables à une liste
                 if (x + 2 < width) walls.add(new int[]{x + 1, y, x, y, x + 2, y});
@@ -46,7 +46,7 @@ public class RandomFusionGenerator implements MazeGenerator {
             SetCell s2 = sets[w[5]][w[6]].find();
 
             if (s1 != s2) {
-                grid[w[0]][w[1]] = CellType.EMPTY; // On casse le mur
+                grid[w[1]][w[0]] = CellType.EMPTY; // On casse le mur
                 s1.union(s2);
             }
         }
@@ -60,8 +60,8 @@ public class RandomFusionGenerator implements MazeGenerator {
         Random r = new Random();
         for (int x = 1; x < w - 1; x++) {
             for (int y = 1; y < h - 1; y++) {
-                if (grid[x][y] == CellType.WALL && !(x % 2 == 0 && y % 2 == 0)) {
-                    if (r.nextFloat() < 0.6) grid[x][y] = CellType.BRICK;
+                if (grid[y][x] == CellType.WALL && !(x % 2 == 0 && y % 2 == 0)) {
+                    if (r.nextFloat() < 0.6) grid[y][x] = CellType.BRICK;
                 }
             }
         }
