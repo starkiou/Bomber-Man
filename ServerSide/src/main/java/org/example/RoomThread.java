@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import network.message.Message;
+import network.message.MessageFactory;
+import network.message.MessageType;
+import org.json.JSONObject;
 
 public class RoomThread extends Thread {
 	private List<ClientHandler> listClient = Collections.synchronizedList(new ArrayList<ClientHandler>());
@@ -34,15 +37,21 @@ public class RoomThread extends Thread {
 	public int getRoomId() {
 		return this.id;
 	}
-	
-	
-	
+
+
+	public synchronized void sendChatMessage(String pseudo, String text) {
+		String fullMessage = pseudo + " : " + text;
+		JSONObject chatData = new JSONObject();
+		chatData.put("content", fullMessage);
+		Message msg = new MessageFactory().make(MessageType.CHAT, chatData);
+		this.broadcast(msg);
+	}
 	
 	
 	public void addClient(ClientHandler clientHandler) {
 		listClient.add(clientHandler);
+		clientHandler.setRoom(this);
 	}
-	
 	
 
 	@Override

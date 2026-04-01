@@ -16,7 +16,6 @@ import network.message.RoomInfoDTO;
 
 public class ServerClientMessageHandler {
 	private ServerManager serverManager;
-	
 	public MessageFactory factory = new MessageFactory();
 	
 	public synchronized void handle(ClientHandler sender, Message message) {
@@ -24,6 +23,16 @@ public class ServerClientMessageHandler {
 			case BOMB_PLACE:
 				break;
 			case CHAT:
+				RoomThread currentRoom = sender.getRoom();
+				if (currentRoom != null) {
+					JSONObject data = (JSONObject) message.getData();
+					if (data.has("content")) {
+						String textMessage = data.getString("content");
+						currentRoom.sendChatMessage(sender.getPseudo(), textMessage);
+					}
+				} else {
+					System.out.println("Le joueur " + sender.getPseudo() + " tente de parler sans être dans une room.");
+				}
 				break;
 			case CONNECTION:
 				ConnectionMessage messageConnection = (ConnectionMessage) message;
