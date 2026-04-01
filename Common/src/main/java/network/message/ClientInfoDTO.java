@@ -14,7 +14,7 @@ public class ClientInfoDTO {
     }
 
     public ClientInfoDTO(JSONObject json) {
-    	this.clientId = json.getInt("clientclientId");
+    	this.clientId = json.getInt("clientId");
         this.isReady = json.getBoolean("isReady");
         this.pseudo = json.getString("pseudo");
     }
