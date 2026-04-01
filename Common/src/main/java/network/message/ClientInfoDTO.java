@@ -14,7 +14,7 @@ public class ClientInfoDTO {
     }
 
     public ClientInfoDTO(JSONObject json) {
-    	this.clientId = json.getInt("clientclientId");
+    	this.clientId = json.getInt("clientId");
         this.isReady = json.getBoolean("isReady");
         this.pseudo = json.getString("pseudo");
     }
@@ -27,8 +27,7 @@ public class ClientInfoDTO {
         return json;
     }
 
-    public int getClientId() {
-    	return clientId;
-    }
-    
+    public int getClientId() { return clientId; }
+    public boolean isReady() { return isReady; }
+    public String getPseudo() { return pseudo; }
 }

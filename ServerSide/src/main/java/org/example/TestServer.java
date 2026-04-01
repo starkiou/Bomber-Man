@@ -54,7 +54,7 @@ public class TestServer {
             // ÉTAPE 2 : création d'un salon
             // ----------------------------------------------------------------
             System.out.println("[2] Envoi RoomCreationMessage (maxPlayer=4, name='SalonToto')...");
-            send(out, serializer, new RoomCreationMessage(4, "Salon Toto"));
+            send(out, serializer, new RoomCreationMessage(4, "Salon Toto", "Moyenne (15x15)", "Normal", 1));
             sleep(300);
 
             // ----------------------------------------------------------------

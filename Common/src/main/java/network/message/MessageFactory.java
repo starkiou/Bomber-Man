@@ -22,7 +22,7 @@ public class MessageFactory {
 		case MOVE:
 			break;
 		case READY_UPDATE:
-			break;
+			return new ReadyUpdateMessage(jsonObject);
 		case ROOM_CREATION:
 			return new RoomCreationMessage(jsonObject);
 
@@ -43,7 +43,10 @@ public class MessageFactory {
 		case REFUSED_ROOM_CREATION:
 			return new RoomRefusedCreationMessage(jsonObject);
 		case ACCEPTED_ROOM_CREATION:
-			return new RoomAcceptedJoinMessage(jsonObject);
+			// FIX était RoomAcceptedJoinMessage par erreur
+			return new RoomAcceptedCreationMessage(jsonObject);
+		case LAUNCH_GAME:
+			return new LaunchGameMessage(jsonObject);
 		default:
 			break;
 

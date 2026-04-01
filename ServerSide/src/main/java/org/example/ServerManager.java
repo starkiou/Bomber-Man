@@ -22,17 +22,11 @@ public class ServerManager {
 	private Map<Integer, RoomThread> roomMap = Collections.synchronizedMap(new HashMap<>());
 	public MessageFactory factory = new MessageFactory();
 
-	
 	private ServerClientMessageHandler serverMessageHandler;
-	
 	private AcceptConnectionThread acceptConnectionThread;
-	
 	private int nextRoomId = 1;
-	
 	private int nextClientId = 1;
-	
-	
-	
+
     public ServerManager(int port) {
     	System.out.println("Lancement d'un serveur sur le port : "+port);
     	try {
@@ -43,22 +37,18 @@ public class ServerManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 	        System.out.println("Echec de lancement de serveur sur le port : "+port);
-
 		}
-    	
-
-        
     }
-    
+
     public synchronized void addClientWithSocket(Socket socket) {
     	ClientHandler clientHandler = new ClientHandler(socket, this, nextClientId);
     	nextClientId++;
     	listClient.add(clientHandler);
     	clientHandler.start();
     }
-    
-    public synchronized void createRoomAsClient(ClientHandler client, int nbMaxPlayers, String name) {
-    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId, name);
+
+    public synchronized void createRoomAsClient(ClientHandler client, int nbMaxPlayers, String name, String mapSize, String difficulty, int botCount) {
+    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId, name, mapSize, difficulty, botCount);
     	this.roomMap.put(Integer.valueOf(nextRoomId), newRoom);
     	this.nextRoomId++;
     	newRoom.start();
@@ -66,24 +56,14 @@ public class ServerManager {
     	client.setRoom(newRoom);
     	this.updateRoomsListOfClients();
     }
-    
-    public synchronized void createRoom(int nbMaxPlayers, String name) {
-    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId, name);
-    	this.roomMap.put(Integer.valueOf(nextRoomId), newRoom);
-    	this.nextRoomId++;
-    	newRoom.start();
-    	this.updateRoomsListOfClients();
-
-    }
 
     public synchronized Collection<RoomThread> getRooms() {
         return roomMap.values();
     }
-    
+
     public RoomThread getRoomsById(int id) {
         return roomMap.get(id);
     }
-    
 
 	public ServerClientMessageHandler getServerMessageHandler() {
 		return serverMessageHandler;
@@ -92,35 +72,49 @@ public class ServerManager {
 	public void setServerMessageHandler(ServerClientMessageHandler serverMessageHandler) {
 		this.serverMessageHandler = serverMessageHandler;
 	}
-	
+
 	public void removeClient(ClientHandler client) {
 		this.listClient.remove(client);
 	}
-	
+
 	public void broadCastToAllClient(Message message) {
 		for(ClientHandler client : listClient) {
 			client.addMessage(message);
 		}
 	}
-	
-	public void updateRoomsListOfClients() {
-		List<RoomInfoDTO> roomInfos = new ArrayList<>();
-		JSONObject roomInfosJson = new JSONObject();
-        JSONArray array = new JSONArray();
 
-	    for (RoomThread room : this.getRooms()) {
-	    	JSONObject roomJson = new JSONObject();
-	    	roomJson.put("id", room.id);
-	    	roomJson.put("currentPlayers", room.getPlayerCount());
-	    	roomJson.put("maxPlayers", room.getMaxPlayers());
-	    	roomJson.put("inGame", room.isInGame());
-	    	roomJson.put("roomName", room.getRoomName());
-	    	array.put(roomJson);
-	    }
-	    
-	    
-	    roomInfosJson.put("rooms", array);
-	    
-	    this.broadCastToAllClient(factory.make(MessageType.ROOM_LIST_UPDATE, roomInfosJson));
+	/** Construit le JSON d'une room et l'envoie à tous les clients */
+	private JSONObject buildRoomJson(RoomThread room) {
+		JSONObject roomJson = new JSONObject();
+		roomJson.put("id", room.id);
+		roomJson.put("currentPlayers", room.getPlayerCount());
+		roomJson.put("maxPlayers", room.getMaxPlayers());
+		roomJson.put("inGame", room.isInGame());
+		roomJson.put("roomName", room.getRoomName());
+		roomJson.put("mapSize", room.getMapSize());
+		roomJson.put("difficulty", room.getDifficulty());
+		roomJson.put("botCount", room.getBotCount());
+		return roomJson;
+	}
+
+	public void updateRoomsListOfClients() {
+		JSONObject roomInfosJson = new JSONObject();
+		JSONArray array = new JSONArray();
+		for (RoomThread room : this.getRooms()) {
+			array.put(buildRoomJson(room));
+		}
+		roomInfosJson.put("rooms", array);
+		this.broadCastToAllClient(factory.make(MessageType.ROOM_LIST_UPDATE, roomInfosJson));
+	}
+
+	/** Envoie la liste des rooms à un seul client (réponse à GET_ROOM_LIST_UPDATE) */
+	public void sendRoomsListToClient(ClientHandler client) {
+		JSONObject roomInfosJson = new JSONObject();
+		JSONArray array = new JSONArray();
+		for (RoomThread room : this.getRooms()) {
+			array.put(buildRoomJson(room));
+		}
+		roomInfosJson.put("rooms", array);
+		client.addMessage(factory.make(MessageType.ROOM_LIST_UPDATE, roomInfosJson));
 	}
 }

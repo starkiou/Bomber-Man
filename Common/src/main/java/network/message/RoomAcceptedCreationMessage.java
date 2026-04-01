@@ -23,7 +23,8 @@ public class RoomAcceptedCreationMessage implements Message {
 
 	@Override
 	public MessageType getMessageType() {
-		return MessageType.ACCEPTED_ROOM_JOIN;
+		// FIX était ACCEPTED_ROOM_JOIN par erreur
+		return MessageType.ACCEPTED_ROOM_CREATION;
 	}
 
 	public int getIdRoom() {
