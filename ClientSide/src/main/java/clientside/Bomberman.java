@@ -11,7 +11,7 @@ public class Bomberman extends Application {
         SceneManager.getInstance().setStage(stage);
         stage.setTitle("Bomberman \uD83D\uDCA3");
 
-        SceneManager.getInstance().loadScene("login-view.fxml");
+        SceneManager.getInstance().loadScene("home-view.fxml");
 
         stage.show();
     }
