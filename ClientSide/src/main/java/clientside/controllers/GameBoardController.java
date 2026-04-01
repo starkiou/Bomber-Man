@@ -19,9 +19,11 @@ import javafx.scene.layout.GridPane;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class GameBoardController {
 
@@ -38,6 +40,23 @@ public class GameBoardController {
     // Entités
     private Map<Integer, ImageView> playerViews = new HashMap<>();
     private Image player1Img, botImg;
+
+    // Bombes
+    private static final int    BOMB_IDLE_FRAMES       = 28;  // B2_0..B2_27 (clignotement avant explosion)
+    private static final int    EXPLOSION_SPRITE_TYPES  = 7;   // types 0-6 de explosion_Z_F
+    private static final int    EXPLOSION_FRAMES        = 14;  // frames 0-13 par type
+    private static final long   EXPLOSION_ANIM_MS      = 700;
+    private static final long   BOMB_ANIM_TOTAL_MS     = 3000; // DEFAULT_BOMB_DELAY
+
+    private Image[]   bombIdleFrames  = new Image[BOMB_IDLE_FRAMES];
+    private Image[][] explosionFrames = new Image[EXPLOSION_SPRITE_TYPES][EXPLOSION_FRAMES];
+
+    /** ImageViews for active bombs, keyed by bomb ID. */
+    private Map<Integer, ImageView> bombViews     = new HashMap<>();
+    /** First time each bomb ID was seen in a snapshot (for frame animation). */
+    private Map<Integer, Long>      bombFirstSeen = new HashMap<>();
+    /** ImageViews for explosion cells, keyed by "x_y". */
+    private Map<String, ImageView>  explosionViews = new HashMap<>();
 
     private Game game;
 
@@ -62,6 +81,22 @@ public class GameBoardController {
         // Sprites des joueurs
         player1Img = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/0/D_0.png")));
         botImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/1/D_0.png")));
+
+        // Sprites de la bombe avant explosion (clignotement d'avertissement)
+        for (int i = 0; i < BOMB_IDLE_FRAMES; i++) {
+            bombIdleFrames[i] = new Image(Objects.requireNonNull(
+                    getClass().getResourceAsStream("/sprites/output/bomb/B2_" + i + ".png")));
+        }
+
+        // Sprites d'explosion directionnels : explosion_Z_F.png
+        // Z : 0=centre, 1=H-mid, 2=V-mid, 3=bout-haut, 4=bout-bas, 5=bout-droit, 6=bout-gauche
+        for (int type = 0; type < EXPLOSION_SPRITE_TYPES; type++) {
+            for (int f = 0; f < EXPLOSION_FRAMES; f++) {
+                explosionFrames[type][f] = new Image(Objects.requireNonNull(
+                        getClass().getResourceAsStream(
+                                "/sprites/output/explosions/explosion_" + type + "_" + f + ".png")));
+            }
+        }
     }
 
     private void initMap() {
@@ -137,7 +172,61 @@ public class GameBoardController {
             }
         }
 
-        // 2. Met à jour les joueurs (Toi et le Bot)
+        // 2. Bombes actives (pas encore explosées)
+        long now = System.currentTimeMillis();
+        Set<Integer> liveBombIds = new HashSet<>();
+        for (GameSnapshot.BombState b : snap.getBombs()) {
+            liveBombIds.add(b.id());
+            bombFirstSeen.computeIfAbsent(b.id(), id -> now);
+            long elapsed = now - bombFirstSeen.get(b.id());
+            int frame = (int) ((elapsed * BOMB_IDLE_FRAMES / BOMB_ANIM_TOTAL_MS) % BOMB_IDLE_FRAMES);
+
+            ImageView bView = bombViews.computeIfAbsent(b.id(), id -> {
+                ImageView v = new ImageView();
+                v.setFitWidth(TILE_SIZE);
+                v.setFitHeight(TILE_SIZE);
+                gameGrid.getChildren().add(v);
+                return v;
+            });
+            bView.setImage(bombIdleFrames[frame]);
+            GridPane.setColumnIndex(bView, b.x());
+            GridPane.setRowIndex(bView, b.y());
+        }
+        // Nettoyer les bombes disparues
+        Set<Integer> staleBombIds = new HashSet<>(bombViews.keySet());
+        staleBombIds.removeAll(liveBombIds);
+        for (int id : staleBombIds) {
+            gameGrid.getChildren().remove(bombViews.remove(id));
+            bombFirstSeen.remove(id);
+        }
+
+        // 3. Cellules en explosion
+        Set<String> liveExplosionKeys = new HashSet<>();
+        for (GameSnapshot.ExplosionState e : snap.getExplosions()) {
+            String key = e.x() + "_" + e.y();
+            liveExplosionKeys.add(key);
+            int frame = (int) Math.min(e.ageMs() * EXPLOSION_FRAMES / EXPLOSION_ANIM_MS, EXPLOSION_FRAMES - 1);
+            int type  = Math.min(Math.max(e.spriteType(), 0), EXPLOSION_SPRITE_TYPES - 1);
+
+            ImageView eView = explosionViews.computeIfAbsent(key, k -> {
+                ImageView v = new ImageView();
+                v.setFitWidth(TILE_SIZE);
+                v.setFitHeight(TILE_SIZE);
+                gameGrid.getChildren().add(v);
+                return v;
+            });
+            eView.setImage(explosionFrames[type][frame]);
+            GridPane.setColumnIndex(eView, e.x());
+            GridPane.setRowIndex(eView, e.y());
+        }
+        // Nettoyer les cellules d'explosion disparues
+        Set<String> staleExplosionKeys = new HashSet<>(explosionViews.keySet());
+        staleExplosionKeys.removeAll(liveExplosionKeys);
+        for (String key : staleExplosionKeys) {
+            gameGrid.getChildren().remove(explosionViews.remove(key));
+        }
+
+        // 4. Met à jour les joueurs (Toi et le Bot)
         for (GameSnapshot.PlayerState p : snap.getPlayers()) {
             if (p.isDead()) {
                 // Si le joueur est mort, on retire son image de la grille
