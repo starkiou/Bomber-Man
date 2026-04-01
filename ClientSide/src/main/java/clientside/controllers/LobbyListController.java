@@ -48,9 +48,8 @@ public class LobbyListController {
 
     @FXML
     private void onCreateRoomClick() {
-        System.out.println("Creation room ");
-        NetworkManager.getInstance().sendMessage(new RoomCreationMessage(4,"Roomtest"));
-        onRefreshClick();
+        GameConfigController.setOnlineMode(true); // On active le mode Online
+        SceneManager.getInstance().loadScene("game-conf-view.fxml");
     }
 
     @FXML

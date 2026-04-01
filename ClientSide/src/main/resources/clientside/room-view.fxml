@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane prefHeight="400.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="clientside.controllers.RoomController">
+
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <top>
+        <HBox alignment="CENTER">
+            <padding>
+                <Insets bottom="10"/>
+            </padding>
+            <Label fx:id="roomNameLabel" text="Arena-0" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.4">
+            <items>
+                <ListView fx:id="playerListView" />
+                <VBox spacing="5">
+                    <TextArea fx:id="chatArea" editable="false" VBox.vgrow="ALWAYS" wrapText="true" focusTraversable="false"/>
+                    <HBox spacing="5">
+                        <TextField fx:id="chatInputField" promptText="Message..." HBox.hgrow="ALWAYS" onAction="#onSendMessageClick"/>
+                        <Button text="Envoyer" onAction="#onSendMessageClick"/>
+                    </HBox>
+                </VBox>
+            </items>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <BorderPane>
+            <padding>
+                <Insets top="10"/>
+            </padding>
+            <left>
+                <Button text="Quitter" onAction="#onQuitClick"/>
+            </left>
+            <right>
+                <Button fx:id="readyButton" text="Prêt" onAction="#onReadyClick"/>
+            </right>
+        </BorderPane>
+    </bottom>
+
+</BorderPane>

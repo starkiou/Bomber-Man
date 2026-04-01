@@ -84,8 +84,8 @@ public class LoginController {
     private void onPlayOfflineClick() {
         String username = usernameField.getText().isBlank() ? "Player1" : usernameField.getText();
         NetworkManager.getInstance().setNickname(username);
-
-        SceneManager.getInstance().loadScene("game-config.fxml");
+        GameConfigController.setOnlineMode(false);
+        SceneManager.getInstance().loadScene("game-conf-view.fxml");
     }
 
     @FXML

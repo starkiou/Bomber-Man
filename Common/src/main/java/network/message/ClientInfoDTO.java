@@ -30,5 +30,13 @@ public class ClientInfoDTO {
     public int getClientId() {
     	return clientId;
     }
+
+    public boolean isReady() {
+        return isReady;
+    }
+
+    public String getPseudo() {
+        return pseudo;
+    }
     
 }

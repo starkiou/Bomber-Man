@@ -47,4 +47,8 @@ public class RoomStatusMessage implements Message {
     public MessageType getMessageType() {
         return MessageType.ROOM_STATUS_UPDATE;
     }
+
+    public int getRoomId() {
+        return this.roomId;
+    }
 }

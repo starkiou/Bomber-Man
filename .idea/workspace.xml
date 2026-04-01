@@ -5,22 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c83188f1-a693-4da3-a589-f803193e0ece" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/ClientCorrectReadyUpdateMessage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/ClientReadyMessage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomCorrectQuitMessage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomQuitMessage.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/Launcher.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameConfigController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameConfigController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/LobbyListController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/LobbyListController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/LoginController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-config.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/room-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/room-view.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/ClientInfoDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/ClientInfoDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/MessageFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/MessageFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/MessageType.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/MessageType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomAcceptedCreationMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomAcceptedCreationMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomAcceptedJoinMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomAcceptedJoinMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/AcceptConnectionThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/AcceptConnectionThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ClientHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ClientHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomStatusMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomStatusMessage.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/RoomThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/RoomThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerClientMessageHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerClientMessageHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,7 +43,7 @@
     "Application.Launcher.executor": "Run",
     "Application.Main.executor": "Run",
     "Application.TestServer.executor": "Run",
-    "git-widget-placeholder": "Merging client-room-creation",
+    "git-widget-placeholder": "client-room-creation",
     "last_opened_file_path": "C:/Users/milos/Desktop/SAE/sae_s4_groupe_b/ClientSide/src/main/java/clientside/controllers",
     "node.js.selected.package.tslint": "(autodetect)"
   }
@@ -71,7 +65,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775052436495</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002">
+      <option name="closed" value="true" />
+      <created>1775056847191</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1775056847191</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
