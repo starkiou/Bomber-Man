@@ -90,5 +90,4 @@ public class Bomb extends Entity {
         }
         return affectedCells;
     }
-
 }
