@@ -12,7 +12,8 @@ public enum MessageType {
 	GET_ROOM_LIST_UPDATE(9),
 	READY_UPDATE(10),
 	ROOM_CREATION(11),
-	ROOM_JOIN(12);
+	ROOM_JOIN(12),
+	REFUSED_ROOM_JOIN(13);
 
     private final byte id;
 

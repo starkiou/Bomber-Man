@@ -112,6 +112,10 @@ public class RoomThread extends Thread {
 		this.roomName=roomName;
 	}
 	
+	public boolean isFull() {
+		return (this.getPlayerCount()>=this.maxPlayer);
+	}
+	
 	
 	
 }
