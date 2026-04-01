@@ -13,7 +13,8 @@ public enum MessageType {
 	READY_UPDATE(10),
 	ROOM_CREATION(11),
 	ROOM_JOIN(12),
-	REFUSED_ROOM_JOIN(13);
+	REFUSED_ROOM_JOIN(13), 
+	ROOM_STATUS_UPDATE(14);
 
     private final byte id;
 

@@ -63,7 +63,7 @@ public class ServerClientMessageHandler {
 				break;
 			case READY_UPDATE:
 				break;
-			case GET_ROOM_UPDATE:
+			case GET_ROOM_UPDATE: 
 				break;
 			case ROOM_JOIN:
 				this.roomJoin(sender,message);
@@ -86,7 +86,10 @@ public class ServerClientMessageHandler {
 			json.put("roomId", room.getRoomId());
 			sender.addMessage(factory.make(MessageType.REFUSED_ROOM_JOIN, json));
 		} else {
-			this.serverManager.getRoomsById(roomId).addClient(sender);
+			room.addClient(sender);
+			sender.setRoom(room);
+	    	this.serverManager.updateRoomsListOfClients();
+
 		}
 	}
 	

@@ -15,6 +15,8 @@ public class ClientHandler extends Thread {
 	
 	private ServerManager serverManager;
 	
+	private int clientId;
+	
 	private final MessageSerializer serializer = new MessageSerializer();
 	
 	private final Queue<Message> messageQueue = new LinkedList<>();
@@ -28,12 +30,14 @@ public class ClientHandler extends Thread {
     
 	private boolean isReady = false; //maybe need to be moved into roomThread
 	
-	public String pseudo; 
+	private String pseudo; 
 
 	
-	public ClientHandler(Socket socket, ServerManager serverManager){
+	public ClientHandler(Socket socket, ServerManager serverManager, int clientId){
 		this.socket=socket;
 		this.serverManager=serverManager;
+		this.clientId=clientId;
+		
 		
 		
 	}
@@ -53,11 +57,7 @@ public class ClientHandler extends Thread {
 	    }
 	}
 	
-	private boolean ping() {
-		//TODO
-		return true;
-		
-	}
+	
 
 	public boolean isReady() {
 		return isReady;
@@ -86,7 +86,7 @@ public class ClientHandler extends Thread {
 		return room;
 	}
 
-	public void setRoom(RoomThread room) {
+	public synchronized void setRoom(RoomThread room) {
 		this.room = room;
 	}
 	
@@ -97,6 +97,11 @@ public class ClientHandler extends Thread {
 	public void setPseudo(String pseudo) {
 		this.pseudo = pseudo;
 	}
+	
+	public int getClientId() {
+		return this.clientId;
+	}
+
 	
 	public void addMessage(Message message) {
 	    synchronized (messageQueue) {

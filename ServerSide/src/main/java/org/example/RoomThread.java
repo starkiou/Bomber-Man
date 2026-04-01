@@ -4,16 +4,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import network.message.ClientInfoDTO;
 import network.message.Message;
+import network.message.MessageFactory;
+import network.message.MessageType;
+import network.message.RoomStatusMessage;
 
 public class RoomThread extends Thread {
 	private List<ClientHandler> listClient = Collections.synchronizedList(new ArrayList<ClientHandler>());
 
-	public boolean isLooping = true;
+	public MessageFactory factory = new MessageFactory();
+	
+	public boolean isWaitingToLaunch = true;
 	
 	public final int id;
 	
-	private static final int waitingPlayerTime = 1000;
+	private static final int timeBeforeLaunchWhenReady = 5000;
 	
 	private boolean readyToLaunch = false;
 	
@@ -47,16 +56,36 @@ public class RoomThread extends Thread {
 
 	@Override
 	public void run() {
-		while(isLooping) {
-			if(!readyToLaunch) {
-				this.updateReadyToLaunch();
+		while(isWaitingToLaunch) {
+			this.updateReadyToLaunch();
+
+			JSONObject json = new JSONObject();
+			json.put("roomId", this.getRoomId());
+			json.put("isWaitingToLaunch", this.isWaitingToLaunch);
+	        JSONArray array = new JSONArray();
+	        for(ClientHandler client : listClient) {
+	        	ClientInfoDTO clientInfoDTO = new ClientInfoDTO(client.getClientId(), client.isReady(), client.getPseudo());
+	        	array.put(clientInfoDTO);
+	        }
+	        json.put("clients", array);
+			
+			RoomStatusMessage roomStatusMessage = (RoomStatusMessage) factory.make(MessageType.ROOM_STATUS_UPDATE, json);
+			for(ClientHandler client : this.listClient) {
+				client.addMessage(roomStatusMessage);
+				
+			}
+
+			try {
+				sleep(200);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 			
 		}
 	}
 	
-	public void stopLooping() {
-		isLooping = false;
+	public void stopWaiting() {
+		isWaitingToLaunch = false;
 	}
 	
 	private void updateReadyToLaunch() {
