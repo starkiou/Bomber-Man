@@ -186,6 +186,35 @@ public abstract class AIPlayer extends Player {
         return false;
     }
 
+    // ─── Cooldowns ───────────────────────────────────────────────────────────────
+
+    private long moveCooldownMs = 200;
+
+    private static final long BOMB_COOLDOWN_MS = 500;
+
+    private long lastMoveTime  = 0;
+    private long lastBombTime  = 0;
+
+    public boolean canMove() {
+        return System.currentTimeMillis() - lastMoveTime >= moveCooldownMs;
+    }
+
+    public boolean canBomb() {
+        return System.currentTimeMillis() - lastBombTime >= BOMB_COOLDOWN_MS;
+    }
+
+    public void onMoveDone() {
+        lastMoveTime = System.currentTimeMillis();
+    }
+
+    public void onBombDone() {
+        lastBombTime = System.currentTimeMillis();
+    }
+
+    public void setMoveCooldownMs(long ms) {
+        this.moveCooldownMs = ms;
+    }
+
     // ─── Utilities ─────────────────────────────────────────────────────────
 
     protected int manhattan(int x1, int y1, int x2, int y2) {

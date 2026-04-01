@@ -1,16 +1,28 @@
 package clientside.network;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
+
+import network.message.ConnectionMessage;
+import network.message.Message;
+import network.message.MessageSerializer;
+import java.util.function.Consumer;
 
 public class NetworkManager {
     private static NetworkManager instance;
     private Socket socket;
-    private ObjectOutputStream out;
-    private String nickname;
+    private OutputStream out;
+    private boolean connected = false;
 
-    // Singleton : une seule instance pour toute l'appli
+    private String nickname;
+    private int selectedCharacterId = 0;
+
+    private Consumer<Message> currentMessageHandler;
+
+    private final MessageSerializer serializer = new MessageSerializer();
+
+    // Singleton
     public static NetworkManager getInstance() {
         if (instance == null) instance = new NetworkManager();
         return instance;
@@ -19,22 +31,38 @@ public class NetworkManager {
     public void connect(String host, int port, String user) throws IOException {
         this.nickname = user;
         this.socket = new Socket(host, port);
-        this.out = new ObjectOutputStream(socket.getOutputStream());
+        this.out = socket.getOutputStream();
 
-        // Lancer le thread qui écoute le serveur ici
-        new Thread(new NetworkListener(socket)).start();
+        // Si on arrive ici, la socket est ouverte
+        this.connected = true;
+
+        // Lancer le thread qui écoute le serveur
+        Thread listenerThread = new Thread(new NetworkListener(socket));
+        listenerThread.setDaemon(true); // Important : s'arrête quand l'appli ferme
+        listenerThread.start();
+
+        this.sendMessage(new ConnectionMessage(this.nickname, selectedCharacterId));
     }
 
-    public void sendMessage(Object msg) {
+    public void sendMessage(Message message) {
+        if (!connected || out == null) {
+            System.err.println("Impossible d'envoyer : non connecté au serveur.");
+            return;
+        }
+
         try {
-            out.writeObject(msg);
+            byte[] data = serializer.serialize(message);
+            out.write(data);
             out.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Erreur lors de l'envoi du message.");
+            disconnect(); // On coupe tout si l'envoi échoue
         }
     }
 
-
+    public boolean isConnected() {
+        return connected;
+    }
 
     public String getNickname() {
         return this.nickname;
@@ -42,5 +70,35 @@ public class NetworkManager {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void disconnect() {
+        this.connected = false; // On repasse à false immédiatement
+        try {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            out = null;
+            socket = null;
+        }
+    }
+
+    public void setMessageHandler(Consumer<Message> handler) {
+        this.currentMessageHandler = handler;
+    }
+
+    public Consumer<Message> getMessageHandler() {
+        return this.currentMessageHandler;
+    }
+
+    public int getSelectedCharacterId() {
+        return selectedCharacterId;
+    }
+
+    public void setSelectedCharacterId(int id) {
+        this.selectedCharacterId = id;
     }
 }

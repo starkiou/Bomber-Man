@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="clientside.controllers.HomeController"
+      prefHeight="600.0" prefWidth="800.0">
+
+    <padding>
+        <Insets bottom="50.0" left="50.0" right="50.0" top="50.0"/>
+    </padding>
+
+    <Label text="BOMBERMAN" style="-fx-font-size: 40px;  -fx-font-weight: bold;"/>
+
+    <VBox alignment="CENTER" spacing="10.0" maxWidth="300.0">
+        <Button text="PLAY" onAction="#onPlayClick" prefWidth="200.0"/>
+
+        <Button text="SETTINGS" onAction="#onSettingsClick" prefWidth="200.0"
+                style="-fx-font-size: 14px;"/>
+
+        <Button text="EXIT" onAction="#onExitClick" prefWidth="200.0"/>
+    </VBox>
+
+    <Label text="v1.0 - SAE S4" style="-fx-text-fill: #95a5a6;"/>
+</VBox>

@@ -16,7 +16,7 @@ public class PlayerDTO {
 	
 	public PlayerDTO(JSONObject datajason) {
 		this.id = datajason.getInt("id");
-		this.y = datajason.getInt("y");
+		this.y = datajason.getDouble("y");
 		this.x = datajason.getDouble("x");
 		this.isDead = datajason.getBoolean("isDead");
 	}
@@ -24,11 +24,28 @@ public class PlayerDTO {
 	public JSONObject toJson() {
         JSONObject obj = new JSONObject();
         obj.put("id", this.id);
-        obj.put("y", this.id);
-        obj.put("x", this.id);
+        obj.put("y", this.y);
+        obj.put("x", this.x);
         obj.put("isDead", this.isDead);
         return obj;
 	}
+
+	public int getId() {
+		return id;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public boolean isDead() {
+		return isDead;
+	}
+	
 	
 	
 }

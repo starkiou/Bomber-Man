@@ -6,10 +6,11 @@ import java.nio.charset.StandardCharsets;
 import org.json.JSONObject;
 
 public class MessageSerializer {
+	private MessageFactory messageFactory = new MessageFactory();
+	
+	
 	public byte[] serialize(Message message) {
 		byte typeByte = message.getMessageType().getId();
-
-		String stringMessage = message.getMessageType().name() + "|" + message.getData().toString();
 
 		byte[] dataBytes = message.getData().toString().getBytes(StandardCharsets.UTF_8);
 		
@@ -25,37 +26,16 @@ public class MessageSerializer {
 	public Message deserialize(byte[] byteObject) {
 		ByteBuffer buffer = ByteBuffer.wrap(byteObject);
 
-        byte typeByte = buffer.get();   // lit l'ID
-        int length = buffer.getInt();   // lit la longueur du payload
+        byte typeByte = buffer.get();
+        int length = buffer.getInt();
 
         byte[] dataBytes = new byte[length];
-        buffer.get(dataBytes);          // lit les données
+        buffer.get(dataBytes);
 
         JSONObject dataJson = new JSONObject(new String(dataBytes, StandardCharsets.UTF_8));
         MessageType type = MessageType.fromId(typeByte);
 
-        switch(type) {
-            case CONNECTION:
-                return new ConnectionMessage(dataJson);
-            case CHAT:
-            	break;
-
-            case MOVE:
-            	break;
-
-            case BOMB_PLACE:
-            	break;
-
-            case GAME_STATE:
-            	break;
-
-            case LOBBY_UPDATE:
-            	break;
-
-            default:
-                throw new RuntimeException("Type de message inconnu : " + type);
-        }
-		return null;
+        return messageFactory.make(type, dataJson);
     
 		
 	};
