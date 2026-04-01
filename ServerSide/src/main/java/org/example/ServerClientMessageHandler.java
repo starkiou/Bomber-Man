@@ -13,6 +13,7 @@ import network.message.Message;
 import network.message.MessageFactory;
 import network.message.MessageType;
 import network.message.RoomInfoDTO;
+import network.message.RoomJoiningMessage;
 
 public class ServerClientMessageHandler {
 	private ServerManager serverManager;
@@ -73,8 +74,16 @@ public class ServerClientMessageHandler {
 				break;
 			case GET_ROOM_UPDATE:
 				break;
+			case ROOM_JOIN:
+				RoomJoiningMessage messageRoomJoining = (RoomJoiningMessage) message;
+				int roomId = messageRoomJoining.getIdRoom();
+				this.serverManager.getRoomsById(roomId).addClient(sender);
+				break;
+			case ROOM_UPDATE:
+				break;
 			default:
 				break;
+				
 			
 			}
 	}
