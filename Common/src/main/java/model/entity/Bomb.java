@@ -33,6 +33,17 @@ public class Bomb extends Entity {
         return ownerID;
     }
 
+    /**
+     * Returns the milliseconds remaining before this bomb explodes.
+     * Returns 0 if it has already exploded or the delay has passed.
+     *
+     * @param now current time in milliseconds (pass {@code System.currentTimeMillis()})
+     */
+    public long getTimeRemainingMs(long now) {
+        long elapsed = now - placedTime;
+        return Math.max(0L, explosionDelay - elapsed);
+    }
+
     // ─── Logic ───────────────────────────────────────────────────────────────
 
     // à mettre dans la boucle de gameplay
