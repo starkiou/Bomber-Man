@@ -12,8 +12,10 @@ public class Bomberman extends Application {
         LogManager.getInstance().info("Démarrage de l'application client");
         SceneManager.getInstance().setStage(stage);
         stage.setTitle("Bomberman \uD83D\uDCA3");
+        
+        SceneManager.getInstance().loadScene("/clientside/game-config.fxml");
 
-        SceneManager.getInstance().loadScene("login-view.fxml");
+        //SceneManager.getInstance().loadScene("login-view.fxml");
 
         stage.show();
     }
