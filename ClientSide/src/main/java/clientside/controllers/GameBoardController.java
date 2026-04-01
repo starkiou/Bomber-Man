@@ -26,9 +26,9 @@ public class GameBoardController {
         CellType[][] grid = MazeFactory.createMaze(MazeFactory.Algorithm.EXHAUSTIVE, MAZE_WIDTH, MAZE_HEIGHT);
 
         // Chargement des 3 textures
-        Image wallImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/block_07.png")));
-        Image floorImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/ground_06.png")));
-        Image brickImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/block_08.png"))); // Ta texture de brique
+        Image wallImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/walls/block_07.png")));
+        Image floorImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/ground/ground_06.png")));
+        Image brickImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/walls/block_08.png"))); // Ta texture de brique
 
         for (int x = 0; x < MAZE_WIDTH; x++) {
             for (int y = 0; y < MAZE_HEIGHT; y++) {
