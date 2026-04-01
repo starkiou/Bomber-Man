@@ -51,9 +51,11 @@ public class NetworkListener implements Runnable {
         }
     }
 
-    private void handleMessage(Message message) {
-        if (message.getMessageType() == MessageType.CHAT) {
-            JSONObject data = (JSONObject) message.getData();
+    private void handleMessage(Message msg) {
+        System.out.println("Message reçu du serveur : " + msg.getMessageType());
+
+        if (msg.getMessageType() == MessageType.CHAT) {
+            JSONObject data = (JSONObject) msg.getData();
             String content = data.getString("content");
 
             // TODO: Il faudra une méthode pour récupérer l'instance
@@ -63,6 +65,10 @@ public class NetworkListener implements Runnable {
 
             // Si tu as une référence vers ton controller (via SceneManager par exemple) :
             // sceneManager.getChatController().appendMessage(content);
+        }
+        // On transmet au contrôleur qui écoute actuellement
+        if (NetworkManager.getInstance().getMessageHandler() != null) {
+            NetworkManager.getInstance().getMessageHandler().accept(msg);
         }
     }
 

@@ -2,75 +2,97 @@ package clientside.controllers;
 
 import clientside.SceneManager;
 import clientside.network.NetworkManager;
-import javafx.animation.PauseTransition;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.TilePane;
 import javafx.scene.paint.Color;
-import javafx.util.Duration;
 
 public class MenuController {
-    // Variable simple et fondamentale pour stocker l'état
-    public static boolean isConnected = false;
 
-    private static final int MAX_USERNAME_LENGTH = 30;
-    private static final int RETRY_DURATION_MS = 3000;
-    private static final int SLEEP_BETWEEN_RETRY = 500;
-    private static final double REDIRECT_DELAY = 1.0;
-
-    @FXML public TextField usernameField;
-    @FXML public TextField ipAddressField;
-    @FXML public TextField serverPortField;
+    @FXML private TextField usernameField;
+    @FXML private TextField ipAddressField;
+    @FXML private TextField serverPortField;
     @FXML private Label debugText;
+    @FXML private Button playOnlineButton;
+    @FXML private TilePane spriteContainer;
+
+    private String selectedSprite = "default_bomber.png";
 
     @FXML
-    public void onConnectButtonClick(ActionEvent actionEvent) {
+    public void initialize() {
+        ipAddressField.setText("");
+        serverPortField.setText("3000");
+
+        // Sécurité : Si on revient sur le menu alors qu'on est déjà connecté
+        if (NetworkManager.getInstance().isConnected()) {
+            playOnlineButton.setDisable(false);
+            updateDebugStatus("Déjà connecté !", Color.GREEN);
+        }
+    }
+
+    @FXML
+    public void onConnectButtonClick() {
         String username = usernameField.getText();
         String ipAddress = ipAddressField.getText();
-        Integer port = Integer.parseInt(serverPortField.getText());
+        String portStr = serverPortField.getText();
 
-        if (username == null || username.isBlank()) {
-            updateDebugStatus("Username can't be blank!", Color.RED);
+        if (username.isBlank() || ipAddress.isBlank() || portStr.isBlank()) {
+            updateDebugStatus("Champs incomplets !", Color.RED);
             return;
         }
 
-        if (ipAddress == null || ipAddress.isBlank()) {
-            updateDebugStatus("IP address can't be blank!", Color.RED);
-            return;
-        }
-
-        updateDebugStatus("Connecting...", Color.BLUE);
+        updateDebugStatus("Connexion...", Color.BLUE);
 
         Task<Boolean> connectionTask = new Task<>() {
             @Override
             protected Boolean call() {
-                long startTime = System.currentTimeMillis();
-                while (System.currentTimeMillis() - startTime < RETRY_DURATION_MS) {
-                    try {
-                        NetworkManager.getInstance().connect(ipAddress, port, username);
-                        return true;
-                    } catch (Exception e) {
-                        try { Thread.sleep(SLEEP_BETWEEN_RETRY); } catch (InterruptedException ie) { return false; }
-                    }
+                try {
+                    int port = Integer.parseInt(portStr);
+                    NetworkManager.getInstance().connect(ipAddress, port, username);
+                    return true;
+                } catch (Exception e) {
+                    return false;
                 }
-                return false;
             }
         };
 
         connectionTask.setOnSucceeded(e -> {
-            isConnected = connectionTask.getValue(); // On stocke le résultat ici
-            if (isConnected) {
-                SceneManager.getInstance().loadScene("connection-choice.fxml");
+            if (connectionTask.getValue()) {
+                updateDebugStatus("Connecté !", Color.GREEN);
+                playOnlineButton.setDisable(false); // Active le bouton Online
             } else {
-                updateDebugStatus("Connection failed. Entering anyway...", Color.RED);
-                PauseTransition delay = new PauseTransition(Duration.seconds(REDIRECT_DELAY));
-                delay.setOnFinished(event -> SceneManager.getInstance().loadScene("connection-choice.fxml"));
-                delay.play();
+                updateDebugStatus("Échec connexion.", Color.RED);
             }
         });
+
         new Thread(connectionTask).start();
+    }
+
+    @FXML
+    private void onPlayOnlineClick() {
+        if (NetworkManager.getInstance().isConnected()) {
+            SceneManager.getInstance().loadScene("lobby-list.fxml");
+        }
+    }
+
+    @FXML
+    private void onPlayOfflineClick() {
+        String username = usernameField.getText().isBlank() ? "Player1" : usernameField.getText();
+        NetworkManager.getInstance().setNickname(username);
+
+        SceneManager.getInstance().loadScene("game-board.fxml");
+    }
+
+    @FXML
+    private void onBackClick() {
+        // Déconnecte le joueur si besoin avant de quitter
+        if (NetworkManager.getInstance().isConnected()) {
+            NetworkManager.getInstance().disconnect();
+        }
+        SceneManager.getInstance().loadScene("home-view.fxml");
     }
 
     private void updateDebugStatus(String message, Color color) {
