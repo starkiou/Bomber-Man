@@ -28,9 +28,9 @@ public class Main {
      * # = Mur fixe, X = Brique, . = Vide
      */
     private static void displayMaze(CellType[][] grid) {
-        for (int y = 0; y < grid[0].length; y++) {
-            for (int x = 0; x < grid.length; x++) {
-                switch (grid[x][y]) {
+        for (int y = 0; y < grid.length; y++) {
+            for (int x = 0; x < grid[0].length; x++) {
+                switch (grid[y][x]) {
                     case WALL -> System.out.print("##"); // Mur indestructible
                     case BRICK -> System.out.print("XX"); // Brique destructible
                     case EMPTY -> System.out.print("  "); // Passage
