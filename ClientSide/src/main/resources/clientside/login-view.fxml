@@ -14,10 +14,12 @@
 
     <Label text="Bomberman" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
 
-    <TextField fx:id="usernameField" prefWidth="100.0" maxWidth="150.0" promptText="Enter your name..."/>
+    <TextField fx:id="usernameField" prefWidth="150.0" maxWidth="200.0" promptText="Entrez votre pseudo..."/>
+
+    <TextField fx:id="ipAddressField" prefWidth="100.0" maxWidth="150.0" promptText="Ip du serveur"/>
+    <TextField fx:id="serverPortField" prefWidth="50.0" maxWidth="50.0" promptText="Port"/>
 
     <Button text="Se connecter" onAction="#onConnectButtonClick"/>
-    <Button text="Jouer en Local" onAction="#onSkipConnectClick" />
 
     <Label fx:id="debugText" text="debug"/>
 </VBox>

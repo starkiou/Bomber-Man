@@ -1,0 +1,41 @@
+stages:
+  - build
+  - review
+
+# ─── Job 1 : Compilation ────────────────────────────────────────────────────
+build-and-check:
+  stage: build
+  image: maven:3.9-eclipse-temurin-25
+  cache:
+    paths:
+      - .m2/repository
+  variables:
+    MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  script:
+    - echo "=== Compilation ==="
+    - mvn compile --no-transfer-progress
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: false  # bloque la MR si ça compile pas
+
+# ─── Job 2 : Review IA ──────────────────────────────────────────────────────
+ai-review:
+  stage: review
+  image: python:3.12-slim
+  script:
+    - pip install requests --quiet
+    - python scripts/ai_review.py
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true  # la MR n'est pas bloquée si le bot plante
+
+# ─── Job 3 : Review AI complète quand merge dans development ────────────────
+ai-full-review:
+  stage: review
+  image: python:3.12-slim
+  script:
+    - pip install requests --quiet
+    - python scripts/ai_full_review.py
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "development" && $CI_PIPELINE_SOURCE == "push"'
+  allow_failure: true
