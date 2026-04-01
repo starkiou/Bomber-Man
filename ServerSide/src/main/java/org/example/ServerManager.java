@@ -44,16 +44,16 @@ public class ServerManager {
     	clientHandler.start();
     }
     
-    public synchronized void createRoomAsClient(ClientHandler client, int nbMaxPlayers) {
-    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId);
+    public synchronized void createRoomAsClient(ClientHandler client, int nbMaxPlayers, String name) {
+    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId, name);
     	this.roomMap.put(Integer.valueOf(nextRoomId), newRoom);
     	this.nextRoomId++;
     	newRoom.start();
     	newRoom.addClient(client);
     }
     
-    public synchronized void createRoom(int nbMaxPlayers) {
-    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId);
+    public synchronized void createRoom(int nbMaxPlayers, String name) {
+    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId, name);
     	this.roomMap.put(Integer.valueOf(nextRoomId), newRoom);
     	this.nextRoomId++;
     	newRoom.start();

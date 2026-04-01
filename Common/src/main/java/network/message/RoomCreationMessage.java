@@ -5,19 +5,24 @@ import org.json.JSONObject;
 public class RoomCreationMessage implements Message {
 	
 	private int maxPlayer;
+	private String name;
 	
-	public RoomCreationMessage(int maxPlayer) {
+	public RoomCreationMessage(int maxPlayer, String name) {
 		this.maxPlayer=maxPlayer;
+		this.name=name;
 	}
 	
 	public RoomCreationMessage(JSONObject dataJson) {
 		this.maxPlayer = dataJson.getInt("maxPlayer");
+		this.name = dataJson.getString("name");
+
 	}
 	
 	@Override
 	public JSONObject getData() {
 		JSONObject obj = new JSONObject();
 	    obj.put("maxPlayer", this.maxPlayer);
+	    obj.put("name", this.name);
 	    return obj;
 	}
 
@@ -32,6 +37,14 @@ public class RoomCreationMessage implements Message {
 
 	public void setMaxPlayer(int maxPlayer) {
 		this.maxPlayer = maxPlayer;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

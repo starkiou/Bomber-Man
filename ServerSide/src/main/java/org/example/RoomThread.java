@@ -21,11 +21,14 @@ public class RoomThread extends Thread {
 	
 	private int maxPlayer;
 	
+	private String roomName;
 	
 	
-	public RoomThread(int maxPlayer, int id) {
+	
+	public RoomThread(int maxPlayer, int id, String roomName) {
 		this.maxPlayer=maxPlayer;
 		this.id = id;
+		this.roomName=roomName;
 	}
 	
 	public int getRoomId() {
@@ -99,6 +102,14 @@ public class RoomThread extends Thread {
 
 	public int getPlayerCount() {
 		return this.listClient.size();
+	}
+	
+	public String getRoomName() {
+		return roomName;
+	}
+	
+	public void setRoomName(String roomName) {
+		this.roomName=roomName;
 	}
 	
 	

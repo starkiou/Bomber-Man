@@ -52,8 +52,8 @@ public class TestServer {
             // ----------------------------------------------------------------
             // ÉTAPE 2 : création d'un salon
             // ----------------------------------------------------------------
-            System.out.println("[2] Envoi RoomCreationMessage (maxPlayer=4)...");
-            send(out, serializer, new RoomCreationMessage(4));
+            System.out.println("[2] Envoi RoomCreationMessage (maxPlayer=4, name='SalonToto')...");
+            send(out, serializer, new RoomCreationMessage(4, "Salon Toto"));
             sleep(300);
 
             // ----------------------------------------------------------------
@@ -91,6 +91,7 @@ public class TestServer {
                     String statut = room.isInGame()  ? "EN COURS" :
                                     room.isFull()    ? "PLEIN"    : "EN ATTENTE";
                     System.out.printf("  %-15s  %d/%d joueurs  [%s]%n",
+                    	room.getRoomName(),
                         room.getRoomId(),
                         room.getCurrentPlayers(),
                         room.getMaxPlayers(),

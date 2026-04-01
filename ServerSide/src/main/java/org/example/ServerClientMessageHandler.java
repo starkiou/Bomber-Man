@@ -40,6 +40,7 @@ public class ServerClientMessageHandler {
 			    	roomJson.put("currentPlayers", room.getPlayerCount());
 			    	roomJson.put("maxPlayers", room.getMaxPlayers());
 			    	roomJson.put("inGame", room.isInGame());
+			    	roomJson.put("roomName", room.getRoomName());
 			    	array.put(roomJson);
 			    }
 			    
@@ -52,7 +53,7 @@ public class ServerClientMessageHandler {
 				break;
 			case ROOM_CREATION:
 				RoomCreationMessage messageLobbyCreation = (RoomCreationMessage) message;
-				this.serverManager.createRoomAsClient(sender, messageLobbyCreation.getMaxPlayer());
+				this.serverManager.createRoomAsClient(sender, messageLobbyCreation.getMaxPlayer(), messageLobbyCreation.getName());
 				
 				break;
 			case ROOM_LIST_UPDATE:
