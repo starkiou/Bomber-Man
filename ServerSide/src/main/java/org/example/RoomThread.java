@@ -65,7 +65,7 @@ public class RoomThread extends Thread {
 	        JSONArray array = new JSONArray();
 	        for(ClientHandler client : listClient) {
 	        	ClientInfoDTO clientInfoDTO = new ClientInfoDTO(client.getClientId(), client.isReady(), client.getPseudo());
-	        	array.put(clientInfoDTO);
+	        	array.put(clientInfoDTO.toJson());
 	        }
 	        json.put("clients", array);
 			
@@ -143,6 +143,10 @@ public class RoomThread extends Thread {
 	
 	public boolean isFull() {
 		return (this.getPlayerCount()>=this.maxPlayer);
+	}
+	
+	public void removeClient(ClientHandler client) {
+		this.listClient.remove(client);
 	}
 	
 	

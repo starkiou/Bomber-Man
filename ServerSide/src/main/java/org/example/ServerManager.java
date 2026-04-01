@@ -1,6 +1,8 @@
 package org.example;
 
+
 import java.io.IOException;
+import model.logger.LogManager;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +20,7 @@ import network.message.MessageType;
 import network.message.RoomInfoDTO;
 
 public class ServerManager {
+
 	private List<ClientHandler> listClient = Collections.synchronizedList(new ArrayList<ClientHandler>());
 	private Map<Integer, RoomThread> roomMap = Collections.synchronizedMap(new HashMap<>());
 	public MessageFactory factory = new MessageFactory();
@@ -35,26 +38,19 @@ public class ServerManager {
 	
     public ServerManager(int port) {
     	System.out.println("Lancement d'un serveur sur le port : "+port);
-    	try {
-			acceptConnectionThread = new AcceptConnectionThread(this, port);
-			acceptConnectionThread.start();
-	    	this.setServerMessageHandler(new ServerClientMessageHandler(this));
-	        System.out.println("Serveur lancé sur le port : "+port);
-		} catch (IOException e) {
-			e.printStackTrace();
-	        System.out.println("Echec de lancement de serveur sur le port : "+port);
-
-		}
+    	acceptConnectionThread = new AcceptConnectionThread(this, port);
+		acceptConnectionThread.start();
+		this.setServerMessageHandler(new ServerClientMessageHandler(this));
+		System.out.println("Serveur lancé sur le port : "+port);
     	
-
-        
     }
-    
+
     public synchronized void addClientWithSocket(Socket socket) {
     	ClientHandler clientHandler = new ClientHandler(socket, this, nextClientId);
     	nextClientId++;
     	listClient.add(clientHandler);
     	clientHandler.start();
+    	LogManager.getInstance().info("Client connecté : " + socket.getInetAddress() + ":" + socket.getPort());
     }
     
     public synchronized void createRoomAsClient(ClientHandler client, int nbMaxPlayers, String name) {

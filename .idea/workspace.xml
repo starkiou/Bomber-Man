@@ -5,12 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c83188f1-a693-4da3-a589-f803193e0ece" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/ClientCorrectReadyUpdateMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/ClientReadyMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomCorrectQuitMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomQuitMessage.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameBoardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameBoardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameConfController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-conf-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-conf-view.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/module-info.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/TestServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/TestServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/ClientInfoDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/ClientInfoDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/MessageFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/MessageFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/MessageType.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/MessageType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomAcceptedCreationMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomAcceptedCreationMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomAcceptedJoinMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomAcceptedJoinMessage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/AcceptConnectionThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/AcceptConnectionThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ClientHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ClientHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/RoomThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/RoomThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerClientMessageHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerClientMessageHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,16 +44,16 @@
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Launcher.executor&quot;: &quot;Run&quot;,
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Application.TestServer.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;client-interface-nav&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/milos/Desktop/SAE/sae_s4_groupe_b/ClientSide/src/main/java/clientside/controllers&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Launcher.executor": "Run",
+    "Application.Main.executor": "Run",
+    "Application.TestServer.executor": "Run",
+    "git-widget-placeholder": "Merging client-room-creation",
+    "last_opened_file_path": "C:/Users/milos/Desktop/SAE/sae_s4_groupe_b/ClientSide/src/main/java/clientside/controllers",
+    "node.js.selected.package.tslint": "(autodetect)"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\milos\Desktop\SAE\sae_s4_groupe_b\ClientSide\src\main\java\clientside\controllers" />

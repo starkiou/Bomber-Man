@@ -6,6 +6,8 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import network.message.ClientCorrectReadyUpdateMessage;
+import network.message.ClientReadyMessage;
 import network.message.ConnectionMessage;
 import network.message.RoomCreationMessage;
 import network.message.RoomListUpdateMessage;
@@ -14,6 +16,7 @@ import network.message.Message;
 import network.message.MessageFactory;
 import network.message.MessageType;
 import network.message.RoomAcceptedCreationMessage;
+import network.message.RoomCorrectQuitMessage;
 import network.message.RoomInfoDTO;
 import network.message.RoomJoiningMessage;
 
@@ -69,13 +72,19 @@ public class ServerClientMessageHandler {
 				break;
 			case MOVE:
 				break;
-			case READY_UPDATE:
-				break;
 			case ROOM_JOIN:
 				this.roomJoin(sender,message);
 				break;
 			case ROOM_UPDATE:
 				break;
+			case ROOM_QUIT:
+				sender.getRoom().removeClient(sender);
+				sender.addMessage(new RoomCorrectQuitMessage());
+				break;
+			case READY_CLIENT:
+				ClientReadyMessage clientReadyMessage = (ClientReadyMessage) message;
+				sender.setReady(clientReadyMessage.isReady());
+				sender.addMessage(new ClientCorrectReadyUpdateMessage());
 			default:
 				break;
 				
