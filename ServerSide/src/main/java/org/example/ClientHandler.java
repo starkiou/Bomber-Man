@@ -8,9 +8,12 @@ import java.util.LinkedList;
 import java.util.Queue;
 import network.message.Message;
 import network.message.MessageSerializer;
+import java.nio.ByteBuffer;
 
 public class ClientHandler extends Thread {
 	private Socket socket;
+	
+	private ServerManager serverManager;
 	
 	private final MessageSerializer serializer = new MessageSerializer();
 	
@@ -24,10 +27,13 @@ public class ClientHandler extends Thread {
     public OutputStream out;
     
 	private boolean isReady = false; //maybe need to be moved into roomThread
+	
+	public String pseudo; 
 
 	
-	public ClientHandler(Socket socket){
+	public ClientHandler(Socket socket, ServerManager serverManager){
 		this.socket=socket;
+		this.serverManager=serverManager;
 		
 		
 	}
@@ -84,6 +90,14 @@ public class ClientHandler extends Thread {
 		this.room = room;
 	}
 	
+	public String getPseudo() {
+		return pseudo;
+	}
+
+	public void setPseudo(String pseudo) {
+		this.pseudo = pseudo;
+	}
+	
 	public void addMessage(Message message) {
 	    synchronized (messageQueue) {
 	        messageQueue.add(message);
@@ -122,12 +136,12 @@ public class ClientHandler extends Thread {
 	            byte[] lengthBytes = in.readNBytes(4);
 	            if (lengthBytes.length < 4) break;
 
-	            int length = java.nio.ByteBuffer.wrap(lengthBytes).getInt();
+	            int length = ByteBuffer.wrap(lengthBytes).getInt();
 
 	            byte[] dataBytes = in.readNBytes(length);
 	            if (dataBytes.length < length) break;
 
-	            java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocate(1 + 4 + length);
+	            ByteBuffer buffer = ByteBuffer.allocate(1 + 4 + length);
 	            buffer.put((byte) type);
 	            buffer.putInt(length);
 	            buffer.put(dataBytes);
@@ -135,13 +149,14 @@ public class ClientHandler extends Thread {
 	            Message message = this.serializer.deserialize(buffer.array());
 
 	            if (message != null) {
-	                System.out.println("Reçu: " + message.getMessageType());
+	                this.serverManager.getServerMessageHandler().handle(this, message);
 	            }
 	        }
 	    } catch (IOException e) {
 	        if (mustContinueListen) e.printStackTrace();
 	    } finally {
 	        closeConnection();
+	        serverManager.removeClient(this);
 	    }
 	}
 
