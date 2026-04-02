@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import model.logger.LogManager;
+
 public class AcceptConnectionThread extends Thread {
 
 
@@ -18,12 +20,18 @@ public class AcceptConnectionThread extends Thread {
 		this.serverSocket=serverSocket;
 		this.serverMain=serverMain;
 	}
-	
-	public AcceptConnectionThread(ServerManager serverMain, int port) throws IOException {
+
+
 		
-		this.serverSocket=new ServerSocket(port);
-	    System.out.println("Socket ouvert sur le port : "+port);
-		
+
+	public AcceptConnectionThread(ServerManager serverMain, int port) {
+		try {
+			this.serverSocket=new ServerSocket(port);
+			LogManager.getInstance().info("Serveur en écoute sur le port " + port);
+		} catch (IOException e) {
+			LogManager.getInstance().error("Impossible de démarrer le serveur sur le port " + port + " : " + e.getMessage());
+		}
+
 		this.serverMain=serverMain;
 	}
 	

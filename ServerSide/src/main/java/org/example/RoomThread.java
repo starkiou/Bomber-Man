@@ -18,26 +18,30 @@ public class RoomThread extends Thread {
 
 	public MessageFactory factory = new MessageFactory();
 	
-	public boolean isWaitingToLaunch = true;
+	public boolean isWaiting = true;
 	
 	public final int id;
 	
-	private static final int timeBeforeLaunchWhenReady = 5000;
+	private long readyStartTime = -1;
+	private static final int TIME_BEFORE_LAUNCH = 10000;
 	
 	private boolean readyToLaunch = false;
 	
 	private boolean inGame = false;
 	
 	private int maxPlayer;
-	
 	private String roomName;
-	
-	
-	
-	public RoomThread(int maxPlayer, int id, String roomName) {
-		this.maxPlayer=maxPlayer;
+	private String mapSize;
+	private String difficulty;
+	private int botCount;
+
+	public RoomThread(int maxPlayer, int id, String roomName, String mapSize, String difficulty, int botCount) {
+		this.maxPlayer = maxPlayer;
 		this.id = id;
-		this.roomName=roomName;
+		this.roomName = roomName;
+		this.mapSize = mapSize;
+		this.difficulty = difficulty;
+		this.botCount = botCount;
 	}
 	
 	public int getRoomId() {
@@ -56,45 +60,90 @@ public class RoomThread extends Thread {
 
 	@Override
 	public void run() {
-		while(isWaitingToLaunch) {
-			this.updateReadyToLaunch();
+	    while (isWaiting) {
+	        this.updateReadyToLaunch();
+	        
+	        
 
-			JSONObject json = new JSONObject();
-			json.put("roomId", this.getRoomId());
-			json.put("isWaitingToLaunch", this.isWaitingToLaunch);
-	        JSONArray array = new JSONArray();
-	        for(ClientHandler client : listClient) {
-	        	ClientInfoDTO clientInfoDTO = new ClientInfoDTO(client.getClientId(), client.isReady(), client.getPseudo());
-	        	array.put(clientInfoDTO);
+	        if (readyToLaunch && readyStartTime != -1) {
+	            long elapsed = System.currentTimeMillis() - readyStartTime;
+
+	            if (elapsed >= TIME_BEFORE_LAUNCH) {
+	                System.out.println("Lancement de la partie !");
+	                this.stopWaiting();
+	                this.setInGame(true);
+	                break;
+	            }
+
 	        }
-	        json.put("clients", array);
-			
-			RoomStatusMessage roomStatusMessage = (RoomStatusMessage) factory.make(MessageType.ROOM_STATUS_UPDATE, json);
-			for(ClientHandler client : this.listClient) {
-				client.addMessage(roomStatusMessage);
-				
-			}
 
-			try {
-				sleep(200);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-		}
+	        JSONObject json = new JSONObject();
+	        json.put("roomId", this.getRoomId());
+	        json.put("isWaiting", this.isWaiting);
+
+	        if (readyStartTime != -1) {
+	            long remaining = TIME_BEFORE_LAUNCH - (System.currentTimeMillis() - readyStartTime);
+	            json.put("countdown", Math.max(0, remaining));
+	        } else {
+	        	json.put("countdown", -1);
+	        }
+
+	        JSONArray array = new JSONArray();
+	        synchronized (listClient) {
+	            for (ClientHandler client : listClient) {
+	                ClientInfoDTO clientInfoDTO = new ClientInfoDTO(
+	                        client.getClientId(),
+	                        client.isReady(),
+	                        client.getPseudo()
+	                );
+	                array.put(clientInfoDTO.toJson());
+	            }
+	        }
+
+	        json.put("clients", array);
+
+	        RoomStatusMessage roomStatusMessage = (RoomStatusMessage) factory.make(MessageType.ROOM_STATUS_UPDATE, json);
+
+	        synchronized (listClient) {
+	            for (ClientHandler client : listClient) {
+	                client.addMessage(roomStatusMessage);
+	            }
+	        }
+
+	        try {
+	            sleep(200);
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 	
 	public void stopWaiting() {
-		isWaitingToLaunch = false;
+		isWaiting = false;
 	}
 	
 	private void updateReadyToLaunch() {
-		for(ClientHandler client : listClient) {		
-			this.readyToLaunch=true;
-			if(!client.isReady()) {
-				readyToLaunch = false;
-			}
+		// fix: était remis à true dans la boucle, + cas liste vide
+		if (listClient.isEmpty()) { readyToLaunch = false; readyStartTime = -1; return; }
+		readyToLaunch = true;
+		for (ClientHandler client : listClient) {
+			if (!client.isReady()) { readyToLaunch = false; break; }
 		}
+		if (readyToLaunch) {
+			if (readyStartTime == -1) readyStartTime = System.currentTimeMillis();
+		} else {
+			readyStartTime = -1;
+		}
+	}
+
+	public boolean isReadyToLaunch() { return readyToLaunch; }
+
+	// liste des clients sous forme DTO pour le LaunchGameMessage
+	public List<ClientInfoDTO> getClientInfoList() {
+		List<ClientInfoDTO> list = new ArrayList<>();
+		for (ClientHandler c : listClient)
+			list.add(new ClientInfoDTO(c.getClientId(), c.isReady(), c.getPseudo()));
+		return list;
 	}
 	
 	public synchronized void broadcast(Message message) {
@@ -133,18 +182,27 @@ public class RoomThread extends Thread {
 		return this.listClient.size();
 	}
 	
-	public String getRoomName() {
-		return roomName;
+	public String getRoomName() { return roomName; }
+	public void setRoomName(String roomName) { this.roomName = roomName; }
+	public String getMapSize() { return mapSize; }
+	public String getDifficulty() { return difficulty; }
+	public int getBotCount() { return botCount; }
+	public boolean isFull() { return (this.getPlayerCount() >= this.maxPlayer); }
+	
+	public void removeClient(ClientHandler client) {
+		this.listClient.remove(client);
+		if(this.listClient.isEmpty()) {
+			ServerManager.getInstance().getRooms().remove(this);
+		}
 	}
 	
-	public void setRoomName(String roomName) {
-		this.roomName=roomName;
+	public List<ClientHandler> getListClient(){
+		return this.listClient;
 	}
 	
-	public boolean isFull() {
-		return (this.getPlayerCount()>=this.maxPlayer);
+	public boolean getReadyToLaunch() {
+		return this.readyToLaunch;
 	}
-	
 	
 	
 }
