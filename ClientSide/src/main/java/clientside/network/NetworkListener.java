@@ -43,16 +43,18 @@ public class NetworkListener implements Runnable {
             }
         } catch (Exception e) {
             System.err.println("Connexion perdue avec le serveur.");
-            e.printStackTrace();
         } finally {
             stop();
         }
     }
 
-    private void handleMessage(Object msg) {
-        //TODO logique de redirection vers les controleurs pour l'affichage des infos recues
+    private void handleMessage(Message msg) {
+        System.out.println("Message reçu du serveur : " + msg.getMessageType());
 
-        System.out.println("Message reçu du serveur : " + msg);
+        // On transmet au contrôleur qui écoute actuellement
+        if (NetworkManager.getInstance().getMessageHandler() != null) {
+            NetworkManager.getInstance().getMessageHandler().accept(msg);
+        }
     }
 
     public void stop() {

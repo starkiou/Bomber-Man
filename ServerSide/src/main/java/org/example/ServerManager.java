@@ -43,14 +43,14 @@ public class ServerManager {
 		this.setServerMessageHandler(new ServerClientMessageHandler(this));
 		System.out.println("Serveur lancé sur le port : "+port);
     	
-    }
 
+    }
+    
     public synchronized void addClientWithSocket(Socket socket) {
     	ClientHandler clientHandler = new ClientHandler(socket, this, nextClientId);
     	nextClientId++;
     	listClient.add(clientHandler);
     	clientHandler.start();
-    	LogManager.getInstance().info("Client connecté : " + socket.getInetAddress() + ":" + socket.getPort());
     }
     
     public synchronized void createRoomAsClient(ClientHandler client, int nbMaxPlayers, String name) {

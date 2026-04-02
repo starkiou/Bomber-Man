@@ -72,8 +72,6 @@ public class ServerClientMessageHandler {
 				break;
 			case MOVE:
 				break;
-			case READY_UPDATE:
-				break;
 			case ROOM_JOIN:
 				this.roomJoin(sender,message);
 				break;
@@ -86,6 +84,7 @@ public class ServerClientMessageHandler {
 			case READY_CLIENT:
 				ClientReadyMessage clientReadyMessage = (ClientReadyMessage) message;
 				sender.setReady(clientReadyMessage.isReady());
+				System.out.println(sender.getPseudo()+" PRÊT");
 				sender.addMessage(new ClientCorrectReadyUpdateMessage());
 			default:
 				break;

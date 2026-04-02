@@ -47,7 +47,7 @@ public class TestServer {
             // ÉTAPE 1 : connexion avec pseudo
             // ----------------------------------------------------------------
             System.out.println("[1] Envoi ConnectionMessage (pseudo='TestBot')...");
-            send(out, serializer, new ConnectionMessage("TestBot"));
+            send(out, serializer, new ConnectionMessage("TestBot", 0));
             sleep(200);
 
             // ----------------------------------------------------------------
@@ -115,7 +115,7 @@ public class TestServer {
             // ÉTAPE 6 : connexion a une room pseudo
             // ----------------------------------------------------------------
             System.out.println("[6] Envoi ConnectionMessage (pseudo='TestBot2')...");
-            send(out, serializer, new ConnectionMessage("TestBot2"));
+            send(out, serializer, new ConnectionMessage("TestBot2", 0));
             sleep(200);
             
             System.out.println("[7] Envoi RoomJoiningMessage (roomId=1)...");

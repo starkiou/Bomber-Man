@@ -47,7 +47,6 @@ public class ClientHandler extends Thread {
 		this.clientId=clientId;
 		
 		
-		
 
 	}
 	

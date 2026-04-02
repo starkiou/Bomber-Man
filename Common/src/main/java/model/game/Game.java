@@ -51,6 +51,7 @@ public class Game implements Runnable {
 
     private static final int  DEFAULT_BOMB_RADIUS = 2;
     private static final int  DEFAULT_BOMB_DELAY = 3000; // ms before explosion
+    private static final long EXPLOSION_ANIM_DURATION_MS = 700; // how long blast cells stay visible
 
     // ── State ────────────────────────────────────────────────────────
     /** The maze grid, indexed grid[y][x]. Mutated during explosion (BRICK → EMPTY). */
@@ -61,6 +62,12 @@ public class Game implements Runnable {
 
     /** Bombs currently on the field. Use synchronized(activeBombs) when iterating. */
     private final List<Bomb> activeBombs;
+
+    /**
+     * Blast cells currently animating. Each entry is {x, y, startTimeMs}.
+     * Entries are added by processExplosion and purged after EXPLOSION_ANIM_DURATION_MS.
+     */
+    private final List<long[]> activeExplosionCells;
 
     /**
      * Master lock for compound state mutations:
@@ -107,6 +114,7 @@ public class Game implements Runnable {
         this.grid = deepCopyGrid(grid);
         this.players = new ConcurrentHashMap<>();
         this.activeBombs = Collections.synchronizedList(new ArrayList<>());
+        this.activeExplosionCells = Collections.synchronizedList(new ArrayList<>());
 
         for (Player p : initialPlayers) {
             players.put(p.getId(), p);
@@ -168,16 +176,25 @@ public class Game implements Runnable {
     // ─────────────────────────────────────────────────────────────────
 
     private void update() {
-        updatePlayers();  // bomb regen
-        updateBombs();    // countdown → explosion → damage
-        updateBots();     // AI decision → handleAction
-        checkVictory();   // last survivor wins
+        updatePlayers();     // bomb regen
+        updateBombs();       // countdown → explosion → damage
+        updateExplosions();  // purge expired blast cells
+        updateBots();        // AI decision → handleAction
+        checkVictory();      // last survivor wins
     }
 
     /** Ticks each living player (handles bomb regen timer internally). */
     private void updatePlayers() {
         for (Player p : players.values()) {
             if (!p.isDead()) p.update();
+        }
+    }
+
+    /** Removes blast cells whose animation has finished. */
+    private void updateExplosions() {
+        long now = System.currentTimeMillis();
+        synchronized (activeExplosionCells) {
+            activeExplosionCells.removeIf(e -> (now - e[2]) >= EXPLOSION_ANIM_DURATION_MS);
         }
     }
 
@@ -213,24 +230,72 @@ public class Game implements Runnable {
      *   <li>Fires {@link GameStateListener#onPlayerDied} for any newly eliminated player.</li>
      * </ul>
      */
+    /**
+     * Sprite-type constants for explosion cells (index Z in explosion_Z_F.png).
+     * 0=centre, 1=H-mid, 2=V-mid, 3=top-end, 4=bottom-end, 5=right-end, 6=left-end
+     */
+    private static final int EXPL_CENTER     = 0;
+    private static final int EXPL_H_MID      = 1;
+    private static final int EXPL_V_MID      = 2;
+    private static final int EXPL_END_TOP    = 3;
+    private static final int EXPL_END_BOTTOM = 4;
+    private static final int EXPL_END_RIGHT  = 5;
+    private static final int EXPL_END_LEFT   = 6;
+
     private void processExplosion(Bomb bomb) {
         synchronized (stateLock) {
-            List<int[]> blast = bomb.getExplosionArea(grid);
+            int bx = bomb.getX(), by = bomb.getY();
+            long now = System.currentTimeMillis();
+
+            // Directions: UP, DOWN, RIGHT, LEFT
+            int[][] dirs = {{0, -1}, {0, 1}, {1, 0}, {-1, 0}};
+            int[]   endTypes = {EXPL_END_TOP, EXPL_END_BOTTOM, EXPL_END_RIGHT, EXPL_END_LEFT};
+            int[]   midTypes = {EXPL_V_MID,   EXPL_V_MID,    EXPL_H_MID,    EXPL_H_MID};
+
+            List<int[]>  allBlast     = new ArrayList<>();
+            List<long[]> blastTyped   = new ArrayList<>();
+
+            // Centre
+            allBlast.add(new int[]{bx, by});
+            blastTyped.add(new long[]{bx, by, now, EXPL_CENTER});
+
+            for (int d = 0; d < 4; d++) {
+                int dx = dirs[d][0], dy = dirs[d][1];
+                List<int[]> arm = new ArrayList<>();
+
+                for (int i = 1; i <= bomb.getRadius(); i++) {
+                    int nx = bx + dx * i;
+                    int ny = by + dy * i;
+                    if (!isInBounds(nx, ny)) break;
+                    CellType cell = grid[ny][nx];
+                    if (cell == CellType.WALL) break;
+                    arm.add(new int[]{nx, ny});
+                    if (cell == CellType.BRICK) break; // brick is the end cap
+                }
+
+                for (int i = 0; i < arm.size(); i++) {
+                    int[] c = arm.get(i);
+                    int spriteType = (i == arm.size() - 1) ? endTypes[d] : midTypes[d];
+                    allBlast.add(c);
+                    blastTyped.add(new long[]{c[0], c[1], now, spriteType});
+                }
+            }
+
             log.info("Bomb " + bomb.getId() + " exploded at ("
-                    + bomb.getX() + "," + bomb.getY()
-                    + ") — blast covers " + blast.size() + " cell(s).");
+                    + bx + "," + by + ") — blast covers " + allBlast.size() + " cell(s).");
 
-            for (int[] cell : blast) {
-                int cx = cell[0];
-                int cy = cell[1];
+            synchronized (activeExplosionCells) {
+                activeExplosionCells.addAll(blastTyped);
+            }
 
-                // Destroy destructible walls
+            for (int[] cell : allBlast) {
+                int cx = cell[0], cy = cell[1];
+
                 if (isInBounds(cx, cy) && grid[cy][cx] == CellType.BRICK) {
                     grid[cy][cx] = CellType.EMPTY;
                     log.info("Brick destroyed at (" + cx + "," + cy + ").");
                 }
 
-                // Damage players standing in the blast
                 for (Player p : players.values()) {
                     if (!p.isDead() && p.getX() == cx && p.getY() == cy) {
                         p.takeDamage(1);
@@ -254,31 +319,29 @@ public class Game implements Runnable {
      * its pathfinding cannot mutate live game state.
      */
     private void updateBots() {
-        List<Player> playerSnapshot;
-        synchronized (stateLock) {
-            playerSnapshot = new ArrayList<>(players.values());
-        }
-
-        List<Bomb> bombSnapshot;
+        List<Player> playerList = new ArrayList<>(players.values());
+        List<Bomb>   bombList;
         synchronized (activeBombs) {
-            bombSnapshot = new ArrayList<>(activeBombs);
+            bombList = new ArrayList<>(activeBombs);
         }
 
         for (AIPlayer bot : bots.values()) {
             if (bot.isDead()) continue;
 
-            AIPlayer.AIAction action = bot.computeAction(
-                    deepCopyGrid(grid),
-                    playerSnapshot,
-                    bombSnapshot
-            );
+            boolean moveReady = bot.canMove();
+            boolean bombReady = bot.canBomb();
+            if (!moveReady && !bombReady) continue;
+
+            AIPlayer.AIAction action = bot.computeAction(grid, playerList, bombList);
 
             synchronized (stateLock) {
-                if (action.move() != null) {
+                if (action.move() != null && moveReady) {
                     processMovement(bot, action.move());
+                    bot.onMoveDone();
                 }
-                if (action.placeBomb()) {
+                if (action.placeBomb() && bombReady) {
                     placeBomb(bot);
+                    bot.onBombDone();
                 }
             }
         }
@@ -428,7 +491,9 @@ public class Game implements Runnable {
     public GameSnapshot getSnapshot() {
         synchronized (stateLock) {
             synchronized (activeBombs) {
-                return GameSnapshot.capture(players.values(), activeBombs, grid, gameOver, winnerId);
+                synchronized (activeExplosionCells) {
+                    return GameSnapshot.capture(players.values(), activeBombs, activeExplosionCells, grid, gameOver, winnerId);
+                }
             }
         }
     }
