@@ -29,7 +29,8 @@ public final class GameSnapshot {
             int y,
             boolean isDead,
             int hp,
-            int currentBombs
+            int currentBombs,
+            int maxBombs
     ) {}
 
     /** Lightweight representation of an active bomb at snapshot time. */
@@ -59,6 +60,7 @@ public final class GameSnapshot {
     private final long timestamp;
     private final boolean gameOver;
     private final int winnerId;   // -1 if no winner yet / draw
+    private final long remainingSeconds; // -1 = no time limit
 
     // ── Private constructor — use capture() ───────────────────────────
 
@@ -69,7 +71,8 @@ public final class GameSnapshot {
             CellType[][] grid,
             long timestamp,
             boolean gameOver,
-            int winnerId
+            int winnerId,
+            long remainingSeconds
     ) {
         this.players = Collections.unmodifiableList(players);
         this.bombs = Collections.unmodifiableList(bombs);
@@ -78,6 +81,7 @@ public final class GameSnapshot {
         this.timestamp = timestamp;
         this.gameOver = gameOver;
         this.winnerId = winnerId;
+        this.remainingSeconds = remainingSeconds;
     }
 
     // ── Factory ───────────────────────────────────────────────────────
@@ -99,13 +103,14 @@ public final class GameSnapshot {
             List<long[]> explosionCells,
             CellType[][] grid,
             boolean gameOver,
-            int winnerId
+            int winnerId,
+            long remainingSeconds
     ) {
         List<PlayerState> playerStates = new ArrayList<>(players.size());
         for (Player p : players) {
             playerStates.add(new PlayerState(
                     p.getId(), p.getX(), p.getY(),
-                    p.isDead(), p.getHp(), p.getCurrentBombs()
+                    p.isDead(), p.getHp(), p.getCurrentBombs(), p.getMaxBombs()
             ));
         }
 
@@ -131,7 +136,7 @@ public final class GameSnapshot {
             gridCopy[i] = Arrays.copyOf(grid[i], grid[i].length);
         }
 
-        return new GameSnapshot(playerStates, bombStates, explosionStates, gridCopy, now, gameOver, winnerId);
+        return new GameSnapshot(playerStates, bombStates, explosionStates, gridCopy, now, gameOver, winnerId, remainingSeconds);
     }
 
     // ── Getters ───────────────────────────────────────────────────────
@@ -148,4 +153,6 @@ public final class GameSnapshot {
     public long getTimestamp() { return timestamp; }
     public boolean isGameOver()  { return gameOver; }
     public int getWinnerId() { return winnerId; }
+    /** Seconds remaining, or -1 if no time limit. */
+    public long getRemainingSeconds() { return remainingSeconds; }
 }

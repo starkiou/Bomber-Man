@@ -98,23 +98,36 @@ public class Game implements Runnable {
     private volatile boolean running = false;
     private Thread gameThread;
 
+    // ── Timer ────────────────────────────────────────────────────────
+    /** -1 = no time limit. */
+    private final long gameDurationMs;
+    private long startTimeMs;
+    private volatile long remainingSeconds = -1;
+
     // ── Logger ───────────────────────────────────────────────────────
     private final LogManager log = LogManager.getInstance();
 
     // ─────────────────────────────────────────────────────────────────
-    // Constructor
+    // Constructors
     // ─────────────────────────────────────────────────────────────────
 
-    /**
-     * @param grid           maze grid to play on (will be deep-copied internally)
-     * @param initialPlayers players joining the game (can be modified after construction
-     *                       via {@link #addBot})
-     */
+    /** Creates a game with no time limit. */
     public Game(CellType[][] grid, List<Player> initialPlayers) {
+        this(grid, initialPlayers, -1);
+    }
+
+    /**
+     * @param grid            maze grid to play on (will be deep-copied internally)
+     * @param initialPlayers  players joining the game
+     * @param durationSeconds time limit in seconds, or -1 for unlimited
+     */
+    public Game(CellType[][] grid, List<Player> initialPlayers, int durationSeconds) {
         this.grid = deepCopyGrid(grid);
         this.players = new ConcurrentHashMap<>();
         this.activeBombs = Collections.synchronizedList(new ArrayList<>());
         this.activeExplosionCells = Collections.synchronizedList(new ArrayList<>());
+        this.gameDurationMs = durationSeconds > 0 ? durationSeconds * 1000L : -1L;
+        this.remainingSeconds = durationSeconds > 0 ? durationSeconds : -1L;
 
         for (Player p : initialPlayers) {
             players.put(p.getId(), p);
@@ -150,6 +163,7 @@ public class Game implements Runnable {
 
     @Override
     public void run() {
+        this.startTimeMs = System.currentTimeMillis();
         log.info("Game loop thread started.");
         while (running && !gameOver) {
             long frameStart = System.currentTimeMillis();
@@ -176,11 +190,20 @@ public class Game implements Runnable {
     // ─────────────────────────────────────────────────────────────────
 
     private void update() {
+        updateTime();        // countdown timer
         updatePlayers();     // bomb regen
         updateBombs();       // countdown → explosion → damage
         updateExplosions();  // purge expired blast cells
         updateBots();        // AI decision → handleAction
         checkVictory();      // last survivor wins
+    }
+
+    /** Decrements the countdown and ends the game when time runs out. */
+    private void updateTime() {
+        if (gameDurationMs < 0) return; // unlimited
+        long remMs = Math.max(0, gameDurationMs - (System.currentTimeMillis() - startTimeMs));
+        this.remainingSeconds = remMs / 1000;
+        if (remMs <= 0) gameOver = true;
     }
 
     /** Ticks each living player (handles bomb regen timer internally). */
@@ -492,7 +515,7 @@ public class Game implements Runnable {
         synchronized (stateLock) {
             synchronized (activeBombs) {
                 synchronized (activeExplosionCells) {
-                    return GameSnapshot.capture(players.values(), activeBombs, activeExplosionCells, grid, gameOver, winnerId);
+                    return GameSnapshot.capture(players.values(), activeBombs, activeExplosionCells, grid, gameOver, winnerId, remainingSeconds);
                 }
             }
         }

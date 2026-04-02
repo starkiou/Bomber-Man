@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!-- Alias de game-config.fxml – conservé pour compatibilité ascendante.
+     Pointe vers le même contrôleur avec les mêmes ids. -->
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
@@ -16,28 +17,32 @@
     <Label text="Configuration de la Partie" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
 
     <HBox alignment="CENTER" spacing="10">
-        <Label text="Nombre de joueurs :"/>
-        <Spinner fx:id="playerCountSpinner" min="2" max="4" initialValue="2" prefWidth="80"/>
+        <Label text="Taille de la carte :"/>
+        <ComboBox fx:id="mapSizeBox" prefWidth="180"/>
     </HBox>
 
     <HBox alignment="CENTER" spacing="10">
         <Label text="Nombre de bots :"/>
-        <Spinner fx:id="botCountSpinner" min="0" max="3" initialValue="0" prefWidth="80"/>
+        <Spinner fx:id="botCountSpinner" prefWidth="80"/>
     </HBox>
 
     <HBox alignment="CENTER" spacing="10">
-        <Label text="Difficulté des bots :"/>
-        <ComboBox fx:id="difficultySelector" prefWidth="150"/>
+        <Label text="Difficulté :"/>
+        <ComboBox fx:id="difficultyBox" prefWidth="150"/>
     </HBox>
 
     <HBox alignment="CENTER" spacing="10">
-        <Label text="Choix de la Map :"/>
-        <ComboBox fx:id="mapSelector" prefWidth="150"/>
+        <Label text="Nombre de bombes :"/>
+        <Spinner fx:id="bombCountSpinner" prefWidth="80"/>
+    </HBox>
+
+    <HBox alignment="CENTER" spacing="10">
+        <Label text="Durée (s) :"/>
+        <Spinner fx:id="timeSpinner" prefWidth="80"/>
     </HBox>
 
     <Button text="Lancer la partie" onAction="#onStartButtonClick"
             style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px;"/>
 
     <Button text="Retour" onAction="#onBackButtonClick"/>
-
 </VBox>
