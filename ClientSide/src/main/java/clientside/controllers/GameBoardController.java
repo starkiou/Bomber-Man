@@ -1,5 +1,6 @@
 package clientside.controllers;
 
+import clientside.network.NetworkManager;
 import model.game.Game;
 import model.game.GameSnapshot;
 import model.game.GameStateListener;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class GameBoardController {
 
@@ -79,8 +81,13 @@ public class GameBoardController {
         brickImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/walls/block_08.png")));
 
         // Sprites des joueurs
-        player1Img = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/0/D_0.png")));
-        botImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/1/D_0.png")));
+        int randomId = ThreadLocalRandom.current().nextInt(1, 35);
+
+        String spriteJoueur = "/sprites/output/characters/" + NetworkManager.getInstance().getSelectedCharacterId() + "/R_0.png";
+        String spriteBot = "/sprites/output/characters/" + randomId + "/R_0.png";
+
+        player1Img = new Image(Objects.requireNonNull(getClass().getResourceAsStream(spriteJoueur)));
+        botImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream(spriteBot)));
 
         // Sprites de la bombe avant explosion (clignotement d'avertissement)
         for (int i = 0; i < BOMB_IDLE_FRAMES; i++) {
