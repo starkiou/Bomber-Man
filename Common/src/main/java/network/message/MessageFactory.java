@@ -20,7 +20,7 @@ public class MessageFactory {
 			
 		
 		case MOVE:
-			break;
+			return new PlayActionMessage(jsonObject);
 		case READY_UPDATE:
 			return new ReadyUpdateMessage(jsonObject);
 		case ROOM_CREATION:

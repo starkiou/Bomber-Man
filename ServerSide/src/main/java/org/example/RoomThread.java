@@ -93,12 +93,22 @@ public class RoomThread extends Thread {
 	}
 	
 	private void updateReadyToLaunch() {
-		for(ClientHandler client : listClient) {		
-			this.readyToLaunch=true;
-			if(!client.isReady()) {
-				readyToLaunch = false;
-			}
+		// bug fix: était remis à true dans la boucle
+		if (listClient.isEmpty()) { readyToLaunch = false; return; }
+		readyToLaunch = true;
+		for (ClientHandler client : listClient) {
+			if (!client.isReady()) { readyToLaunch = false; break; }
 		}
+	}
+
+	public boolean isReadyToLaunch() { return readyToLaunch; }
+
+	// liste des clients sous forme DTO pour le LaunchGameMessage
+	public List<ClientInfoDTO> getClientInfoList() {
+		List<ClientInfoDTO> list = new ArrayList<>();
+		for (ClientHandler c : listClient)
+			list.add(new ClientInfoDTO(c.getClientId(), c.isReady(), c.getPseudo()));
+		return list;
 	}
 	
 	public synchronized void broadcast(Message message) {

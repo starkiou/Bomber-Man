@@ -1,12 +1,17 @@
 package org.example;
 
+import java.util.List;
 import org.json.JSONObject;
 
+import model.maze.CellType;
+import model.maze.MazeFactory;
+import network.message.ClientInfoDTO;
 import network.message.ConnectionMessage;
 import network.message.LaunchGameMessage;
 import network.message.Message;
 import network.message.MessageFactory;
 import network.message.MessageType;
+import network.message.PlayActionMessage;
 import network.message.ReadyUpdateMessage;
 import network.message.RoomAcceptedCreationMessage;
 import network.message.RoomAcceptedJoinMessage;
@@ -47,6 +52,10 @@ public class ServerClientMessageHandler {
 			case ROOM_LIST_UPDATE:
 				break;
 			case MOVE:
+				// relay action à tous les joueurs de la room
+				if (sender.getRoom() != null && sender.getRoom().isInGame()) {
+					sender.getRoom().broadcast(message);
+				}
 				break;
 			case READY_UPDATE:
 				ReadyUpdateMessage readyMsg = (ReadyUpdateMessage) message;
@@ -54,9 +63,14 @@ public class ServerClientMessageHandler {
 				// NOTE pas besoin de broadcast explicite, RoomThread le fait toutes les 200ms
 				break;
 			case LAUNCH_GAME:
-				if(sender.getRoom() != null) {
-					// BROADCAST à tous les membres de la room
-					sender.getRoom().broadcast(new LaunchGameMessage());
+				if (sender.getRoom() != null) {
+					// vérif que tout le monde est prêt
+					if (!sender.getRoom().isReadyToLaunch()) break;
+					// génère la grille côté serveur, envoyée à tous les clients
+					CellType[][] grid = MazeFactory.createMaze(MazeFactory.Algorithm.EXHAUSTIVE, 15, 11);
+					List<ClientInfoDTO> playerList = sender.getRoom().getClientInfoList();
+					int bots = sender.getRoom().getBotCount();
+					sender.getRoom().broadcast(new LaunchGameMessage(playerList, bots, grid));
 					sender.getRoom().setInGame(true);
 					sender.getRoom().stopWaiting();
 					this.serverManager.updateRoomsListOfClients();

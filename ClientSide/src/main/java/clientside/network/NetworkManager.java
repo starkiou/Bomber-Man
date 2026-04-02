@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import network.message.ConnectionMessage;
+import network.message.LaunchGameMessage;
 import network.message.Message;
 import network.message.MessageSerializer;
 import java.util.function.Consumer;
@@ -21,6 +22,7 @@ public class NetworkManager {
     private boolean isHost = false;
 
     private Consumer<Message> currentMessageHandler;
+    private LaunchGameMessage pendingLaunch;
 
     private final MessageSerializer serializer = new MessageSerializer();
 
@@ -108,4 +110,6 @@ public class NetworkManager {
     public void setCurrentRoomId(int id) { this.currentRoomId = id; }
     public boolean isHost() { return isHost; }
     public void setHost(boolean host) { this.isHost = host; }
+    public LaunchGameMessage getPendingLaunch() { return pendingLaunch; }
+    public void setPendingLaunch(LaunchGameMessage msg) { this.pendingLaunch = msg; }
 }

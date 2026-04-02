@@ -13,12 +13,6 @@ import network.message.Message;
 import network.message.ReadyUpdateMessage;
 import network.message.RoomStatusMessage;
 
-/**
- * Salle d'attente avant le lancement d'une partie en ligne.
- * Reçoit les RoomStatusMessage du serveur (toutes les 200ms) pour
- * afficher la liste des joueurs et leur état prêt/pas prêt.
- * N'importe quel joueur peut lancer la partie.
- */
 public class RoomViewController {
 
     @FXML private ListView<String> playerListView;
@@ -33,14 +27,24 @@ public class RoomViewController {
         NetworkManager.getInstance().setMessageHandler(this::onMessageReceived);
         roomInfoLabel.setText("Room #" + NetworkManager.getInstance().getCurrentRoomId()
             + (NetworkManager.getInstance().isHost() ? "  (vous êtes le créateur)" : ""));
+        // désactivé par défaut, activé quand tous prêts
+        launchButton.setDisable(true);
     }
 
     private void onMessageReceived(Message msg) {
         if (msg instanceof RoomStatusMessage) {
             RoomStatusMessage status = (RoomStatusMessage) msg;
-            Platform.runLater(() -> updatePlayerList(status));
+            Platform.runLater(() -> {
+                updatePlayerList(status);
+                // activer lancer seulement si tous prêts et au moins 1 joueur
+                boolean allReady = !status.getClients().isEmpty()
+                    && status.getClients().stream().allMatch(ClientInfoDTO::isReady);
+                launchButton.setDisable(!allReady);
+            });
         } else if (msg instanceof LaunchGameMessage) {
-            // LAUNCH reçu du serveur : tout le monde va en jeu
+            LaunchGameMessage launch = (LaunchGameMessage) msg;
+            // stocker la config pour GameBoardController
+            NetworkManager.getInstance().setPendingLaunch(launch);
             Platform.runLater(() -> SceneManager.getInstance().loadScene("game-board.fxml"));
         }
     }
@@ -59,7 +63,6 @@ public class RoomViewController {
     private void onReadyClick() {
         localReady = !localReady;
         NetworkManager.getInstance().sendMessage(new ReadyUpdateMessage(localReady));
-        // FEEDBACK visuel immédiat
         readyButton.setText(localReady ? "Annuler le prêt" : "Je suis prêt");
         readyButton.setStyle(localReady
             ? "-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold;"
@@ -68,12 +71,12 @@ public class RoomViewController {
 
     @FXML
     private void onLaunchClick() {
+        // envoie juste le trigger, le serveur vérifie isReadyToLaunch() et renvoie le vrai message
         NetworkManager.getInstance().sendMessage(new LaunchGameMessage());
     }
 
     @FXML
     private void onLeaveClick() {
-        // NOTE pas de message de départ implémenté côté serveur, on quitte juste l'écran
         NetworkManager.getInstance().setCurrentRoomId(-1);
         NetworkManager.getInstance().setHost(false);
         NetworkManager.getInstance().setMessageHandler(null);
