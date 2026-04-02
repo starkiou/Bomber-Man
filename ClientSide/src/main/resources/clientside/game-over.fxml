@@ -3,23 +3,29 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox alignment="CENTER" spacing="20" style="-fx-background-color: rgba(0,0,0,0.85); -fx-background-radius: 20;"
+<VBox alignment="CENTER" spacing="25"
+      style="-fx-background-color: rgba(17, 17, 17, 0.95); -fx-border-color: #ff5555; -fx-border-width: 3; -fx-border-radius: 15; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, #000, 20, 0, 0, 0);"
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="clientside.controllers.GameOverController">
-    <padding><Insets行为="40"/></padding>
+      fx:controller="clientside.controllers.GameOverController"
+      maxWidth="450" maxHeight="350">
 
-    <Label fx:id="resultTitle" text="PARTIE TERMINÉE" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
+    <padding><Insets top="30" right="50" bottom="30" left="50"/></padding>
 
-    <Separator prefWidth="200" />
+    <Label fx:id="resultTitle" text="VOUS AVEZ PERDU !"
+           style="-fx-text-fill: #ff5555; -fx-font-size: 38px; -fx-font-family: 'Monospaced'; -fx-font-weight: bold; -fx-effect: glow(0.8);"/>
 
-    <GridPane vgap="10" hgap="20" alignment="CENTER">
-        <Label text="Temps survécu :" style="-fx-text-fill: #aaa;" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-        <Label fx:id="timeLabel" text="00:00" style="-fx-text-fill: white; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+    <VBox spacing="15" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.05); -fx-padding: 20; -fx-background-radius: 10;">
+        <HBox spacing="20" alignment="CENTER_LEFT">
+            <Label text="⏱ TEMPS SURVÉCU :" style="-fx-text-fill: #aaa; -fx-font-size: 16px; -fx-font-family: 'Monospaced';"/>
+            <Label fx:id="timeLabel" text="00:00" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+        </HBox>
 
-        <Label text="Adversaires éliminés :" style="-fx-text-fill: #aaa;" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-        <Label fx:id="killsLabel" text="0" style="-fx-text-fill: white; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-    </GridPane>
+        <HBox spacing="20" alignment="CENTER_LEFT">
+            <Label text="⚔️ NOMBRE DE KILLS :" style="-fx-text-fill: #aaa; -fx-font-size: 16px; -fx-font-family: 'Monospaced';"/>
+            <Label fx:id="killsLabel" text="0" style="-fx-text-fill: #ff3333; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+        </HBox>
+    </VBox>
 
-    <Button text="Retour au Menu principal" onAction="#onReturnMenu"
-            style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold;"/>
+    <Button text="RETOUR AU MENU" onAction="#onReturnMenu"
+            style="-fx-background-color: #333; -fx-text-fill: white; -fx-border-color: #555; -fx-border-radius: 5; -fx-cursor: hand; -fx-font-family: 'Monospaced'; -fx-font-weight: bold; -fx-padding: 10 20 10 20;"/>
 </VBox>

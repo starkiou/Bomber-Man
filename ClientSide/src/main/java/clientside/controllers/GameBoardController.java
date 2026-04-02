@@ -10,7 +10,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane; // Ajouté pour l'affichage de l'overlay
+import javafx.scene.layout.StackPane;
 import model.aiPlayer.AIFactory;
 import model.aiPlayer.Strategy;
 import model.entity.Player;
@@ -26,33 +26,26 @@ import java.util.*;
 public class GameBoardController {
 
     @FXML private GridPane gameGrid;
-    @FXML private Label hpLabel;
-    @FXML private Label bombsLabel;
-    @FXML private Label timerLabel;
+    @FXML private Label hpLabel, bombsLabel, timerLabel;
 
     private static final int TILE_SIZE = 40;
-
     private Image wallImg, floorImg, brickImg, playerImg, botImg;
-    private Map<Integer, ImageView> playerViews = new HashMap<>();
+    private final Image[] bombIdleFrames = new Image[28];
+    private final Image[][] explosionFrames = new Image[7][14];
+
+    private final Map<Integer, ImageView> playerViews = new HashMap<>();
+    private final Map<Integer, ImageView> bombViews = new HashMap<>();
+    private final Map<String, ImageView> explosionViews = new HashMap<>();
+
     private Game game;
-
-    private Image[] bombIdleFrames = new Image[28];
-    private Image[][] explosionFrames = new Image[7][14];
-    private Map<Integer, ImageView> bombViews = new HashMap<>();
-    private Map<String, ImageView> explosionViews = new HashMap<>();
-
-    private int currentWidth;
-    private int currentHeight;
+    private int currentWidth, currentHeight;
     private ImageView[][] tileViews;
-
-    // Ajouté pour le calcul du score final
     private long startTime;
 
     @FXML
     public void initialize() {
         loadImages();
         startGame();
-
         Platform.runLater(() -> {
             if (gameGrid.getScene() != null) {
                 gameGrid.getScene().setOnKeyPressed(this::handleKeyPress);
@@ -62,206 +55,150 @@ public class GameBoardController {
     }
 
     private void loadImages() {
-        wallImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/walls/block_07.png")));
-        floorImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/ground/ground_06.png")));
-        brickImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/walls/block_08.png")));
-
+        wallImg = new Image(getClass().getResourceAsStream("/sprites/output/walls/block_07.png"));
+        floorImg = new Image(getClass().getResourceAsStream("/sprites/output/ground/ground_06.png"));
+        brickImg = new Image(getClass().getResourceAsStream("/sprites/output/walls/block_08.png"));
         int charId = NetworkManager.getInstance().getSelectedCharacterId();
-        playerImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/" + charId + "/D_0.png")));
-        botImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/1/D_0.png")));
+        playerImg = new Image(getClass().getResourceAsStream("/sprites/output/characters/" + charId + "/D_0.png"));
+        botImg = new Image(getClass().getResourceAsStream("/sprites/output/characters/1/D_0.png"));
 
-        // Chargement des bombes
-        for (int i = 0; i < 28; i++) {
-            bombIdleFrames[i] = new Image(Objects.requireNonNull(
-                    getClass().getResourceAsStream("/sprites/output/bomb/B2_" + i + ".png")));
-        }
-
-        // --- CORRECTION : Chargement des explosions (indispensable) ---
-        for (int t = 0; t < 7; t++) {
-            for (int f = 0; f < 14; f++) {
-                explosionFrames[t][f] = new Image(Objects.requireNonNull(
-                        getClass().getResourceAsStream("/sprites/output/explosions/explosion_" + t + "_" + f + ".png")));
-            }
-        }
-    }
-
-    private void initMap() {
-        for (int x = 0; x < currentWidth; x++) {
-            for (int y = 0; y < currentHeight; y++) {
-                ImageView iv = new ImageView();
-                iv.setFitWidth(TILE_SIZE);
-                iv.setFitHeight(TILE_SIZE);
-                tileViews[x][y] = iv;
-                gameGrid.add(iv, x, y);
-            }
-        }
+        for (int i = 0; i < 28; i++)
+            bombIdleFrames[i] = new Image(getClass().getResourceAsStream("/sprites/output/bomb/B2_" + i + ".png"));
+        for (int t = 0; t < 7; t++)
+            for (int f = 0; f < 14; f++)
+                explosionFrames[t][f] = new Image(getClass().getResourceAsStream("/sprites/output/explosions/explosion_" + t + "_" + f + ".png"));
     }
 
     private void startGame() {
-        // Initialisation du chrono
         this.startTime = System.currentTimeMillis();
-
-        String selectedSize = GameConfigController.selectedMapSize;
-        if (selectedSize != null && selectedSize.contains("Petite")) {
-            currentWidth = 11; currentHeight = 11;
-        } else if (selectedSize != null && selectedSize.contains("Grande")) {
-            currentWidth = 19; currentHeight = 15;
-        } else {
-            currentWidth = 15; currentHeight = 11;
-        }
+        configureDimensions();
 
         tileViews = new ImageView[currentWidth][currentHeight];
         gameGrid.getChildren().clear();
-        initMap();
+        initBackgroundGrid();
 
         CellType[][] grid = MazeFactory.createMaze(MazeFactory.Algorithm.EXHAUSTIVE, currentWidth, currentHeight);
-        List<Player> players = new ArrayList<>();
-        players.add(new Player(1, 1, 1, 3, 1.0, GameConfigController.selectedBombs));
+        game = new Game(grid, List.of(new Player(1, 1, 1, 3, 1.0, GameConfigController.selectedBombs)), GameConfigController.selectedTime);
 
-        game = new Game(grid, players, GameConfigController.selectedTime);
-
-        int nbBots = GameConfigController.selectedBots;
-        for (int i = 0; i < nbBots; i++) {
+        for (int i = 0; i < GameConfigController.selectedBots; i++) {
             int startX = (i % 2 == 0) ? currentWidth - 2 : 1;
             int startY = (i < 2) ? currentHeight - 2 : currentHeight / 2;
             game.addBot(AIFactory.create(Strategy.SURVIVALIST, i + 2, startX, startY, 3, 1.0, 1));
         }
 
         game.addListener(new GameStateListener() {
-            @Override
-            public void onGameStateUpdate(GameSnapshot snap) {
-                Platform.runLater(() -> drawMap(snap));
-            }
+            @Override public void onGameStateUpdate(GameSnapshot snap) { Platform.runLater(() -> drawMap(snap)); }
             @Override public void onPlayerDied(int id) {}
-            @Override
-            public void onGameOver(int winnerId) {
-                Platform.runLater(() -> showGameOverScreen(winnerId));
-            }
+            @Override public void onGameOver(int winnerId) { Platform.runLater(() -> showGameOverScreen(winnerId)); }
         });
-
         game.start();
     }
 
-    private void handleKeyPress(KeyEvent event) {
-        if (game == null) return;
-        switch (event.getCode()) {
-            case Z, UP    -> game.handleAction(1, ActionType.MOVE_UP);
-            case S, DOWN  -> game.handleAction(1, ActionType.MOVE_DOWN);
-            case Q, LEFT  -> game.handleAction(1, ActionType.MOVE_LEFT);
-            case D, RIGHT -> game.handleAction(1, ActionType.MOVE_RIGHT);
-            case SPACE    -> game.handleAction(1, ActionType.PLACE_BOMB);
+    private void configureDimensions() {
+        String size = GameConfigController.selectedMapSize;
+        if (size != null && size.contains("Petite")) { currentWidth = 11; currentHeight = 11; }
+        else if (size != null && size.contains("Grande")) { currentWidth = 19; currentHeight = 15; }
+        else { currentWidth = 15; currentHeight = 11; }
+    }
+
+    private void initBackgroundGrid() {
+        for (int x = 0; x < currentWidth; x++) {
+            for (int y = 0; y < currentHeight; y++) {
+                ImageView iv = new ImageView();
+                iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
+                tileViews[x][y] = iv;
+                gameGrid.add(iv, x, y);
+            }
         }
     }
 
     private void showGameOverScreen(int winnerId) {
         try {
-            // Remplacez par le vrai chemin de votre fichier FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/game-over.fxml"));
-            Parent gameOverRoot = loader.load();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/clientside/game-over.fxml"));
+            Parent rootNode = loader.load();
 
             GameOverController controller = loader.getController();
+            String timeStr = String.format("%02d:%02d", (System.currentTimeMillis() - startTime)/60000, ((System.currentTimeMillis() - startTime)/1000)%60);
+            controller.setStats(winnerId == 1 ? "VICTOIRE !" : "DÉFAITE...", timeStr, 0);
 
-            long duration = (System.currentTimeMillis() - startTime) / 1000;
-            String timeStr = String.format("%02d:%02d", duration / 60, duration % 60);
-            String title = (winnerId == 1) ? "VICTOIRE !" : "VOUS AVEZ PERDU !!";
-
-            // On suppose que l'ID 1 est le joueur local
-            controller.setStats(title, timeStr, 0);
-
-            // Affichage par dessus la grille (si le root de la scène est un StackPane)
-            Pane root = (Pane) gameGrid.getScene().getRoot();
-            root.getChildren().add(gameOverRoot);
-
-        } catch (IOException e) {
-            System.err.println("Erreur lors du chargement de l'écran Game Over : " + e.getMessage());
-        }
+            StackPane rootStack = (StackPane) gameGrid.getScene().getRoot();
+            rootStack.getChildren().add(rootNode);
+            rootNode.toFront();
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
+
+
     private void drawMap(GameSnapshot snap) {
-        // 1. Grille
+        // 1. Grille statique
         CellType[][] grid = snap.getGrid();
-        for (int x = 0; x < currentWidth; x++) {
-            for (int y = 0; y < currentHeight; y++) {
-                CellType type = grid[y][x];
-                if (type == CellType.WALL) tileViews[x][y].setImage(wallImg);
-                else if (type == CellType.BRICK) tileViews[x][y].setImage(brickImg);
-                else tileViews[x][y].setImage(floorImg);
-            }
-        }
+        for (int x = 0; x < currentWidth; x++)
+            for (int y = 0; y < currentHeight; y++)
+                tileViews[x][y].setImage(grid[y][x] == CellType.WALL ? wallImg : (grid[y][x] == CellType.BRICK ? brickImg : floorImg));
 
-        // 2. Bombes
-        Set<Integer> activeBombIds = new HashSet<>();
-        for (GameSnapshot.BombState b : snap.getBombs()) {
-            activeBombIds.add(b.id());
-            int frame = (int) ((System.currentTimeMillis() / 100) % 28);
-            ImageView bView = bombViews.computeIfAbsent(b.id(), id -> {
-                ImageView v = new ImageView();
-                v.setFitWidth(TILE_SIZE); v.setFitHeight(TILE_SIZE);
-                gameGrid.getChildren().add(v);
-                return v;
+        // 2. Objets dynamiques (Bombes & Explosions)
+        renderDynamicObjects(snap);
+
+        // 3. HUD & Joueurs
+        timerLabel.setText(String.format("%02d:%02d", snap.getRemainingSeconds() / 60, snap.getRemainingSeconds() % 60));
+        renderPlayers(snap);
+    }
+
+    private void renderDynamicObjects(GameSnapshot snap) {
+        // Bombes
+        Set<Integer> activeBombs = new HashSet<>();
+        int bombFrame = (int) ((System.currentTimeMillis() / 100) % 28);
+        for (var b : snap.getBombs()) {
+            activeBombs.add(b.id());
+            ImageView v = bombViews.computeIfAbsent(b.id(), id -> {
+                ImageView iv = new ImageView(); iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
+                gameGrid.getChildren().add(iv); return iv;
             });
-            bView.setImage(bombIdleFrames[frame]);
-            GridPane.setColumnIndex(bView, b.x());
-            GridPane.setRowIndex(bView, b.y());
+            v.setImage(bombIdleFrames[bombFrame]);
+            GridPane.setColumnIndex(v, b.x()); GridPane.setRowIndex(v, b.y());
         }
-        bombViews.keySet().removeIf(id -> {
-            if (!activeBombIds.contains(id)) {
-                gameGrid.getChildren().remove(bombViews.get(id));
-                return true;
-            }
-            return false;
-        });
+        bombViews.keySet().removeIf(id -> { if(!activeBombs.contains(id)) { gameGrid.getChildren().remove(bombViews.get(id)); return true; } return false; });
 
-        // 3. Explosions
-        Set<String> activeExplosionKeys = new HashSet<>();
-        for (GameSnapshot.ExplosionState e : snap.getExplosions()) {
-            String key = e.x() + "_" + e.y();
-            activeExplosionKeys.add(key);
-            int frame = (int) Math.min(e.ageMs() / 50, 13);
-            ImageView eView = explosionViews.computeIfAbsent(key, k -> {
-                ImageView v = new ImageView();
-                v.setFitWidth(TILE_SIZE); v.setFitHeight(TILE_SIZE);
-                gameGrid.getChildren().add(v);
-                return v;
+        // Explosions
+        Set<String> activeExplosions = new HashSet<>();
+        for (var e : snap.getExplosions()) {
+            String key = e.x() + "_" + e.y(); activeExplosions.add(key);
+            ImageView v = explosionViews.computeIfAbsent(key, k -> {
+                ImageView iv = new ImageView(); iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
+                gameGrid.getChildren().add(iv); return iv;
             });
-            eView.setImage(explosionFrames[e.spriteType()][frame]);
-            GridPane.setColumnIndex(eView, e.x());
-            GridPane.setRowIndex(eView, e.y());
+            v.setImage(explosionFrames[e.spriteType()][(int) Math.min(e.ageMs() / 50, 13)]);
+            GridPane.setColumnIndex(v, e.x()); GridPane.setRowIndex(v, e.y());
         }
-        explosionViews.keySet().removeIf(key -> {
-            if (!activeExplosionKeys.contains(key)) {
-                gameGrid.getChildren().remove(explosionViews.get(key));
-                return true;
-            }
-            return false;
-        });
+        explosionViews.keySet().removeIf(k -> { if(!activeExplosions.contains(k)) { gameGrid.getChildren().remove(explosionViews.get(k)); return true; } return false; });
+    }
 
-        // 4. Timer
-        long sec = snap.getRemainingSeconds();
-        if (timerLabel != null) {
-            timerLabel.setText(String.format("%02d:%02d", sec / 60, sec % 60));
-        }
-
-        // 5. Joueurs
-        for (GameSnapshot.PlayerState p : snap.getPlayers()) {
-            if (p.id() == 1) {
-                hpLabel.setText(String.valueOf(p.hp()));
-                bombsLabel.setText(p.currentBombs() + "/" + p.maxBombs());
-            }
-
-            if (p.isDead()) {
-                ImageView v = playerViews.remove(p.id());
-                if (v != null) gameGrid.getChildren().remove(v);
-            } else {
+    private void renderPlayers(GameSnapshot snap) {
+        Set<Integer> aliveIds = new HashSet<>();
+        for (var p : snap.getPlayers()) {
+            aliveIds.add(p.id());
+            if (p.id() == 1) { hpLabel.setText(String.valueOf(p.hp())); bombsLabel.setText(p.currentBombs() + "/" + p.maxBombs()); }
+            if (!p.isDead()) {
                 ImageView v = playerViews.computeIfAbsent(p.id(), id -> {
                     ImageView iv = new ImageView(id == 1 ? playerImg : botImg);
                     iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
-                    gameGrid.getChildren().add(iv);
-                    return iv;
+                    gameGrid.getChildren().add(iv); return iv;
                 });
-                GridPane.setColumnIndex(v, p.x());
-                GridPane.setRowIndex(v, p.y());
+                GridPane.setColumnIndex(v, p.x()); GridPane.setRowIndex(v, p.y());
             }
+        }
+        playerViews.keySet().removeIf(id -> { if(!aliveIds.contains(id)) { gameGrid.getChildren().remove(playerViews.get(id)); return true; } return false; });
+    }
+
+    private void handleKeyPress(KeyEvent event) {
+        if (game == null) return;
+        switch (event.getCode()) {
+            case Z, UP -> game.handleAction(1, ActionType.MOVE_UP);
+            case S, DOWN -> game.handleAction(1, ActionType.MOVE_DOWN);
+            case Q, LEFT -> game.handleAction(1, ActionType.MOVE_LEFT);
+            case D, RIGHT -> game.handleAction(1, ActionType.MOVE_RIGHT);
+            case SPACE -> game.handleAction(1, ActionType.PLACE_BOMB);
+            default -> {}
         }
     }
 }
