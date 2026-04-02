@@ -122,8 +122,12 @@ public class Game implements Runnable {
                     for (int i = 1; i <= bomb.getRadius(); i++) {
                         int nx = bx + dirs[d][0] * i, ny = by + dirs[d][1] * i;
                         if (!isInBounds(nx, ny) || grid[ny][nx] == CellType.WALL) break;
-                        activeExplosionCells.add(new long[]{nx, ny, now, d + 3});
-                        if (grid[ny][nx] == CellType.BRICK) { grid[ny][nx] = CellType.EMPTY; break; }
+                        boolean isBrick = grid[ny][nx] == CellType.BRICK;
+                        int nextX = bx + dirs[d][0] * (i + 1), nextY = by + dirs[d][1] * (i + 1);
+                        boolean isLastCell = isBrick || i == bomb.getRadius() || !isInBounds(nextX, nextY) || grid[nextY][nextX] == CellType.WALL;
+                        int spriteType = isLastCell ? (d == 0 ? 3 : d == 1 ? 4 : d == 2 ? 2 : 1) : (d < 2 ? 6 : 5);
+                        activeExplosionCells.add(new long[]{nx, ny, now, spriteType});
+                        if (isBrick) { grid[ny][nx] = CellType.EMPTY; break; }
                     }
                 }
             }

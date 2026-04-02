@@ -35,6 +35,7 @@ public class GameBoardController {
 
     private final Map<Integer, ImageView> playerViews = new HashMap<>();
     private final Map<Integer, ImageView> bombViews = new HashMap<>();
+    private final Map<Integer, Long> bombFirstSeen = new HashMap<>();
     private final Map<String, ImageView> explosionViews = new HashMap<>();
 
     private Game game;
@@ -147,9 +148,10 @@ public class GameBoardController {
     private void renderDynamicObjects(GameSnapshot snap) {
         // Bombes
         Set<Integer> activeBombs = new HashSet<>();
-        int bombFrame = (int) ((System.currentTimeMillis() / 100) % 28);
         for (var b : snap.getBombs()) {
             activeBombs.add(b.id());
+            long firstSeen = bombFirstSeen.computeIfAbsent(b.id(), id -> System.currentTimeMillis());
+            int bombFrame = (int) ((System.currentTimeMillis() - firstSeen) / 100 % 28);
             ImageView v = bombViews.computeIfAbsent(b.id(), id -> {
                 ImageView iv = new ImageView(); iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
                 gameGrid.getChildren().add(iv); return iv;
@@ -157,7 +159,7 @@ public class GameBoardController {
             v.setImage(bombIdleFrames[bombFrame]);
             GridPane.setColumnIndex(v, b.x()); GridPane.setRowIndex(v, b.y());
         }
-        bombViews.keySet().removeIf(id -> { if(!activeBombs.contains(id)) { gameGrid.getChildren().remove(bombViews.get(id)); return true; } return false; });
+        bombViews.keySet().removeIf(id -> { if(!activeBombs.contains(id)) { gameGrid.getChildren().remove(bombViews.get(id)); bombFirstSeen.remove(id); return true; } return false; });
 
         // Explosions
         Set<String> activeExplosions = new HashSet<>();
