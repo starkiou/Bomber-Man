@@ -10,50 +10,60 @@ import javafx.scene.control.SpinnerValueFactory;
 
 public class GameConfigController {
 
-    @FXML
-    private ComboBox<String> mapSizeBox;
+    @FXML private ComboBox<String> mapSizeBox;
+    @FXML private Spinner<Integer> botCountSpinner;
+    @FXML private ComboBox<String> difficultyBox;
+    @FXML private Spinner<Integer> bombCountSpinner;
+    @FXML private Spinner<Integer> timeSpinner;
 
-    @FXML
-    private Spinner<Integer> botCountSpinner;
+    @FXML private Button startButton;
+    @FXML private Button backButton;
 
-    @FXML
-    private ComboBox<String> difficultyBox;
-
-    @FXML
-    private Button startButton;
-
-    @FXML
-    private Button backButton;
+    // Variables statiques pour transmettre les données au plateau de jeu
+    public static int selectedBombs = 3;
+    public static int selectedTime = 120;
+    public static int selectedBots = 1;
+    public static String selectedMapSize = "Moyenne (15x15)";
+    public static String selectedDifficulty = "Normal";
 
     @FXML
     public void initialize() {
-        mapSizeBox.getItems().addAll("Petite (10x10)", "Moyenne (15x15)", "Grande (20x20)");
+        // --- 1. Remplissage des ComboBox (Taille et Difficulté) ---
+        mapSizeBox.getItems().clear();
+        mapSizeBox.getItems().addAll("Petite (11x11)", "Moyenne (15x15)", "Grande (19x19)");
         mapSizeBox.setValue("Moyenne (15x15)");
 
-        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 3, 1);
-        botCountSpinner.setValueFactory(valueFactory);
-
+        difficultyBox.getItems().clear();
         difficultyBox.getItems().addAll("Facile", "Normal", "Difficile", "Extrême");
         difficultyBox.setValue("Normal");
+
+        // --- 2. Initialisation des Spinners (Indispensable pour l'affichage) ---
+        // Format : new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, defaut)
+        botCountSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 3, 1));
+        bombCountSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 3));
+        timeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(30, 600, 120));
+
+        // Permet de taper directement au clavier dans les champs
+        bombCountSpinner.setEditable(true);
+        timeSpinner.setEditable(true);
     }
 
     @FXML
     void onStartButtonClick(ActionEvent event) {
-        String taille = mapSizeBox.getValue();
-        int nbBots = botCountSpinner.getValue();
-        String diff = difficultyBox.getValue();
+        // On récupère toutes les valeurs avant de changer de scène
+        selectedBots = botCountSpinner.getValue();
+        selectedBombs = bombCountSpinner.getValue();
+        selectedTime = timeSpinner.getValue();
+        selectedMapSize = mapSizeBox.getValue();
+        selectedDifficulty = difficultyBox.getValue();
 
-        System.out.println("🚀 Lancement de la partie Offline !");
-        System.out.println("Carte : " + taille + " | Bots : " + nbBots + " | Difficulté : " + diff);
+        System.out.println("🚀 Config : Map=" + selectedMapSize + " | Bots=" + selectedBots + " | Time=" + selectedTime + "s");
 
         SceneManager.getInstance().loadScene("game-board.fxml");
     }
 
     @FXML
     void onBackButtonClick(ActionEvent event) {
-        System.out.println("🔙 Retour au choix de connexion.");
-        
-        // TODO : Utiliser le SceneManager pour revenir en arrière
-       SceneManager.getInstance().loadScene("connection-choice.fxml");
+        SceneManager.getInstance().loadScene("connection-choice.fxml");
     }
 }

@@ -1,26 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" spacing="10" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="clientside.controllers.GameBoardController">
+<VBox alignment="CENTER" spacing="0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="clientside.controllers.GameBoardController" style="-fx-background-color: #111;">
 
-    <HBox alignment="CENTER" spacing="20" style="-fx-background-color: #333; -fx-padding: 10;">
-        <Label fx:id="modeLabel" text="Offline Mode" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+    <HBox alignment="CENTER" spacing="40" style="-fx-background-color: #333; -fx-padding: 10; -fx-border-color: #555; -fx-border-width: 0 0 2 0;">
 
-        <HBox spacing="5" alignment="CENTER">
-            <Label text="❤️ HP:" style="-fx-text-fill: #ff5555; -fx-font-weight: bold;"/>
-            <Label fx:id="hpLabel" text="0" style="-fx-text-fill: white;"/>
+        <HBox spacing="8" alignment="CENTER">
+            <Label text="❤️" style="-fx-font-size: 18px;"/>
+            <Label text="HP:" style="-fx-text-fill: #ff5555; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+            <Label fx:id="hpLabel" text="3" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
         </HBox>
 
-        <HBox spacing="5" alignment="CENTER">
-            <Label text="💣 Bombs:" style="-fx-text-fill: #55ff55; -fx-font-weight: bold;"/>
-            <Label fx:id="bombsLabel" text="0" style="-fx-text-fill: white;"/>
+        <VBox alignment="CENTER">
+            <Label fx:id="timerLabel" text="02:00"
+                   style="-fx-text-fill: #55ff55; -fx-font-size: 24px; -fx-font-family: 'Monospaced'; -fx-font-weight: bold; -fx-background-color: black; -fx-padding: 2 15 2 15; -fx-background-radius: 5;"/>
+        </VBox>
+
+        <HBox spacing="8" alignment="CENTER">
+            <Label text="💣" style="-fx-font-size: 18px;"/>
+            <Label text="BOMBS:" style="-fx-text-fill: #55aaff; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+            <Label fx:id="bombsLabel" text="1/1" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
         </HBox>
+
+        <Label fx:id="modeLabel" text="OFFLINE" style="-fx-text-fill: #888; -fx-font-size: 10px; -fx-font-weight: bold;"/>
     </HBox>
 
-    <ScrollPane fitToHeight="true" fitToWidth="true">
-        <GridPane fx:id="gameGrid" alignment="CENTER" style="-fx-background-color: #222;" />
-    </ScrollPane>
+    <StackPane VBox.vgrow="ALWAYS" style="-fx-padding: 20;">
+        <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+            <GridPane fx:id="gameGrid" alignment="CENTER" style="-fx-background-color: #222; -fx-border-color: #444; -fx-border-width: 4; -fx-background-radius: 5; -fx-border-radius: 5;" />
+        </ScrollPane>
+    </StackPane>
+
 </VBox>

@@ -7,190 +7,90 @@ import model.entity.Player;
 import model.logger.LogManager;
 import model.maze.CellType;
 import network.message.ActionType;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Core game engine — shared by ServerSide (multi-player) and ClientSide (offline/solo).
- *
- * <p><b>Thread-safety contract:</b>
- * <ul>
- *   <li>{@link #handleAction} is the only public entry-point for external threads (network,
- *       UI event thread). It acquires {@code stateLock} before mutating any game state.</li>
- *   <li>The game loop runs on its own dedicated thread and acquires the same lock only
- *       during compound state reads (snapshot capture) or writes (explosion processing).</li>
- *   <li>{@code activeBombs} is a synchronized list; every iteration is wrapped in a
- *       {@code synchronized(activeBombs)} block as required by the Java spec.</li>
- *   <li>{@code players} is a {@link ConcurrentHashMap} — safe for concurrent per-key
- *       get/put, but compound operations still use {@code stateLock}.</li>
- * </ul>
- *
- * <p><b>Observer integration (ServerSide):</b>
- * <pre>{@code
- *   game.addListener(new GameStateListener() {
- *       public void onGameStateUpdate(GameSnapshot snap) {
- *           // build GameStateMessage from snap, broadcast to all ClientHandlers
- *       }
- *       public void onPlayerDied(int id)  { ... }
- *       public void onGameOver(int winner) { ... }
- *   });
- *   game.start();
- * }</pre>
- */
 public class Game implements Runnable {
+    public static final int TARGET_FPS = 60;
+    public static final long FRAME_TIME_MS = 1000L / TARGET_FPS;
+    private static final long EXPLOSION_ANIM_DURATION_MS = 700;
 
-    // ── Constants ────────────────────────────────────────────────────
-    public static final int  TARGET_FPS = 60;
-    public static final long FRAME_TIME_MS = 1000L / TARGET_FPS; // ≈ 16 ms
-
-    private static final int  DEFAULT_BOMB_RADIUS = 2;
-    private static final int  DEFAULT_BOMB_DELAY = 3000; // ms before explosion
-    private static final long EXPLOSION_ANIM_DURATION_MS = 700; // how long blast cells stay visible
-
-    // ── State ────────────────────────────────────────────────────────
-    /** The maze grid, indexed grid[y][x]. Mutated during explosion (BRICK → EMPTY). */
     private final CellType[][] grid;
-
-    /** All players (alive and dead) keyed by their ID. */
     private final ConcurrentHashMap<Integer, Player> players;
-
-    /** Bombs currently on the field. Use synchronized(activeBombs) when iterating. */
     private final List<Bomb> activeBombs;
-
-    /**
-     * Blast cells currently animating. Each entry is {x, y, startTimeMs}.
-     * Entries are added by processExplosion and purged after EXPLOSION_ANIM_DURATION_MS.
-     */
     private final List<long[]> activeExplosionCells;
-
-    /**
-     * Master lock for compound state mutations:
-     * movement, bomb placement, explosion processing, victory check.
-     * Any thread touching more than one field at once must hold this lock.
-     */
     private final Object stateLock = new Object();
-
-    /** Auto-incrementing ID counter for new bombs. */
     private final AtomicInteger bombIdSeq = new AtomicInteger(1000);
 
     private volatile boolean gameOver = false;
-    private volatile int winnerId = -1; // -1 = no winner yet / draw
-
-    // ── AI ──────────────────────────────────────────────────────────
-    /** Active bots, keyed by player ID. AIPlayer extends Player so they also live in {@code players}. */
+    private volatile int winnerId = -1;
     private final Map<Integer, AIPlayer> bots = new ConcurrentHashMap<>();
-
-    // ── Observer ────────────────────────────────────────────────────
-    /**
-     * Registered listeners notified every tick and on game events.
-     * CopyOnWriteArrayList allows listeners to register/unregister safely
-     * from any thread without blocking the game loop during iteration.
-     */
     private final List<GameStateListener> listeners = new CopyOnWriteArrayList<>();
-
-    // ── Game loop ────────────────────────────────────────────────────
     private volatile boolean running = false;
     private Thread gameThread;
 
-    // ── Logger ───────────────────────────────────────────────────────
-    private final LogManager log = LogManager.getInstance();
+    // Gestion du temps
+    private final long gameDurationMs;
+    private long startTimeMs;
+    private long remainingSeconds;
 
-    // ─────────────────────────────────────────────────────────────────
-    // Constructor
-    // ─────────────────────────────────────────────────────────────────
-
-    /**
-     * @param grid           maze grid to play on (will be deep-copied internally)
-     * @param initialPlayers players joining the game (can be modified after construction
-     *                       via {@link #addBot})
-     */
-    public Game(CellType[][] grid, List<Player> initialPlayers) {
+    public Game(CellType[][] grid, List<Player> initialPlayers, int durationSeconds) {
         this.grid = deepCopyGrid(grid);
         this.players = new ConcurrentHashMap<>();
         this.activeBombs = Collections.synchronizedList(new ArrayList<>());
         this.activeExplosionCells = Collections.synchronizedList(new ArrayList<>());
+        this.gameDurationMs = durationSeconds * 1000L;
+        this.remainingSeconds = durationSeconds;
 
         for (Player p : initialPlayers) {
             players.put(p.getId(), p);
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Lifecycle
-    // ─────────────────────────────────────────────────────────────────
-
-    /** Starts the game loop on a dedicated daemon thread. Idempotent. */
     public void start() {
         if (running) return;
         running = true;
         gameThread = new Thread(this, "GameLoop");
         gameThread.setDaemon(true);
         gameThread.start();
-        log.info("Game started — " + players.size() + " player(s), " + TARGET_FPS + " FPS.");
     }
-
-    /** Stops the game loop cleanly. Safe to call from any thread. */
-    public void stop() {
-        running = false;
-        if (gameThread != null) {
-            gameThread.interrupt();
-        }
-        log.info("Game stopped.");
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // Game loop (runs on gameThread)
-    // ─────────────────────────────────────────────────────────────────
 
     @Override
     public void run() {
-        log.info("Game loop thread started.");
+        this.startTimeMs = System.currentTimeMillis();
         while (running && !gameOver) {
             long frameStart = System.currentTimeMillis();
-
             update();
-            broadcastState(); // every tick = 60 Hz
-
-            long elapsed = System.currentTimeMillis() - frameStart;
-            long sleep = FRAME_TIME_MS - elapsed;
+            broadcastState();
+            long sleep = FRAME_TIME_MS - (System.currentTimeMillis() - frameStart);
             if (sleep > 0) {
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+                try { Thread.sleep(sleep); } catch (InterruptedException e) { break; }
             }
         }
-        log.info("Game loop thread ended.");
     }
-
-    // ─────────────────────────────────────────────────────────────────
-    // Update pipeline (game thread only)
-    // ─────────────────────────────────────────────────────────────────
 
     private void update() {
-        updatePlayers();     // bomb regen
-        updateBombs();       // countdown → explosion → damage
-        updateExplosions();  // purge expired blast cells
-        updateBots();        // AI decision → handleAction
-        checkVictory();      // last survivor wins
+        updateTime();
+        updatePlayers();
+        updateBombs();
+        updateExplosions();
+        updateBots();
+        checkVictory();
     }
 
-    /** Ticks each living player (handles bomb regen timer internally). */
+    private void updateTime() {
+        long elapsed = System.currentTimeMillis() - startTimeMs;
+        long remMs = Math.max(0, gameDurationMs - elapsed);
+        this.remainingSeconds = remMs / 1000;
+        if (remMs <= 0) gameOver = true;
+    }
+
     private void updatePlayers() {
-        for (Player p : players.values()) {
-            if (!p.isDead()) p.update();
-        }
+        for (Player p : players.values()) if (!p.isDead()) p.update();
     }
 
-    /** Removes blast cells whose animation has finished. */
     private void updateExplosions() {
         long now = System.currentTimeMillis();
         synchronized (activeExplosionCells) {
@@ -198,112 +98,44 @@ public class Game implements Runnable {
         }
     }
 
-    /**
-     * Ticks each bomb. When a bomb's timer fires, calls {@link #processExplosion(Bomb)}
-     * then removes it from the active list.
-     */
     private void updateBombs() {
         List<Bomb> toExplode = new ArrayList<>();
-
         synchronized (activeBombs) {
             for (Bomb b : activeBombs) {
                 b.update();
                 if (b.isExploded()) toExplode.add(b);
             }
         }
-
-        // Process explosions outside the synchronized block to avoid lock contention
-        for (Bomb b : toExplode) {
-            processExplosion(b);
-        }
-
-        synchronized (activeBombs) {
-            activeBombs.removeIf(Bomb::isExploded);
-        }
+        for (Bomb b : toExplode) processExplosion(b);
+        synchronized (activeBombs) { activeBombs.removeIf(Bomb::isExploded); }
     }
-
-    /**
-     * Handles a single bomb explosion:
-     * <ul>
-     *   <li>Destroys BRICK cells within the blast area.</li>
-     *   <li>Deals 1 HP damage to every living player caught in the blast.</li>
-     *   <li>Fires {@link GameStateListener#onPlayerDied} for any newly eliminated player.</li>
-     * </ul>
-     */
-    /**
-     * Sprite-type constants for explosion cells (index Z in explosion_Z_F.png).
-     * 0=centre, 1=H-mid, 2=V-mid, 3=top-end, 4=bottom-end, 5=right-end, 6=left-end
-     */
-    private static final int EXPL_CENTER     = 0;
-    private static final int EXPL_H_MID      = 1;
-    private static final int EXPL_V_MID      = 2;
-    private static final int EXPL_END_TOP    = 3;
-    private static final int EXPL_END_BOTTOM = 4;
-    private static final int EXPL_END_RIGHT  = 5;
-    private static final int EXPL_END_LEFT   = 6;
 
     private void processExplosion(Bomb bomb) {
         synchronized (stateLock) {
             int bx = bomb.getX(), by = bomb.getY();
             long now = System.currentTimeMillis();
-
-            // Directions: UP, DOWN, RIGHT, LEFT
             int[][] dirs = {{0, -1}, {0, 1}, {1, 0}, {-1, 0}};
-            int[]   endTypes = {EXPL_END_TOP, EXPL_END_BOTTOM, EXPL_END_RIGHT, EXPL_END_LEFT};
-            int[]   midTypes = {EXPL_V_MID,   EXPL_V_MID,    EXPL_H_MID,    EXPL_H_MID};
-
-            List<int[]>  allBlast     = new ArrayList<>();
-            List<long[]> blastTyped   = new ArrayList<>();
-
-            // Centre
-            allBlast.add(new int[]{bx, by});
-            blastTyped.add(new long[]{bx, by, now, EXPL_CENTER});
-
-            for (int d = 0; d < 4; d++) {
-                int dx = dirs[d][0], dy = dirs[d][1];
-                List<int[]> arm = new ArrayList<>();
-
-                for (int i = 1; i <= bomb.getRadius(); i++) {
-                    int nx = bx + dx * i;
-                    int ny = by + dy * i;
-                    if (!isInBounds(nx, ny)) break;
-                    CellType cell = grid[ny][nx];
-                    if (cell == CellType.WALL) break;
-                    arm.add(new int[]{nx, ny});
-                    if (cell == CellType.BRICK) break; // brick is the end cap
-                }
-
-                for (int i = 0; i < arm.size(); i++) {
-                    int[] c = arm.get(i);
-                    int spriteType = (i == arm.size() - 1) ? endTypes[d] : midTypes[d];
-                    allBlast.add(c);
-                    blastTyped.add(new long[]{c[0], c[1], now, spriteType});
-                }
-            }
-
-            log.info("Bomb " + bomb.getId() + " exploded at ("
-                    + bx + "," + by + ") — blast covers " + allBlast.size() + " cell(s).");
 
             synchronized (activeExplosionCells) {
-                activeExplosionCells.addAll(blastTyped);
-            }
-
-            for (int[] cell : allBlast) {
-                int cx = cell[0], cy = cell[1];
-
-                if (isInBounds(cx, cy) && grid[cy][cx] == CellType.BRICK) {
-                    grid[cy][cx] = CellType.EMPTY;
-                    log.info("Brick destroyed at (" + cx + "," + cy + ").");
+                activeExplosionCells.add(new long[]{bx, by, now, 0});
+                for (int d = 0; d < 4; d++) {
+                    for (int i = 1; i <= bomb.getRadius(); i++) {
+                        int nx = bx + dirs[d][0] * i, ny = by + dirs[d][1] * i;
+                        if (!isInBounds(nx, ny) || grid[ny][nx] == CellType.WALL) break;
+                        activeExplosionCells.add(new long[]{nx, ny, now, d + 3});
+                        if (grid[ny][nx] == CellType.BRICK) { grid[ny][nx] = CellType.EMPTY; break; }
+                    }
                 }
-
-                for (Player p : players.values()) {
-                    if (!p.isDead() && p.getX() == cx && p.getY() == cy) {
-                        p.takeDamage(1);
-                        log.warning("Player " + p.getId()
-                                + " hit — HP remaining: " + p.getHp());
-                        if (p.isDead()) {
-                            log.warning("Player " + p.getId() + " eliminated!");
-                            notifyPlayerDied(p.getId());
+            }
+            // Simple damage
+            for (Player p : players.values()) {
+                if (!p.isDead()) {
+                    synchronized (activeExplosionCells) {
+                        for (long[] c : activeExplosionCells) {
+                            if (c[2] == now && p.getX() == c[0] && p.getY() == c[1]) {
+                                p.takeDamage(1);
+                                if (p.isDead()) notifyPlayerDied(p.getId());
+                            }
                         }
                     }
                 }
@@ -311,246 +143,78 @@ public class Game implements Runnable {
         }
     }
 
-    /**
-     * Ticks each registered bot: calls {@code AIPlayer.computeAction()} then applies
-     * the resulting move and/or bomb placement through the normal game-logic methods.
-     *
-     * <p>Defensive copies of the grid and player list are passed to the AI so that
-     * its pathfinding cannot mutate live game state.
-     */
     private void updateBots() {
-        List<Player> playerList = new ArrayList<>(players.values());
-        List<Bomb>   bombList;
-        synchronized (activeBombs) {
-            bombList = new ArrayList<>(activeBombs);
-        }
-
         for (AIPlayer bot : bots.values()) {
             if (bot.isDead()) continue;
-
-            boolean moveReady = bot.canMove();
-            boolean bombReady = bot.canBomb();
-            if (!moveReady && !bombReady) continue;
-
-            AIPlayer.AIAction action = bot.computeAction(grid, playerList, bombList);
-
+            AIPlayer.AIAction action = bot.computeAction(grid, new ArrayList<>(players.values()), new ArrayList<>(activeBombs));
             synchronized (stateLock) {
-                if (action.move() != null && moveReady) {
-                    processMovement(bot, action.move());
-                    bot.onMoveDone();
-                }
-                if (action.placeBomb() && bombReady) {
-                    placeBomb(bot);
-                    bot.onBombDone();
-                }
+                if (action.move() != null && bot.canMove()) processMovement(bot, action.move());
+                if (action.placeBomb() && bot.canBomb()) placeBomb(bot);
             }
         }
     }
 
-    /** Checks for a single survivor or full wipe and notifies listeners. */
     private void checkVictory() {
         if (gameOver) return;
-
-        List<Player> alive = players.values().stream()
-                .filter(p -> !p.isDead())
-                .toList();
-
+        List<Player> alive = players.values().stream().filter(p -> !p.isDead()).toList();
         if (alive.size() <= 1) {
             gameOver = true;
-            winnerId = alive.isEmpty() ? -1 : alive.get(0).getId();
-            String result = (winnerId == -1)
-                    ? "Draw — all players eliminated."
-                    : "Player " + winnerId + " wins!";
-            log.info("Game over. " + result);
+            winnerId = alive.size() == 1 ? alive.get(0).getId() : -1;
             notifyGameOver(winnerId);
-            stop();
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Public input handler — safe to call from any thread
-    // ─────────────────────────────────────────────────────────────────
-
-    /**
-     * Processes a player action. Designed to be called from network threads
-     * (e.g., ServerSide's {@code ClientHandler}) or from the JavaFX event thread
-     * in offline mode.
-     *
-     * <p>Acquires {@code stateLock} to ensure atomicity of the resulting state change.
-     *
-     * @param playerId the acting player's ID
-     * @param action   the action to perform
-     */
     public void handleAction(int playerId, ActionType action) {
         if (gameOver) return;
-        Player player = players.get(playerId);
-        if (player == null || player.isDead()) return;
-
+        Player p = players.get(playerId);
+        if (p == null || p.isDead()) return;
         synchronized (stateLock) {
             switch (action) {
-                case MOVE_UP -> processMovement(player, Direction.UP);
-                case MOVE_DOWN -> processMovement(player, Direction.DOWN);
-                case MOVE_LEFT -> processMovement(player, Direction.LEFT);
-                case MOVE_RIGHT -> processMovement(player, Direction.RIGHT);
-                case PLACE_BOMB -> placeBomb(player);
+                case MOVE_UP -> processMovement(p, Direction.UP);
+                case MOVE_DOWN -> processMovement(p, Direction.DOWN);
+                case MOVE_LEFT -> processMovement(p, Direction.LEFT);
+                case MOVE_RIGHT -> processMovement(p, Direction.RIGHT);
+                case PLACE_BOMB -> placeBomb(p);
             }
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Business logic (must be called while holding stateLock)
-    // ─────────────────────────────────────────────────────────────────
-
-    /**
-     * Moves a player one cell in the given direction if the target cell is passable
-     * (not a WALL, not a BRICK, and not occupied by an active bomb).
-     */
-    private void processMovement(Player player, Direction dir) {
-        int nextX = player.getX();
-        int nextY = player.getY();
-        switch (dir) {
-            case UP -> nextY--;
-            case DOWN -> nextY++;
-            case LEFT -> nextX--;
-            case RIGHT -> nextX++;
-        }
-
-        if (!isInBounds(nextX, nextY)) return;
-
-        CellType cell = grid[nextY][nextX];
-        if (cell == CellType.WALL || cell == CellType.BRICK) return;
-        if (isBombAt(nextX, nextY)) return; // bombs block movement
-
-        log.info("Player " + player.getId() + " moved " + dir + ": (" + player.getX() + "," + player.getY() + ") → (" + nextX + "," + nextY + ").");
-
-        player.setX(nextX);
-        player.setY(nextY);
-    }
-
-    /**
-     * Places a bomb at the player's current position if they have remaining stock
-     * and no other bomb is already there.
-     */
-    private void placeBomb(Player player) {
-        if (!player.canPlaceBomb()) {
-            log.info("Player " + player.getId() + " has no bombs left to place.");
-            return;
-        }
-        int bx = player.getX();
-        int by = player.getY();
-        if (isBombAt(bx, by)) return; // prevent stacking
-
-        int  bombId = bombIdSeq.getAndIncrement();
-        Bomb bomb = new Bomb(bombId, bx, by, player.getId(), DEFAULT_BOMB_RADIUS, DEFAULT_BOMB_DELAY);
-
-        synchronized (activeBombs) {
-            activeBombs.add(bomb);
-        }
-        player.onBombPlaced();
-
-        log.info("Player " + player.getId() + " placed bomb " + bombId + " at (" + bx + "," + by + ") — " + player.getCurrentBombs() + "/" + player.getMaxBombs() + " bomb(s) left.");
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // Observer
-    // ─────────────────────────────────────────────────────────────────
-
-    public void addListener(GameStateListener listener) {
-        listeners.add(listener);
-    }
-
-    public void removeListener(GameStateListener listener) {
-        listeners.remove(listener);
-    }
-
-    /** Broadcasts the current snapshot to every registered listener. */
-    private void broadcastState() {
-        if (listeners.isEmpty()) return;
-        GameSnapshot snapshot = getSnapshot();
-        for (GameStateListener l : listeners) {
-            l.onGameStateUpdate(snapshot);
+    private void processMovement(Player p, Direction d) {
+        int nx = p.getX(), ny = p.getY();
+        switch (d) { case UP->ny--; case DOWN->ny++; case LEFT->nx--; case RIGHT->nx++; }
+        if (isInBounds(nx, ny) && grid[ny][nx] == CellType.EMPTY && !isBombAt(nx, ny)) {
+            p.setX(nx); p.setY(ny);
         }
     }
 
-    private void notifyPlayerDied(int playerId) {
-        for (GameStateListener l : listeners) l.onPlayerDied(playerId);
+    private void placeBomb(Player p) {
+        if (p.canPlaceBomb() && !isBombAt(p.getX(), p.getY())) {
+            activeBombs.add(new Bomb(bombIdSeq.getAndIncrement(), p.getX(), p.getY(), p.getId(), 2, 3000));
+            p.onBombPlaced();
+        }
     }
 
-    private void notifyGameOver(int winner) {
-        for (GameStateListener l : listeners) l.onGameOver(winner);
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // Snapshot (usable from any thread)
-    // ─────────────────────────────────────────────────────────────────
-
-    /**
-     * Returns an immutable snapshot of the current game state.
-     * Safe to call from any thread — acquires {@code stateLock} briefly.
-     */
     public GameSnapshot getSnapshot() {
         synchronized (stateLock) {
-            synchronized (activeBombs) {
-                synchronized (activeExplosionCells) {
-                    return GameSnapshot.capture(players.values(), activeBombs, activeExplosionCells, grid, gameOver, winnerId);
-                }
-            }
+            return GameSnapshot.capture(players.values(), activeBombs, activeExplosionCells, grid, gameOver, winnerId, remainingSeconds);
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // AI support
-    // ─────────────────────────────────────────────────────────────────
-
-    /**
-     * Registers an AI-controlled player.
-     * The bot is added to both the player map and the bot registry so that
-     * {@link #updateBots()} ticks its decision logic every frame.
-     *
-     * <p>Instantiate bots via {@code AIFactory.create(...)} from the {@code model.aiPlayer} package.
-     *
-     * @param bot the AIPlayer instance to register (must not already be in the game)
-     */
-    public void addBot(AIPlayer bot) {
-        players.put(bot.getId(), bot);
-        bots.put(bot.getId(), bot);
-        log.info("Bot " + bot.getId() + " registered (" + bot.getClass().getSimpleName() + ").");
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // Getters
-    // ─────────────────────────────────────────────────────────────────
-
-    public boolean isGameOver() { return gameOver; }
-    public int getWinnerId() { return winnerId; }
-
-    /** Returns a defensive copy of the grid. */
-    public CellType[][] getGrid() { return deepCopyGrid(grid); }
-
-    // ─────────────────────────────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────────────────────────────
-
-    private boolean isInBounds(int x, int y) {
-        return y >= 0 && y < grid.length && x >= 0 && x < grid[0].length;
-    }
-
-    /** Returns true if any active bomb occupies the given cell. Caller must NOT hold activeBombs lock. */
     private boolean isBombAt(int x, int y) {
-        synchronized (activeBombs) {
-            for (Bomb b : activeBombs) {
-                if (b.getX() == x && b.getY() == y) return true;
-            }
-        }
-        return false;
+        synchronized (activeBombs) { return activeBombs.stream().anyMatch(b -> b.getX() == x && b.getY() == y); }
     }
-
-
-    private static CellType[][] deepCopyGrid(CellType[][] src) {
-        CellType[][] copy = new CellType[src.length][];
-        for (int i = 0; i < src.length; i++) {
-            copy[i] = java.util.Arrays.copyOf(src[i], src[i].length);
-        }
-        return copy;
+    private boolean isInBounds(int x, int y) { return y >= 0 && y < grid.length && x >= 0 && x < grid[0].length; }
+    private void broadcastState() {
+        GameSnapshot snap = getSnapshot();
+        for (GameStateListener l : listeners) l.onGameStateUpdate(snap);
+    }
+    public void addListener(GameStateListener l) { listeners.add(l); }
+    private void notifyPlayerDied(int id) { for (GameStateListener l : listeners) l.onPlayerDied(id); }
+    private void notifyGameOver(int id) { for (GameStateListener l : listeners) l.onGameOver(id); }
+    public void addBot(AIPlayer bot) { players.put(bot.getId(), bot); bots.put(bot.getId(), bot); }
+    private CellType[][] deepCopyGrid(CellType[][] s) {
+        CellType[][] c = new CellType[s.length][];
+        for (int i = 0; i < s.length; i++) c[i] = s[i].clone();
+        return c;
     }
 }

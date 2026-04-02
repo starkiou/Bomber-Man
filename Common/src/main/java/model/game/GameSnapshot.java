@@ -15,7 +15,7 @@ import java.util.*;
  * while the game loop continues updating on its own thread.
  */
 public final class GameSnapshot {
-
+    private final long remainingSeconds; // <--- AJOUT
     // ── Inner records ─────────────────────────────────────────────────
 
     /** Lightweight representation of a player's state at snapshot time. */
@@ -60,7 +60,7 @@ public final class GameSnapshot {
     // ── Private constructor — use capture() ───────────────────────────
 
     private GameSnapshot(
-            List<PlayerState> players,
+            long remainingSeconds, List<PlayerState> players,
             List<BombState> bombs,
             List<ExplosionState> explosions,
             CellType[][] grid,
@@ -68,6 +68,7 @@ public final class GameSnapshot {
             boolean gameOver,
             int winnerId
     ) {
+        this.remainingSeconds = remainingSeconds;
         this.players = Collections.unmodifiableList(players);
         this.bombs = Collections.unmodifiableList(bombs);
         this.explosions = Collections.unmodifiableList(explosions);
@@ -96,7 +97,8 @@ public final class GameSnapshot {
             List<long[]> explosionCells,
             CellType[][] grid,
             boolean gameOver,
-            int winnerId
+            int winnerId,
+            long remainingSeconds
     ) {
         List<PlayerState> playerStates = new ArrayList<>(players.size());
         for (Player p : players) {
@@ -128,7 +130,7 @@ public final class GameSnapshot {
             gridCopy[i] = Arrays.copyOf(grid[i], grid[i].length);
         }
 
-        return new GameSnapshot(playerStates, bombStates, explosionStates, gridCopy, now, gameOver, winnerId);
+        return new GameSnapshot(remainingSeconds, playerStates, bombStates, explosionStates, gridCopy, now, gameOver, winnerId);
     }
 
     // ── Getters ───────────────────────────────────────────────────────
@@ -145,4 +147,5 @@ public final class GameSnapshot {
     public long getTimestamp() { return timestamp; }
     public boolean isGameOver()  { return gameOver; }
     public int getWinnerId() { return winnerId; }
+    public long getRemainingSeconds() { return remainingSeconds; }
 }
