@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="clientside.controllers.RoomCreationConfigController"
+      prefHeight="600.0" prefWidth="800.0">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <Label text="Créer une Room">
+        <font><Font name="System Bold" size="22.0" /></font>
+    </Label>
+
+    <Separator prefWidth="200.0" />
+
+    <Label text="Nom de la room :" />
+    <TextField fx:id="roomNameField" promptText="Ma Room" prefWidth="250.0" maxWidth="250.0" />
+
+    <Label text="Taille de la carte :" />
+    <ComboBox fx:id="mapSizeBox" prefWidth="250.0" maxWidth="250.0" />
+
+    <Label text="Nombre d'ennemis (IA) :" />
+    <Spinner fx:id="botCountSpinner" prefWidth="250.0" maxWidth="250.0" />
+
+    <Label text="Niveau de difficulté :" />
+    <ComboBox fx:id="difficultyBox" prefWidth="250.0" maxWidth="250.0" />
+
+    <Label fx:id="errorLabel" style="-fx-text-fill: red;" text="" />
+
+    <Separator prefWidth="200.0" />
+
+    <HBox alignment="CENTER" spacing="20.0">
+        <Button mnemonicParsing="false" onAction="#onBackClick" text="Annuler" />
+        <Button mnemonicParsing="false" onAction="#onCreateClick"
+                style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;"
+                text="Créer la room" />
+    </HBox>
+</VBox>

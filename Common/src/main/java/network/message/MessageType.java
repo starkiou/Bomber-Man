@@ -19,7 +19,8 @@ public enum MessageType {
 	ROOM_QUIT(16),
 	ROOM_CORRECT_QUIT(17), 
 	READY_CLIENT(18),
-	CLIENT_READY_CORRECT_UPDATE(19);
+	CLIENT_READY_CORRECT_UPDATE(19),
+	LAUNCH_GAME(20);
 
     private final byte id;
 

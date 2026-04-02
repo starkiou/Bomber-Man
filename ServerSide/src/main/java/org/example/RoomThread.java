@@ -30,15 +30,18 @@ public class RoomThread extends Thread {
 	private boolean inGame = false;
 	
 	private int maxPlayer;
-	
 	private String roomName;
-	
-	
-	
-	public RoomThread(int maxPlayer, int id, String roomName) {
-		this.maxPlayer=maxPlayer;
+	private String mapSize;
+	private String difficulty;
+	private int botCount;
+
+	public RoomThread(int maxPlayer, int id, String roomName, String mapSize, String difficulty, int botCount) {
+		this.maxPlayer = maxPlayer;
 		this.id = id;
-		this.roomName=roomName;
+		this.roomName = roomName;
+		this.mapSize = mapSize;
+		this.difficulty = difficulty;
+		this.botCount = botCount;
 	}
 	
 	public int getRoomId() {
@@ -71,6 +74,7 @@ public class RoomThread extends Thread {
 	                this.setInGame(true);
 	                break;
 	            }
+
 	        }
 
 	        JSONObject json = new JSONObject();
@@ -87,12 +91,12 @@ public class RoomThread extends Thread {
 	        JSONArray array = new JSONArray();
 	        synchronized (listClient) {
 	            for (ClientHandler client : listClient) {
-	                ClientInfoDTO dto = new ClientInfoDTO(
+	                ClientInfoDTO clientInfoDTO = new ClientInfoDTO(
 	                        client.getClientId(),
 	                        client.isReady(),
 	                        client.getPseudo()
 	                );
-	                array.put(dto);
+	                array.put(clientInfoDTO.toJson());
 	            }
 	        }
 
@@ -173,17 +177,12 @@ public class RoomThread extends Thread {
 		return this.listClient.size();
 	}
 	
-	public String getRoomName() {
-		return roomName;
-	}
-	
-	public void setRoomName(String roomName) {
-		this.roomName=roomName;
-	}
-	
-	public boolean isFull() {
-		return (this.getPlayerCount()>=this.maxPlayer);
-	}
+	public String getRoomName() { return roomName; }
+	public void setRoomName(String roomName) { this.roomName = roomName; }
+	public String getMapSize() { return mapSize; }
+	public String getDifficulty() { return difficulty; }
+	public int getBotCount() { return botCount; }
+	public boolean isFull() { return (this.getPlayerCount() >= this.maxPlayer); }
 	
 	public void removeClient(ClientHandler client) {
 		this.listClient.remove(client);

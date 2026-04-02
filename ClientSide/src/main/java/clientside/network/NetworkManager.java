@@ -17,6 +17,8 @@ public class NetworkManager {
 
     private String nickname;
     private int selectedCharacterId = 0;
+    private int currentRoomId = -1;
+    private boolean isHost = false;
 
     private Consumer<Message> currentMessageHandler;
 
@@ -101,4 +103,9 @@ public class NetworkManager {
     public void setSelectedCharacterId(int id) {
         this.selectedCharacterId = id;
     }
+
+    public int getCurrentRoomId() { return currentRoomId; }
+    public void setCurrentRoomId(int id) { this.currentRoomId = id; }
+    public boolean isHost() { return isHost; }
+    public void setHost(boolean host) { this.isHost = host; }
 }

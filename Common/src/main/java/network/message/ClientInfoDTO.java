@@ -27,8 +27,7 @@ public class ClientInfoDTO {
         return json;
     }
 
-    public int getClientId() {
-    	return clientId;
-    }
-    
+    public int getClientId() { return clientId; }
+    public boolean isReady() { return isReady; }
+    public String getPseudo() { return pseudo; }
 }

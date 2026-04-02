@@ -23,6 +23,7 @@ public class RoomAcceptedJoinMessage implements Message {
 
 	@Override
 	public MessageType getMessageType() {
+
 		return MessageType.ACCEPTED_ROOM_JOIN;
 	}
 

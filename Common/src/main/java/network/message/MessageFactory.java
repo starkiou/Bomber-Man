@@ -19,6 +19,8 @@ public class MessageFactory {
 			return new GetRoomListUpdateMessage();
 		case MOVE:
 			break;
+
+		
 		case ROOM_CREATION:
 			return new RoomCreationMessage(jsonObject);
 
@@ -39,7 +41,8 @@ public class MessageFactory {
 		case REFUSED_ROOM_CREATION:
 			return new RoomRefusedCreationMessage(jsonObject);
 		case ACCEPTED_ROOM_CREATION:
-			return new RoomAcceptedJoinMessage(jsonObject);
+
+			return new RoomAcceptedCreationMessage(jsonObject);
 		case CLIENT_READY_CORRECT_UPDATE:
 			return new ClientCorrectReadyUpdateMessage(jsonObject);
 		case READY_CLIENT:
@@ -48,6 +51,11 @@ public class MessageFactory {
 			return new RoomCorrectQuitMessage(jsonObject);
 		case ROOM_QUIT:
 			return new RoomQuitMessage(jsonObject);
+
+			
+		case LAUNCH_GAME:
+			return new LaunchGameMessage(jsonObject);
+
 		default:
 			break;
 		

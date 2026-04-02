@@ -16,9 +16,10 @@
     <HBox spacing="10" alignment="CENTER">
         <Button text="Rafraîchir" onAction="#onRefreshClick"/>
         <Button text="Créer une Room" onAction="#onCreateRoomClick" style="-fx-background-color: #2ecc71; -fx-text-fill: white;"/>
+        <Button fx:id="joinButton" text="Rejoindre" onAction="#onJoinClick" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
     </HBox>
 
-    <ListView fx:id="roomListView" prefHeight="400.0" prefWidth="600.0" />
+    <ListView fx:id="roomListView" prefHeight="400.0" prefWidth="750.0" />
 
     <Button text="Retour" onAction="#onBackClick" style="-fx-text-fill: red;"/>
 </VBox>
