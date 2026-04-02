@@ -24,6 +24,9 @@ public class ServerManager {
 	private List<ClientHandler> listClient = Collections.synchronizedList(new ArrayList<ClientHandler>());
 	private Map<Integer, RoomThread> roomMap = Collections.synchronizedMap(new HashMap<>());
 	public MessageFactory factory = new MessageFactory();
+	
+	private static ServerManager instance;
+	
 
 	
 	private ServerClientMessageHandler serverMessageHandler;
@@ -36,18 +39,35 @@ public class ServerManager {
 	
 	
 	
-    public ServerManager(int port) {
+    private ServerManager(int port) {
     	System.out.println("Lancement d'un serveur sur le port : "+port);
+    	LogManager.getInstance().info("Démarrage du serveur sur le port "+port);
     	acceptConnectionThread = new AcceptConnectionThread(this, port);
 		acceptConnectionThread.start();
-		this.setServerMessageHandler(new ServerClientMessageHandler(this));
+		this.setServerMessageHandler(new ServerClientMessageHandler());
 		System.out.println("Serveur lancé sur le port : "+port);
     	
 
     }
     
+    public static synchronized ServerManager init(int port) {
+        if (instance == null) {
+            instance = new ServerManager(port);
+        }
+        return instance;
+    }
+    
+    
+    
+    public static ServerManager getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("ServerManager uninitialized !");
+        }
+        return instance;
+    }
+    
     public synchronized void addClientWithSocket(Socket socket) {
-    	ClientHandler clientHandler = new ClientHandler(socket, this, nextClientId);
+    	ClientHandler clientHandler = new ClientHandler(socket, nextClientId);
     	nextClientId++;
     	listClient.add(clientHandler);
     	clientHandler.start();

@@ -109,8 +109,8 @@ public class ServerClientMessageHandler {
 		}
 	}
 	
-	public ServerClientMessageHandler(ServerManager serverManager) {
-		this.serverManager = serverManager;
+	public ServerClientMessageHandler() {
+		this.serverManager = ServerManager.getInstance();
 	}
 
 }

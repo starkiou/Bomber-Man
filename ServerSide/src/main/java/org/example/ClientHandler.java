@@ -41,9 +41,9 @@ public class ClientHandler extends Thread {
 
 
 	
-	public ClientHandler(Socket socket, ServerManager serverManager, int clientId){
+	public ClientHandler(Socket socket, int clientId){
 		this.socket=socket;
-		this.serverManager=serverManager;
+		this.serverManager=ServerManager.getInstance();
 		this.clientId=clientId;
 		
 		
