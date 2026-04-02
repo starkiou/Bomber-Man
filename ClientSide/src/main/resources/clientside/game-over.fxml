@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="CENTER" spacing="20" style="-fx-background-color: rgba(0,0,0,0.85); -fx-background-radius: 20;"
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="clientside.controllers.GameOverController">
+    <padding><Insets行为="40"/></padding>
+
+    <Label fx:id="resultTitle" text="PARTIE TERMINÉE" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
+
+    <Separator prefWidth="200" />
+
+    <GridPane vgap="10" hgap="20" alignment="CENTER">
+        <Label text="Temps survécu :" style="-fx-text-fill: #aaa;" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Label fx:id="timeLabel" text="00:00" style="-fx-text-fill: white; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Adversaires éliminés :" style="-fx-text-fill: #aaa;" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <Label fx:id="killsLabel" text="0" style="-fx-text-fill: white; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    </GridPane>
+
+    <Button text="Retour au Menu principal" onAction="#onReturnMenu"
+            style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold;"/>
+</VBox>

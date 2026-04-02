@@ -3,11 +3,14 @@ package clientside.controllers;
 import clientside.network.NetworkManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane; // Ajouté pour l'affichage de l'overlay
 import model.aiPlayer.AIFactory;
 import model.aiPlayer.Strategy;
 import model.entity.Player;
@@ -17,6 +20,7 @@ import model.game.GameStateListener;
 import model.maze.CellType;
 import model.maze.MazeFactory;
 import network.message.ActionType;
+import java.io.IOException;
 import java.util.*;
 
 public class GameBoardController {
@@ -41,11 +45,12 @@ public class GameBoardController {
     private int currentHeight;
     private ImageView[][] tileViews;
 
+    // Ajouté pour le calcul du score final
+    private long startTime;
+
     @FXML
     public void initialize() {
         loadImages();
-        // On ne lance que startGame, car c'est elle qui va définir les dimensions
-        // et appeler initMap() avec les bonnes tailles.
         startGame();
 
         Platform.runLater(() -> {
@@ -64,10 +69,19 @@ public class GameBoardController {
         int charId = NetworkManager.getInstance().getSelectedCharacterId();
         playerImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/" + charId + "/D_0.png")));
         botImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/1/D_0.png")));
-        // Chargement des 28 images de l'animation de la bombe
+
+        // Chargement des bombes
         for (int i = 0; i < 28; i++) {
             bombIdleFrames[i] = new Image(Objects.requireNonNull(
                     getClass().getResourceAsStream("/sprites/output/bomb/B2_" + i + ".png")));
+        }
+
+        // --- CORRECTION : Chargement des explosions (indispensable) ---
+        for (int t = 0; t < 7; t++) {
+            for (int f = 0; f < 14; f++) {
+                explosionFrames[t][f] = new Image(Objects.requireNonNull(
+                        getClass().getResourceAsStream("/sprites/output/explosions/explosion_" + t + "_" + f + ".png")));
+            }
         }
     }
 
@@ -84,35 +98,28 @@ public class GameBoardController {
     }
 
     private void startGame() {
-        // 1. Déterminer la taille dynamique selon GameConfigController
+        // Initialisation du chrono
+        this.startTime = System.currentTimeMillis();
+
         String selectedSize = GameConfigController.selectedMapSize;
         if (selectedSize != null && selectedSize.contains("Petite")) {
-            currentWidth = 11;
-            currentHeight = 11;
+            currentWidth = 11; currentHeight = 11;
         } else if (selectedSize != null && selectedSize.contains("Grande")) {
-            currentWidth = 19;
-            currentHeight = 15;
+            currentWidth = 19; currentHeight = 15;
         } else {
-            currentWidth = 15;
-            currentHeight = 11;
+            currentWidth = 15; currentHeight = 11;
         }
 
-        // 2. Initialiser le tableau de vues et la grille graphique
         tileViews = new ImageView[currentWidth][currentHeight];
         gameGrid.getChildren().clear();
         initMap();
 
-        // 3. Génération de la logique du labyrinthe
         CellType[][] grid = MazeFactory.createMaze(MazeFactory.Algorithm.EXHAUSTIVE, currentWidth, currentHeight);
-
-        // 4. Création des joueurs
         List<Player> players = new ArrayList<>();
         players.add(new Player(1, 1, 1, 3, 1.0, GameConfigController.selectedBombs));
 
-        // 5. Création du moteur de jeu
         game = new Game(grid, players, GameConfigController.selectedTime);
 
-        // 6. Ajout des bots selon la config
         int nbBots = GameConfigController.selectedBots;
         for (int i = 0; i < nbBots; i++) {
             int startX = (i % 2 == 0) ? currentWidth - 2 : 1;
@@ -120,14 +127,16 @@ public class GameBoardController {
             game.addBot(AIFactory.create(Strategy.SURVIVALIST, i + 2, startX, startY, 3, 1.0, 1));
         }
 
-        // 7. Écouteur de mise à jour
         game.addListener(new GameStateListener() {
             @Override
             public void onGameStateUpdate(GameSnapshot snap) {
                 Platform.runLater(() -> drawMap(snap));
             }
             @Override public void onPlayerDied(int id) {}
-            @Override public void onGameOver(int winnerId) {}
+            @Override
+            public void onGameOver(int winnerId) {
+                Platform.runLater(() -> showGameOverScreen(winnerId));
+            }
         });
 
         game.start();
@@ -144,8 +153,32 @@ public class GameBoardController {
         }
     }
 
+    private void showGameOverScreen(int winnerId) {
+        try {
+            // Remplacez par le vrai chemin de votre fichier FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/game-over.fxml"));
+            Parent gameOverRoot = loader.load();
+
+            GameOverController controller = loader.getController();
+
+            long duration = (System.currentTimeMillis() - startTime) / 1000;
+            String timeStr = String.format("%02d:%02d", duration / 60, duration % 60);
+            String title = (winnerId == 1) ? "VICTOIRE !" : "VOUS AVEZ PERDU !!";
+
+            // On suppose que l'ID 1 est le joueur local
+            controller.setStats(title, timeStr, 0);
+
+            // Affichage par dessus la grille (si le root de la scène est un StackPane)
+            Pane root = (Pane) gameGrid.getScene().getRoot();
+            root.getChildren().add(gameOverRoot);
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors du chargement de l'écran Game Over : " + e.getMessage());
+        }
+    }
+
     private void drawMap(GameSnapshot snap) {
-        // 1. RENDU DE LA GRILLE (SOL, MURS, BRIQUES)
+        // 1. Grille
         CellType[][] grid = snap.getGrid();
         for (int x = 0; x < currentWidth; x++) {
             for (int y = 0; y < currentHeight; y++) {
@@ -156,18 +189,14 @@ public class GameBoardController {
             }
         }
 
-        // 2. RENDU DES BOMBES (ANIMATION)
+        // 2. Bombes
         Set<Integer> activeBombIds = new HashSet<>();
         for (GameSnapshot.BombState b : snap.getBombs()) {
             activeBombIds.add(b.id());
-
-            // Animation simple : on fait défiler les 28 frames toutes les 100ms
             int frame = (int) ((System.currentTimeMillis() / 100) % 28);
-
             ImageView bView = bombViews.computeIfAbsent(b.id(), id -> {
                 ImageView v = new ImageView();
-                v.setFitWidth(TILE_SIZE);
-                v.setFitHeight(TILE_SIZE);
+                v.setFitWidth(TILE_SIZE); v.setFitHeight(TILE_SIZE);
                 gameGrid.getChildren().add(v);
                 return v;
             });
@@ -175,7 +204,6 @@ public class GameBoardController {
             GridPane.setColumnIndex(bView, b.x());
             GridPane.setRowIndex(bView, b.y());
         }
-        // Nettoyage des bombes disparues
         bombViews.keySet().removeIf(id -> {
             if (!activeBombIds.contains(id)) {
                 gameGrid.getChildren().remove(bombViews.get(id));
@@ -184,28 +212,22 @@ public class GameBoardController {
             return false;
         });
 
-        // 3. RENDU DES EXPLOSIONS
+        // 3. Explosions
         Set<String> activeExplosionKeys = new HashSet<>();
         for (GameSnapshot.ExplosionState e : snap.getExplosions()) {
             String key = e.x() + "_" + e.y();
             activeExplosionKeys.add(key);
-
-            // Calcul de la frame d'explosion (on a 14 frames par type)
             int frame = (int) Math.min(e.ageMs() / 50, 13);
-
             ImageView eView = explosionViews.computeIfAbsent(key, k -> {
                 ImageView v = new ImageView();
-                v.setFitWidth(TILE_SIZE);
-                v.setFitHeight(TILE_SIZE);
+                v.setFitWidth(TILE_SIZE); v.setFitHeight(TILE_SIZE);
                 gameGrid.getChildren().add(v);
                 return v;
             });
-            // Utilise le spriteType envoyé par le moteur pour choisir la bonne direction
             eView.setImage(explosionFrames[e.spriteType()][frame]);
             GridPane.setColumnIndex(eView, e.x());
             GridPane.setRowIndex(eView, e.y());
         }
-        // Nettoyage des explosions terminées
         explosionViews.keySet().removeIf(key -> {
             if (!activeExplosionKeys.contains(key)) {
                 gameGrid.getChildren().remove(explosionViews.get(key));
@@ -214,15 +236,15 @@ public class GameBoardController {
             return false;
         });
 
-        // 4. MISE À JOUR DU TIMER
+        // 4. Timer
         long sec = snap.getRemainingSeconds();
         if (timerLabel != null) {
             timerLabel.setText(String.format("%02d:%02d", sec / 60, sec % 60));
         }
 
-        // 5. MISE À JOUR DES JOUEURS ET HUD
+        // 5. Joueurs
         for (GameSnapshot.PlayerState p : snap.getPlayers()) {
-            if (p.id() == 1) { // Ton joueur local
+            if (p.id() == 1) {
                 hpLabel.setText(String.valueOf(p.hp()));
                 bombsLabel.setText(p.currentBombs() + "/" + p.maxBombs());
             }
@@ -233,8 +255,7 @@ public class GameBoardController {
             } else {
                 ImageView v = playerViews.computeIfAbsent(p.id(), id -> {
                     ImageView iv = new ImageView(id == 1 ? playerImg : botImg);
-                    iv.setFitWidth(TILE_SIZE);
-                    iv.setFitHeight(TILE_SIZE);
+                    iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
                     gameGrid.getChildren().add(iv);
                     return iv;
                 });
