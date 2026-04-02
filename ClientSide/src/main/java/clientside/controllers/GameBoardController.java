@@ -113,12 +113,7 @@ public class GameBoardController {
         game = new Game(grid, players, GameConfigController.selectedTime);
 
         // 6. Ajout des bots selon la config
-        int nbBots = GameConfigController.selectedBots;
-        for (int i = 0; i < nbBots; i++) {
-            int startX = (i % 2 == 0) ? currentWidth - 2 : 1;
-            int startY = (i < 2) ? currentHeight - 2 : currentHeight / 2;
-            game.addBot(AIFactory.create(Strategy.SURVIVALIST, i + 2, startX, startY, 3, 1.0, 1));
-        }
+        addBots();
 
         // 7. Écouteur de mise à jour
         game.addListener(new GameStateListener() {
@@ -131,6 +126,28 @@ public class GameBoardController {
         });
 
         game.start();
+    }
+
+    private void addBots() {
+        List<Strategy> strategies = GameConfigController.selectedStrategies;
+
+        // Positions de spawn prédéfinies pour chaque bot (évite les chevauchements)
+        int[][] spawnPositions = {
+                { currentWidth - 2, currentHeight - 2 }, // bot 0 : bas-droit
+                { 1,                currentHeight - 2 }, // bot 1 : bas-gauche
+                { currentWidth - 2, 1                }, // bot 2 : haut-droit
+                { currentWidth / 2, currentHeight - 2 }, // bot 3 : bas-milieu
+        };
+
+        for (int i = 0; i < strategies.size(); i++) {
+            Strategy strategy = strategies.get(i);
+            int botId = i + 2; // les IDs bots commencent à 2 (1 = joueur local)
+            int[] pos = spawnPositions[Math.min(i, spawnPositions.length - 1)];
+
+            game.addBot(AIFactory.create(strategy, botId, pos[0], pos[1],3, 1.0, GameConfigController.selectedBombs));
+
+            System.out.println(" Bot " + botId + " ajouté — stratégie : " + strategy + " en (" + pos[0] + ", " + pos[1] + ")");
+        }
     }
 
     private void handleKeyPress(KeyEvent event) {

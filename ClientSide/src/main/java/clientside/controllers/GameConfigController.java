@@ -3,10 +3,14 @@ package clientside.controllers;
 import clientside.SceneManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import model.aiPlayer.Strategy;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameConfigController {
 
@@ -15,6 +19,7 @@ public class GameConfigController {
     @FXML private ComboBox<String> difficultyBox;
     @FXML private Spinner<Integer> bombCountSpinner;
     @FXML private Spinner<Integer> timeSpinner;
+    @FXML private VBox botStrategyContainer;
 
     @FXML private Button startButton;
     @FXML private Button backButton;
@@ -24,7 +29,21 @@ public class GameConfigController {
     public static int selectedTime = 120;
     public static int selectedBots = 1;
     public static String selectedMapSize = "Moyenne (15x15)";
-    public static String selectedDifficulty = "Normal";
+    public static List<Strategy> selectedStrategies = new ArrayList<>();
+
+    private static final String[] STRATEGY_LABELS = {
+            "Agressif",
+            "Survivant️",
+            "Tactique"
+    };
+
+    private final List<ComboBox<String>> strategyBoxes = new ArrayList<>();
+
+    private static final Strategy[] STRATEGY_VALUES = {
+            Strategy.AGGRESSIVE,
+            Strategy.SURVIVALIST,
+            Strategy.TACTICAL
+    };
 
     @FXML
     public void initialize() {
@@ -46,6 +65,61 @@ public class GameConfigController {
         // Permet de taper directement au clavier dans les champs
         bombCountSpinner.setEditable(true);
         timeSpinner.setEditable(true);
+
+        // Construire les sélecteurs pour la valeur initiale du spinner (1 bot)
+        rebuildStrategySelectors(botCountSpinner.getValue());
+
+        // Reconstruire à chaque changement
+        botCountSpinner.valueProperty().addListener(
+                (obs, oldVal, newVal) -> rebuildStrategySelectors(newVal)
+        );
+    }
+
+    private void rebuildStrategySelectors(int botCount) {
+        botStrategyContainer.getChildren().clear();
+        strategyBoxes.clear();
+
+        for (int i = 0; i < botCount; i++) {
+            // Label
+            Label label = new Label("Bot " + (i + 1) + " :");
+            label.setMinWidth(60);
+
+            // ComboBox
+            ComboBox<String> box = new ComboBox<>();
+            box.getItems().addAll(STRATEGY_LABELS);
+            box.setValue(STRATEGY_LABELS[1]); // Survivant par défaut
+            box.setPrefWidth(160);
+
+            strategyBoxes.add(box);
+
+            // Ligne horizontale
+            HBox row = new HBox(10, label, box);
+            row.setPadding(new Insets(2, 0, 2, 0));
+            botStrategyContainer.getChildren().add(row);
+        }
+
+        // Si 0 bot, on affiche un message discret
+        if (botCount == 0) {
+            botStrategyContainer.getChildren().add(
+                    new Label("Aucun bot dans cette partie.")
+            );
+        }
+    }
+
+    private List<Strategy> readSelectedStrategies() {
+        List<Strategy> result = new ArrayList<>();
+        for (ComboBox<String> box : strategyBoxes) {
+            String label = box.getValue();
+            Strategy strategy = Strategy.SURVIVALIST; // fallback
+            for (int i = 0; i < STRATEGY_LABELS.length; i++) {
+                if (STRATEGY_LABELS[i].equals(label)) {
+                    strategy = STRATEGY_VALUES[i];
+                    break;
+                }
+            }
+            result.add(strategy);
+        }
+        return result;
     }
 
     @FXML
@@ -55,7 +129,7 @@ public class GameConfigController {
         selectedBombs = bombCountSpinner.getValue();
         selectedTime = timeSpinner.getValue();
         selectedMapSize = mapSizeBox.getValue();
-        selectedDifficulty = difficultyBox.getValue();
+        selectedStrategies = readSelectedStrategies();
 
         System.out.println("🚀 Config : Map=" + selectedMapSize + " | Bots=" + selectedBots + " | Time=" + selectedTime + "s");
 
