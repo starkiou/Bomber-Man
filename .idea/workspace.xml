@@ -6,9 +6,19 @@
   <component name="ChangeListManager">
     <list default="true" id="c83188f1-a693-4da3-a589-f803193e0ece" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameBoardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameBoardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/model/game/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/model/game/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/model/game/GameSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/model/game/GameSnapshot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/Bomberman.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/Bomberman.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/SceneManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/SceneManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/character-selection.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-board.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-conf-view.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-config.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-over.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-over.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/gamemode-view.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/home-view.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/lobby-list.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/login-view.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/room-creation-config.fxml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/room-view.fxml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,25 +56,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Launcher.executor&quot;: &quot;Run&quot;,
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Application.TestServer.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Merging player-custom&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/milos/Desktop/SAE/sae_s4_groupe_b/ClientSide/src/main/java/clientside/controllers&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Bomberman.executor": "Run",
+    "Application.Launcher.executor": "Run",
+    "Application.Main.executor": "Run",
+    "Application.TestServer.executor": "Run",
+    "git-widget-placeholder": "player-custom",
+    "last_opened_file_path": "C:/Users/milos/Desktop/SAE/sae_s4_groupe_b/ClientSide/src/main/resources",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\milos\Desktop\SAE\sae_s4_groupe_b\ClientSide\src\main\resources" />
       <recent name="C:\Users\milos\Desktop\SAE\sae_s4_groupe_b\ClientSide\src\main\java\clientside\controllers" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\milos\Desktop\SAE\sae_s4_groupe_b\ClientSide\src\main\resources\clientside" />
+      <recent name="C:\Users\milos\Desktop\SAE\sae_s4_groupe_b\ClientSide\src\main\resources" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -92,7 +105,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775118266407</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003">
+      <option name="closed" value="true" />
+      <created>1775118806389</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1775118806389</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -108,6 +129,11 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Merge branch 'client-interface-player-ui' into player-custom&#10;&#10;# Conflicts:&#10;#&#9;ClientSide/src/main/java/clientside/controllers/GameBoardController.java&#10;#&#9;ServerSide/src/main/java/org/example/ServerClientMessageHandler.java" />
+    <MESSAGE value="Merge branch 'client-interface-animation' into player-custom&#10;&#10;# Conflicts:&#10;#&#9;ClientSide/src/main/java/clientside/controllers/GameBoardController.java" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge branch 'client-interface-animation' into player-custom&#10;&#10;# Conflicts:&#10;#&#9;ClientSide/src/main/java/clientside/controllers/GameBoardController.java" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -4,40 +4,46 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx"
+<VBox alignment="CENTER" spacing="22.0"
+      xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="clientside.controllers.GameConfigController"
-      prefHeight="600.0" prefWidth="800.0">
+      maxWidth="Infinity" maxHeight="Infinity"
+      stylesheets="@/style.css"
+      style="-fx-background-color: #faf8f5;">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="80.0" bottom="80.0" left="360.0" right="360.0"/>
     </padding>
 
-    <Label text="Configuration de la Partie" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+    <Label text="Configuration de la partie" styleClass="title-section"/>
 
-    <HBox alignment="CENTER" spacing="10">
-        <Label text="Nombre de joueurs :"/>
-        <Spinner fx:id="playerCountSpinner" min="2" max="4" initialValue="2" prefWidth="80"/>
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label text="Nombre de joueurs :" styleClass="label" minWidth="180"/>
+        <Spinner fx:id="playerCountSpinner" min="2" max="4" initialValue="2"
+                 maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
     </HBox>
 
-    <HBox alignment="CENTER" spacing="10">
-        <Label text="Nombre de bots :"/>
-        <Spinner fx:id="botCountSpinner" min="0" max="3" initialValue="0" prefWidth="80"/>
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label text="Nombre de bots :" styleClass="label" minWidth="180"/>
+        <Spinner fx:id="botCountSpinner" min="0" max="3" initialValue="0"
+                 maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
     </HBox>
 
-    <HBox alignment="CENTER" spacing="10">
-        <Label text="Difficulté des bots :"/>
-        <ComboBox fx:id="difficultySelector" prefWidth="150"/>
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label text="Difficulté des bots :" styleClass="label" minWidth="180"/>
+        <ComboBox fx:id="difficultySelector" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
     </HBox>
 
-    <HBox alignment="CENTER" spacing="10">
-        <Label text="Choix de la Map :"/>
-        <ComboBox fx:id="mapSelector" prefWidth="150"/>
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label text="Carte :" styleClass="label" minWidth="180"/>
+        <ComboBox fx:id="mapSelector" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
     </HBox>
 
-    <Button text="Lancer la partie" onAction="#onStartButtonClick"
-            style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px;"/>
-
-    <Button text="Retour" onAction="#onBackButtonClick"/>
+    <HBox alignment="CENTER" spacing="14">
+        <Button text="Retour" onAction="#onBackButtonClick" styleClass="button-secondary"/>
+        <Button text="Lancer la partie" onAction="#onStartButtonClick"
+                styleClass="button-primary" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+    </HBox>
 
 </VBox>
