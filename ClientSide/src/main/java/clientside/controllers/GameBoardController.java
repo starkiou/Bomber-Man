@@ -178,12 +178,15 @@ public class GameBoardController {
             boolean foundMe = false;
 
             for (int i = 0; i < roomPlayers.size() && spawnIdx < spawnPos.length; i++) {
-                int pid   = i + 1;
+                // CORRECTION : On utilise le vrai ID du serveur au lieu de 1, 2, 3, 4
+                int pid = roomPlayers.get(i).getClientId();
+
                 int[] pos = spawnPos[spawnIdx++];
                 players.add(new Player(pid, pos[0], pos[1], 3, 1.0, 1));
 
                 playerSkinMap.put(pid, roomPlayers.get(i).getCharacterId());
 
+                // Le joueur local récupère son VRAI ID serveur
                 if (myNick != null && roomPlayers.get(i).getPseudo() != null &&
                         myNick.trim().equalsIgnoreCase(roomPlayers.get(i).getPseudo().trim())) {
                     myPlayerId = pid;
