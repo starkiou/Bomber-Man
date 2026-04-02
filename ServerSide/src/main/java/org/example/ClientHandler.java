@@ -180,4 +180,7 @@ public class ClientHandler extends Thread {
 	}
 
 
+    public int getCharacterId() {
+        return this.skinId;
+    }
 }

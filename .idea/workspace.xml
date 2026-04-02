@@ -6,7 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="c83188f1-a693-4da3-a589-f803193e0ece" name="Changes" comment="Merge branch 'player-custom' into experimental&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;ClientSide/src/main/java/clientside/controllers/GameBoardController.java&#10;#&#9;ClientSide/src/main/resources/clientside/game-board.fxml&#10;#&#9;ClientSide/src/main/resources/clientside/game-conf-view.fxml&#10;#&#9;ClientSide/src/main/resources/clientside/game-config.fxml&#10;#&#9;ClientSide/src/main/resources/clientside/game-over.fxml&#10;#&#9;Common/src/main/java/model/game/Game.java&#10;#&#9;Common/src/main/java/model/game/GameSnapshot.java&#10;#&#9;ServerSide/src/main/java/org/example/ClientHandler.java&#10;#&#9;ServerSide/src/main/java/org/example/ServerClientMessageHandler.java&#10;#&#9;ServerSide/src/main/java/org/example/ServerManager.java&#10;#&#9;ServerSide/src/main/java/org/example/TestServer.java">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameConfigController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameConfigController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameBoardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameBoardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/ClientInfoDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/ClientInfoDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ClientHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ClientHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/RoomThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/RoomThread.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
