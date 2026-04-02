@@ -46,8 +46,8 @@
     </HBox>
 
     <VBox alignment="CENTER" spacing="5">
-        <Label text="Niveau de difficulté :" style="-fx-font-weight: bold;" />
-        <ComboBox fx:id="difficultyBox" prefWidth="150.0" />
+        <Label text="Stratégie des bots :" style="-fx-font-weight: bold;" />
+        <VBox fx:id="botStrategyContainer" spacing="8" />
     </VBox>
 
     <Separator prefWidth="200.0" />
