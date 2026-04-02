@@ -40,31 +40,20 @@ public class GameBoardController {
     private static final int DIR_LEFT = 2;
     private static final int DIR_RIGHT = 3;
 
-    // Décors
-    private int currentWidth, currentHeight;
-    private ImageView[][] tileViews;
     private Image wallImg, floorImg, brickImg;
-
-    // Entités & Animations
-    private final Map<Integer, PlayerVisual> playerVisuals = new HashMap<>();
     private final Image[][] playerSprites = new Image[4][3];
     private final Image[][] botSprites = new Image[4][3];
+    private final Image[] bombIdleFrames = new Image[28];
+    private final Image[][] explosionFrames = new Image[7][14];
 
-    // Bombes & Explosions
-    private static final int BOMB_IDLE_FRAMES = 28;
-    private static final int EXPLOSION_SPRITE_TYPES = 7;
-    private static final int EXPLOSION_FRAMES = 14;
-    private static final long EXPLOSION_ANIM_MS = 700;
-    private static final long BOMB_ANIM_TOTAL_MS = 3000;
-
-    private final Image[] bombIdleFrames = new Image[BOMB_IDLE_FRAMES];
-    private final Image[][] explosionFrames = new Image[EXPLOSION_SPRITE_TYPES][EXPLOSION_FRAMES];
-
+    private final Map<Integer, PlayerVisual> playerVisuals = new HashMap<>();
     private final Map<Integer, ImageView> bombViews = new HashMap<>();
     private final Map<Integer, Long> bombFirstSeen = new HashMap<>();
     private final Map<String, ImageView> explosionViews = new HashMap<>();
 
     private Game game;
+    private int currentWidth, currentHeight;
+    private ImageView[][] tileViews;
     private long startTime;
 
     // --- CLASSE UTILITAIRE POUR L'ANIMATION ---
@@ -88,7 +77,7 @@ public class GameBoardController {
                 this.view.setImage(this.sprites[currentDir][0]);
             });
 
-            gameGrid.add(view, 0, 0); // Placé en 0,0 puis translaté
+            gameGrid.add(view, 0, 0); // Placé en 0,0 puis translaté en pixels
         }
     }
 
@@ -109,41 +98,22 @@ public class GameBoardController {
         floorImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/ground/ground_06.png")));
         brickImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/walls/block_08.png")));
 
-        Number myId = NetworkManager.getInstance().getSelectedCharacterId();
+        Number charId = NetworkManager.getInstance().getSelectedCharacterId();
         String botId = String.valueOf(ThreadLocalRandom.current().nextInt(1, 35));
-        String[] dirs = {"S", "N", "W", "E"};
+        String[] dirs = {"D", "N", "W", "E"};
 
         for (int d = 0; d < 4; d++) {
             for (int f = 0; f < 3; f++) {
-                playerSprites[d][f] = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/" + myId + "/" + dirs[d] + "_" + f + ".png")));
+                playerSprites[d][f] = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/" + charId + "/" + dirs[d] + "_" + f + ".png")));
                 botSprites[d][f] = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/" + botId + "/" + dirs[d] + "_" + f + ".png")));
             }
         }
 
-        for (int i = 0; i < BOMB_IDLE_FRAMES; i++)
+        for (int i = 0; i < 28; i++)
             bombIdleFrames[i] = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/bomb/B2_" + i + ".png")));
-
-        for (int t = 0; t < EXPLOSION_SPRITE_TYPES; t++)
-            for (int f = 0; f < EXPLOSION_FRAMES; f++)
+        for (int t = 0; t < 7; t++)
+            for (int f = 0; f < 14; f++)
                 explosionFrames[t][f] = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/explosions/explosion_" + t + "_" + f + ".png")));
-    }
-
-    private void configureDimensions() {
-        String size = GameConfigController.selectedMapSize;
-        if (size != null && size.contains("Petite")) { currentWidth = 11; currentHeight = 11; }
-        else if (size != null && size.contains("Grande")) { currentWidth = 19; currentHeight = 15; }
-        else { currentWidth = 15; currentHeight = 11; }
-    }
-
-    private void initBackgroundGrid() {
-        for (int x = 0; x < currentWidth; x++) {
-            for (int y = 0; y < currentHeight; y++) {
-                ImageView iv = new ImageView();
-                iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
-                tileViews[x][y] = iv;
-                gameGrid.add(iv, x, y);
-            }
-        }
     }
 
     private void startGame() {
@@ -171,6 +141,24 @@ public class GameBoardController {
         game.start();
     }
 
+    private void configureDimensions() {
+        String size = GameConfigController.selectedMapSize;
+        if (size != null && size.contains("Petite")) { currentWidth = 11; currentHeight = 11; }
+        else if (size != null && size.contains("Grande")) { currentWidth = 19; currentHeight = 15; }
+        else { currentWidth = 15; currentHeight = 11; }
+    }
+
+    private void initBackgroundGrid() {
+        for (int x = 0; x < currentWidth; x++) {
+            for (int y = 0; y < currentHeight; y++) {
+                ImageView iv = new ImageView();
+                iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
+                tileViews[x][y] = iv;
+                gameGrid.add(iv, x, y);
+            }
+        }
+    }
+
     private void showGameOverScreen(int winnerId) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/clientside/game-over.fxml"));
@@ -186,37 +174,54 @@ public class GameBoardController {
         } catch (IOException e) { e.printStackTrace(); }
     }
 
-    private void handleKeyPress(KeyEvent event) {
-        if (game == null) return;
-        switch (event.getCode()) {
-            case Z, UP -> game.handleAction(1, ActionType.MOVE_UP);
-            case S, DOWN -> game.handleAction(1, ActionType.MOVE_DOWN);
-            case Q, LEFT -> game.handleAction(1, ActionType.MOVE_LEFT);
-            case D, RIGHT -> game.handleAction(1, ActionType.MOVE_RIGHT);
-            case SPACE -> game.handleAction(1, ActionType.PLACE_BOMB);
-            default -> {}
-        }
-    }
-
     private void drawMap(GameSnapshot snap) {
         // 1. Grille statique
-        CellType[][] currentGrid = snap.getGrid();
-        for (int x = 0; x < currentWidth; x++) {
-            for (int y = 0; y < currentHeight; y++) {
-                if (currentGrid[y][x] == CellType.WALL) tileViews[x][y].setImage(wallImg);
-                else if (currentGrid[y][x] == CellType.BRICK) tileViews[x][y].setImage(brickImg);
-                else tileViews[x][y].setImage(floorImg);
-            }
-        }
+        CellType[][] grid = snap.getGrid();
+        for (int x = 0; x < currentWidth; x++)
+            for (int y = 0; y < currentHeight; y++)
+                tileViews[x][y].setImage(grid[y][x] == CellType.WALL ? wallImg : (grid[y][x] == CellType.BRICK ? brickImg : floorImg));
 
-        // 2. HUD
-        if(snap.getRemainingSeconds() >= 0) {
-            timerLabel.setText(String.format("%02d:%02d", snap.getRemainingSeconds() / 60, snap.getRemainingSeconds() % 60));
-        }
+        // 2. Objets dynamiques (Bombes & Explosions)
+        renderDynamicObjects(snap);
 
-        // 3. Joueurs & Animations
+        // 3. HUD & Joueurs
+        timerLabel.setText(String.format("%02d:%02d", snap.getRemainingSeconds() / 60, snap.getRemainingSeconds() % 60));
+        renderPlayers(snap);
+    }
+
+    private void renderDynamicObjects(GameSnapshot snap) {
+        // Bombes
+        Set<Integer> activeBombs = new HashSet<>();
+        for (var b : snap.getBombs()) {
+            activeBombs.add(b.id());
+            long firstSeen = bombFirstSeen.computeIfAbsent(b.id(), id -> System.currentTimeMillis());
+            int bombFrame = (int) ((System.currentTimeMillis() - firstSeen) / 100 % 28);
+            ImageView v = bombViews.computeIfAbsent(b.id(), id -> {
+                ImageView iv = new ImageView(); iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
+                gameGrid.getChildren().add(iv); return iv;
+            });
+            v.setImage(bombIdleFrames[bombFrame]);
+            GridPane.setColumnIndex(v, b.x()); GridPane.setRowIndex(v, b.y());
+        }
+        bombViews.keySet().removeIf(id -> { if(!activeBombs.contains(id)) { gameGrid.getChildren().remove(bombViews.get(id)); bombFirstSeen.remove(id); return true; } return false; });
+
+        // Explosions
+        Set<String> activeExplosions = new HashSet<>();
+        for (var e : snap.getExplosions()) {
+            String key = e.x() + "_" + e.y(); activeExplosions.add(key);
+            ImageView v = explosionViews.computeIfAbsent(key, k -> {
+                ImageView iv = new ImageView(); iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
+                gameGrid.getChildren().add(iv); return iv;
+            });
+            v.setImage(explosionFrames[e.spriteType()][(int) Math.min(e.ageMs() / 50, 13)]);
+            GridPane.setColumnIndex(v, e.x()); GridPane.setRowIndex(v, e.y());
+        }
+        explosionViews.keySet().removeIf(k -> { if(!activeExplosions.contains(k)) { gameGrid.getChildren().remove(explosionViews.get(k)); return true; } return false; });
+    }
+
+    private void renderPlayers(GameSnapshot snap) {
         Set<Integer> aliveIds = new HashSet<>();
-        for (GameSnapshot.PlayerState p : snap.getPlayers()) {
+        for (var p : snap.getPlayers()) {
             aliveIds.add(p.id());
 
             // MAJ HUD du joueur local
@@ -225,11 +230,7 @@ public class GameBoardController {
                 bombsLabel.setText(p.currentBombs() + "/" + p.maxBombs());
             }
 
-            if (p.isDead()) {
-                PlayerVisual deadPV = playerVisuals.remove(p.id());
-                if (deadPV != null) gameGrid.getChildren().remove(deadPV.view);
-                continue;
-            }
+            if (p.isDead()) continue;
 
             PlayerVisual pv = playerVisuals.computeIfAbsent(p.id(), id -> new PlayerVisual(id == 1 ? playerSprites : botSprites));
 
@@ -257,76 +258,32 @@ public class GameBoardController {
                 pv.transition.play();
             }
 
+            // Alternance des sprites de marche pendant le mouvement
             if (pv.isMoving) {
                 int frame = (int) ((System.currentTimeMillis() / 100) % 2) + 1;
                 pv.view.setImage(pv.sprites[pv.currentDir][frame]);
             }
         }
 
-        // 4. Bombes (Position absolue)
-        long now = System.currentTimeMillis();
-        Set<Integer> liveBombIds = new HashSet<>();
-        for (GameSnapshot.BombState b : snap.getBombs()) {
-            liveBombIds.add(b.id());
-            bombFirstSeen.computeIfAbsent(b.id(), id -> now);
-            long elapsed = now - bombFirstSeen.get(b.id());
-            int frame = (int) ((elapsed * BOMB_IDLE_FRAMES / BOMB_ANIM_TOTAL_MS) % BOMB_IDLE_FRAMES);
-
-            ImageView bView = bombViews.computeIfAbsent(b.id(), id -> {
-                ImageView v = new ImageView(); v.setFitWidth(TILE_SIZE); v.setFitHeight(TILE_SIZE);
-                gameGrid.getChildren().add(v); return v;
-            });
-            bView.setImage(bombIdleFrames[frame]);
-            bView.setTranslateX(b.x() * TILE_SIZE);
-            bView.setTranslateY(b.y() * TILE_SIZE);
-        }
-
-        // 5. Explosions (Position absolue)
-        Set<String> liveExplosionKeys = new HashSet<>();
-        for (GameSnapshot.ExplosionState e : snap.getExplosions()) {
-            String key = e.x() + "_" + e.y();
-            liveExplosionKeys.add(key);
-            int frame = (int) Math.min(e.ageMs() * EXPLOSION_FRAMES / EXPLOSION_ANIM_MS, EXPLOSION_FRAMES - 1);
-            int type  = Math.min(Math.max(e.spriteType(), 0), EXPLOSION_SPRITE_TYPES - 1);
-
-            ImageView eView = explosionViews.computeIfAbsent(key, k -> {
-                ImageView v = new ImageView(); v.setFitWidth(TILE_SIZE); v.setFitHeight(TILE_SIZE);
-                gameGrid.getChildren().add(v); return v;
-            });
-            eView.setImage(explosionFrames[type][frame]);
-            eView.setTranslateX(e.x() * TILE_SIZE);
-            eView.setTranslateY(e.y() * TILE_SIZE);
-        }
-
-        // --------------------------------------------------------
-        // 6. NETTOYAGE FINAUX (Maintenant que les listes existent)
-        // --------------------------------------------------------
-
+        // Nettoyage des joueurs morts/déconnectés
         playerVisuals.keySet().removeIf(id -> {
             if(!aliveIds.contains(id)) {
-                if(playerVisuals.get(id) != null) {
-                    gameGrid.getChildren().remove(playerVisuals.get(id).view);
-                }
+                if(playerVisuals.get(id) != null) gameGrid.getChildren().remove(playerVisuals.get(id).view);
                 return true;
             }
             return false;
         });
+    }
 
-        bombViews.keySet().removeIf(id -> {
-            if(!liveBombIds.contains(id)) {
-                gameGrid.getChildren().remove(bombViews.get(id));
-                bombFirstSeen.remove(id);
-                return true;
-            }
-            return false;
-        });
-
-        explosionViews.keySet().removeIf(k -> {
-            if(!liveExplosionKeys.contains(k)) {
-                gameGrid.getChildren().remove(explosionViews.get(k));
-                return true;
-            }
-            return false;
-        });
+    private void handleKeyPress(KeyEvent event) {
+        if (game == null) return;
+        switch (event.getCode()) {
+            case Z, UP -> game.handleAction(1, ActionType.MOVE_UP);
+            case S, DOWN -> game.handleAction(1, ActionType.MOVE_DOWN);
+            case Q, LEFT -> game.handleAction(1, ActionType.MOVE_LEFT);
+            case D, RIGHT -> game.handleAction(1, ActionType.MOVE_RIGHT);
+            case SPACE -> game.handleAction(1, ActionType.PLACE_BOMB);
+            default -> {}
+        }
     }
 }

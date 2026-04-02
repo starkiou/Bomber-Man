@@ -5,29 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c83188f1-a693-4da3-a589-f803193e0ece" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameOverController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-over.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameBoardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameBoardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameConfigController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/GameConfigController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/controllers/LoginController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/network/NetworkListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/network/NetworkListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/network/NetworkManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/java/clientside/network/NetworkManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-board.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-board.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-config.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/ClientSide/src/main/resources/clientside/game-config.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Common/src/main/java/model/game/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/model/game/Game.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Common/src/main/java/model/game/GameSnapshot.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/model/game/GameSnapshot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/model/maze/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/model/maze/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/GameStateMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/GameStateMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/GetRoomListUpdateMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/GetRoomListUpdateMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/MessageSerializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/MessageSerializer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomListUpdateMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomListUpdateMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomStatusMessage.java" beforeDir="false" afterPath="$PROJECT_DIR$/Common/src/main/java/network/message/RoomStatusMessage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ClientHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ClientHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/RoomThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/RoomThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerClientMessageHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerClientMessageHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/ServerManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/TestServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/ServerSide/src/main/java/org/example/TestServer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,19 +46,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Launcher.executor": "Run",
-    "Application.Main.executor": "Run",
-    "Application.TestServer.executor": "Run",
-    "git-widget-placeholder": "Merging player-custom",
-    "last_opened_file_path": "C:/Users/milos/Desktop/SAE/sae_s4_groupe_b/ClientSide/src/main/java/clientside/controllers",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Launcher.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Application.TestServer.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Merging player-custom&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/milos/Desktop/SAE/sae_s4_groupe_b/ClientSide/src/main/java/clientside/controllers&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\milos\Desktop\SAE\sae_s4_groupe_b\ClientSide\src\main\java\clientside\controllers" />
@@ -103,7 +84,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775052436495</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002">
+      <option name="closed" value="true" />
+      <created>1775118266407</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1775118266407</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

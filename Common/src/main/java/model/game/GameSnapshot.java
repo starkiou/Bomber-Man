@@ -42,8 +42,8 @@ public final class GameSnapshot {
     /**
      * One blast cell currently animating on screen.
      * spriteType encodes which explosion_Z_F sprite to use:
-     *   0 = centre, 1 = H-mid, 2 = V-mid,
-     *   3 = top-end, 4 = bottom-end, 5 = right-end, 6 = left-end
+     *   0 = centre, 1 = left-end, 2 = right-end,
+     *   3 = top-end, 4 = bottom-end, 5 = H-mid, 6 = V-mid
      */
     public record ExplosionState(int x, int y, long ageMs, int spriteType) {}
 
