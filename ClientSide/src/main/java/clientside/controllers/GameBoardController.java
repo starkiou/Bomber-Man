@@ -32,6 +32,11 @@ public class GameBoardController {
     private Map<Integer, ImageView> playerViews = new HashMap<>();
     private Game game;
 
+    private Image[] bombIdleFrames = new Image[28];
+    private Image[][] explosionFrames = new Image[7][14];
+    private Map<Integer, ImageView> bombViews = new HashMap<>();
+    private Map<String, ImageView> explosionViews = new HashMap<>();
+
     private int currentWidth;
     private int currentHeight;
     private ImageView[][] tileViews;
@@ -59,6 +64,11 @@ public class GameBoardController {
         int charId = NetworkManager.getInstance().getSelectedCharacterId();
         playerImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/" + charId + "/D_0.png")));
         botImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sprites/output/characters/1/D_0.png")));
+        // Chargement des 28 images de l'animation de la bombe
+        for (int i = 0; i < 28; i++) {
+            bombIdleFrames[i] = new Image(Objects.requireNonNull(
+                    getClass().getResourceAsStream("/sprites/output/bomb/B2_" + i + ".png")));
+        }
     }
 
     private void initMap() {
@@ -135,7 +145,7 @@ public class GameBoardController {
     }
 
     private void drawMap(GameSnapshot snap) {
-        // Rendu de la grille (Dynamique sur currentWidth/Height)
+        // 1. RENDU DE LA GRILLE (SOL, MURS, BRIQUES)
         CellType[][] grid = snap.getGrid();
         for (int x = 0; x < currentWidth; x++) {
             for (int y = 0; y < currentHeight; y++) {
@@ -146,15 +156,73 @@ public class GameBoardController {
             }
         }
 
-        // Mise à jour du Timer
+        // 2. RENDU DES BOMBES (ANIMATION)
+        Set<Integer> activeBombIds = new HashSet<>();
+        for (GameSnapshot.BombState b : snap.getBombs()) {
+            activeBombIds.add(b.id());
+
+            // Animation simple : on fait défiler les 28 frames toutes les 100ms
+            int frame = (int) ((System.currentTimeMillis() / 100) % 28);
+
+            ImageView bView = bombViews.computeIfAbsent(b.id(), id -> {
+                ImageView v = new ImageView();
+                v.setFitWidth(TILE_SIZE);
+                v.setFitHeight(TILE_SIZE);
+                gameGrid.getChildren().add(v);
+                return v;
+            });
+            bView.setImage(bombIdleFrames[frame]);
+            GridPane.setColumnIndex(bView, b.x());
+            GridPane.setRowIndex(bView, b.y());
+        }
+        // Nettoyage des bombes disparues
+        bombViews.keySet().removeIf(id -> {
+            if (!activeBombIds.contains(id)) {
+                gameGrid.getChildren().remove(bombViews.get(id));
+                return true;
+            }
+            return false;
+        });
+
+        // 3. RENDU DES EXPLOSIONS
+        Set<String> activeExplosionKeys = new HashSet<>();
+        for (GameSnapshot.ExplosionState e : snap.getExplosions()) {
+            String key = e.x() + "_" + e.y();
+            activeExplosionKeys.add(key);
+
+            // Calcul de la frame d'explosion (on a 14 frames par type)
+            int frame = (int) Math.min(e.ageMs() / 50, 13);
+
+            ImageView eView = explosionViews.computeIfAbsent(key, k -> {
+                ImageView v = new ImageView();
+                v.setFitWidth(TILE_SIZE);
+                v.setFitHeight(TILE_SIZE);
+                gameGrid.getChildren().add(v);
+                return v;
+            });
+            // Utilise le spriteType envoyé par le moteur pour choisir la bonne direction
+            eView.setImage(explosionFrames[e.spriteType()][frame]);
+            GridPane.setColumnIndex(eView, e.x());
+            GridPane.setRowIndex(eView, e.y());
+        }
+        // Nettoyage des explosions terminées
+        explosionViews.keySet().removeIf(key -> {
+            if (!activeExplosionKeys.contains(key)) {
+                gameGrid.getChildren().remove(explosionViews.get(key));
+                return true;
+            }
+            return false;
+        });
+
+        // 4. MISE À JOUR DU TIMER
         long sec = snap.getRemainingSeconds();
         if (timerLabel != null) {
             timerLabel.setText(String.format("%02d:%02d", sec / 60, sec % 60));
         }
 
-        // Mise à jour des Joueurs
+        // 5. MISE À JOUR DES JOUEURS ET HUD
         for (GameSnapshot.PlayerState p : snap.getPlayers()) {
-            if (p.id() == 1) {
+            if (p.id() == 1) { // Ton joueur local
                 hpLabel.setText(String.valueOf(p.hp()));
                 bombsLabel.setText(p.currentBombs() + "/" + p.maxBombs());
             }
