@@ -39,9 +39,32 @@
                 <consoleOutput>true</consoleOutput>
                 <failsOnError>true</failsOnError>
                 <failOnViolation>true</failOnViolation>
-                <!-- Ignore les fichiers générés -->
                 <excludes>**/module-info.java</excludes>
             </configuration>
+            </plugin>
+            <plugin>
+                <groupId>de.elnarion.maven</groupId>
+                <artifactId>plantuml-generator-maven-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>generate-uml</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+
+                            <scanPackages>
+                                <scanPackage>model</scanPackage>
+                                <scanPackage>clientside</scanPackage>
+                            </scanPackages>
+
+                            <outputFilename>architecture-serveur.puml</outputFilename>
+                            <outputDirectory>${project.build.directory}/plantuml</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
