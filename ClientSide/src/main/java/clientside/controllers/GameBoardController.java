@@ -46,14 +46,17 @@ public class GameBoardController {
 
     private Image wallImg, floorImg, brickImg;
     private final Image[] bombIdleFrames = new Image[28];
+    private final Image[][] explosionFrames  = new Image[7][14];
 
     // Caches et Mappings
     private final Map<Integer, Image[][]> entitySpritesCache = new HashMap<>();
     private final Map<Integer, Integer>   playerSkinMap      = new HashMap<>();
+    private static final int[] EXPLO_MAP = {0, 1, 3, 4, 5, 2, 6};
 
     private final Map<Integer, PlayerVisual> playerVisuals = new HashMap<>();
     private final Map<Integer, ImageView>    bombViews     = new HashMap<>();
     private final Map<Integer, Long>         bombFirstSeen = new HashMap<>();
+    private final Map<String,  ImageView>    explosionViews = new HashMap<>();
 
     private Game    game;
     private int     currentWidth, currentHeight;
@@ -123,6 +126,12 @@ public class GameBoardController {
 
         for (int i = 0; i < 28; i++) {
             bombIdleFrames[i] = img("/sprites/output/bomb/B2_" + i + ".png");
+        }
+
+        for (int t = 0; t < 7; t++) {
+            for (int f = 0; f < 14; f++) {
+                explosionFrames[t][f] = img("/sprites/output/explosions/explosion_" + t + "_" + f + ".png");
+            }
         }
     }
 
@@ -194,15 +203,6 @@ public class GameBoardController {
                     foundMe = true;
                 }
             }
-
-            // Optionnel : si le serveur te donne l'ID directement
-            // Attention : il doit correspondre à l'un des 'pid' insérés au-dessus !
-            /*
-            if (config.getMyPlayerId() > 0) {
-                myPlayerId = config.getMyPlayerId();
-                foundMe = true;
-            }
-            */
 
             if (!foundMe) {
                 System.err.println("⚠️ Attention: Pseudo non trouvé (" + myNick + "). myPlayerId forcé à 1 !");
@@ -301,7 +301,7 @@ public class GameBoardController {
     }
 
     private void renderDynamicObjects(GameSnapshot snap) {
-        // Bombes (uniquement)
+        // Bombes
         Set<Integer> activeBombs = new HashSet<>();
         for (var b : snap.getBombs()) {
             activeBombs.add(b.id());
@@ -322,6 +322,26 @@ public class GameBoardController {
             gameGrid.getChildren().remove(bombViews.get(id));
             bombFirstSeen.remove(id);
             return true;
+        });
+
+        // Explosions
+        Set<String> activeExplosions = new HashSet<>();
+        for (var e : snap.getExplosions()) {
+            String key = e.x() + "_" + e.y(); activeExplosions.add(key);
+            ImageView v = explosionViews.computeIfAbsent(key, k -> {
+                ImageView iv = new ImageView(); iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
+                gameGrid.add(iv, 0, 0);
+                return iv;
+            });
+            int visualType = EXPLO_MAP[e.spriteType()];
+            int frame = (int) Math.min(e.ageMs() / 50, 13);
+            v.setImage(explosionFrames[visualType][frame]);
+            v.setTranslateX(e.x() * TILE_SIZE);
+            v.setTranslateY(e.y() * TILE_SIZE);
+        }
+        explosionViews.keySet().removeIf(k -> {
+            if (activeExplosions.contains(k)) return false;
+            gameGrid.getChildren().remove(explosionViews.get(k)); return true;
         });
     }
 
