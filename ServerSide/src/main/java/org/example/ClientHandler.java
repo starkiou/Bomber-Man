@@ -1,14 +1,15 @@
 package org.example;
 
+import network.message.Message;
+import network.message.MessageSerializer;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
-import network.message.Message;
-import network.message.MessageSerializer;
-import java.nio.ByteBuffer;
 
 public class ClientHandler extends Thread {
 	private Socket socket;

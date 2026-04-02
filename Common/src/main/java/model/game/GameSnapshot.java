@@ -4,11 +4,7 @@ import model.entity.Bomb;
 import model.entity.Player;
 import model.maze.CellType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Immutable snapshot of the game state captured at a single tick.
@@ -19,7 +15,7 @@ import java.util.List;
  * while the game loop continues updating on its own thread.
  */
 public final class GameSnapshot {
-
+    private final long remainingSeconds; // <--- AJOUT
     // ── Inner records ─────────────────────────────────────────────────
 
     /** Lightweight representation of a player's state at snapshot time. */
@@ -29,7 +25,8 @@ public final class GameSnapshot {
             int y,
             boolean isDead,
             int hp,
-            int currentBombs
+            int currentBombs,
+            int maxBombs
     ) {}
 
     /** Lightweight representation of an active bomb at snapshot time. */
@@ -63,7 +60,7 @@ public final class GameSnapshot {
     // ── Private constructor — use capture() ───────────────────────────
 
     private GameSnapshot(
-            List<PlayerState> players,
+            long remainingSeconds, List<PlayerState> players,
             List<BombState> bombs,
             List<ExplosionState> explosions,
             CellType[][] grid,
@@ -71,6 +68,7 @@ public final class GameSnapshot {
             boolean gameOver,
             int winnerId
     ) {
+        this.remainingSeconds = remainingSeconds;
         this.players = Collections.unmodifiableList(players);
         this.bombs = Collections.unmodifiableList(bombs);
         this.explosions = Collections.unmodifiableList(explosions);
@@ -99,13 +97,14 @@ public final class GameSnapshot {
             List<long[]> explosionCells,
             CellType[][] grid,
             boolean gameOver,
-            int winnerId
+            int winnerId,
+            long remainingSeconds
     ) {
         List<PlayerState> playerStates = new ArrayList<>(players.size());
         for (Player p : players) {
             playerStates.add(new PlayerState(
                     p.getId(), p.getX(), p.getY(),
-                    p.isDead(), p.getHp(), p.getCurrentBombs()
+                    p.isDead(), p.getHp(), p.getCurrentBombs(), p.getMaxBombs()
             ));
         }
 
@@ -131,7 +130,7 @@ public final class GameSnapshot {
             gridCopy[i] = Arrays.copyOf(grid[i], grid[i].length);
         }
 
-        return new GameSnapshot(playerStates, bombStates, explosionStates, gridCopy, now, gameOver, winnerId);
+        return new GameSnapshot(remainingSeconds, playerStates, bombStates, explosionStates, gridCopy, now, gameOver, winnerId);
     }
 
     // ── Getters ───────────────────────────────────────────────────────
@@ -148,4 +147,5 @@ public final class GameSnapshot {
     public long getTimestamp() { return timestamp; }
     public boolean isGameOver()  { return gameOver; }
     public int getWinnerId() { return winnerId; }
+    public long getRemainingSeconds() { return remainingSeconds; }
 }

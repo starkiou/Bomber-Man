@@ -1,17 +1,12 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import network.message.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import network.message.ClientInfoDTO;
-import network.message.Message;
-import network.message.MessageFactory;
-import network.message.MessageType;
-import network.message.RoomStatusMessage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class RoomThread extends Thread {
 	private List<ClientHandler> listClient = Collections.synchronizedList(new ArrayList<ClientHandler>());

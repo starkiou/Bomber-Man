@@ -1,21 +1,15 @@
 package org.example;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import network.message.Message;
 import network.message.MessageFactory;
 import network.message.MessageType;
 import network.message.RoomInfoDTO;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.util.*;
 
 public class ServerManager {
 	private List<ClientHandler> listClient = Collections.synchronizedList(new ArrayList<ClientHandler>());

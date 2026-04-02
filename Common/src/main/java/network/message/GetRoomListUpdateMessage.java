@@ -1,9 +1,5 @@
 package network.message;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class GetRoomListUpdateMessage implements Message {
