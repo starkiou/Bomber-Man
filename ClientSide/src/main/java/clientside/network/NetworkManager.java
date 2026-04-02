@@ -1,13 +1,13 @@
 package clientside.network;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
-
 import network.message.ConnectionMessage;
 import network.message.LaunchGameMessage;
 import network.message.Message;
 import network.message.MessageSerializer;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.util.function.Consumer;
 
 public class NetworkManager {

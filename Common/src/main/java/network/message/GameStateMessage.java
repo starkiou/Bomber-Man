@@ -1,12 +1,11 @@
 package network.message;
 
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class GameStateMessage implements Message {
 	private List<PlayerDTO> players;

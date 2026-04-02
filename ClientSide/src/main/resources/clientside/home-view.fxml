@@ -4,25 +4,33 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx"
+<!--
+  Plein écran : padding latéral très large pour centrer le contenu
+  Le titre et les boutons restent dans une colonne étroite au centre.
+-->
+<VBox alignment="CENTER" spacing="24.0"
+      xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="clientside.controllers.HomeController"
-      prefHeight="600.0" prefWidth="800.0">
+      maxWidth="Infinity" maxHeight="Infinity"
+      stylesheets="@/style.css"
+      styleClass="root-menu">
 
     <padding>
-        <Insets bottom="50.0" left="50.0" right="50.0" top="50.0"/>
+        <!-- top/bottom généreux, gauche/droite très large = contenu centré sur grand écran -->
+        <Insets top="120.0" bottom="80.0" left="400.0" right="400.0"/>
     </padding>
 
-    <Label text="BOMBERMAN" style="-fx-font-size: 40px;  -fx-font-weight: bold;"/>
+    <Label text="Bomberman" styleClass="title-main"/>
 
-    <VBox alignment="CENTER" spacing="10.0" maxWidth="300.0">
-        <Button text="PLAY" onAction="#onPlayClick" prefWidth="200.0"/>
-
-        <Button text="SETTINGS" onAction="#onSettingsClick" prefWidth="200.0"
-                style="-fx-font-size: 14px;"/>
-
-        <Button text="EXIT" onAction="#onExitClick" prefWidth="200.0"/>
+    <VBox alignment="CENTER" spacing="12.0">
+        <Button text="Jouer" onAction="#onPlayClick"
+                maxWidth="Infinity" styleClass="button-primary"/>
+        <Button text="Paramètres" onAction="#onSettingsClick"
+                maxWidth="Infinity" styleClass="button"/>
+        <Button text="Quitter" onAction="#onExitClick"
+                maxWidth="Infinity" styleClass="button-danger"/>
     </VBox>
 
-    <Label text="v1.0 - SAE S4" style="-fx-text-fill: #95a5a6;"/>
+    <Label text="v1.0 · SAE S4" styleClass="label-version"/>
 </VBox>

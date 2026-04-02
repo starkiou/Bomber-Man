@@ -1,31 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox alignment="CENTER" spacing="25"
-      style="-fx-background-color: rgba(17, 17, 17, 0.95); -fx-border-color: #ff5555; -fx-border-width: 3; -fx-border-radius: 15; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, #000, 20, 0, 0, 0);"
+<!--
+  Game over : carte modale centrée, taille fixe, padding interne confortable.
+  Le conteneur parent (StackPane dans le controller) gère le centrage.
+-->
+<VBox alignment="CENTER" spacing="24"
+      styleClass="gameover-pane"
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="clientside.controllers.GameOverController"
-      maxWidth="450" maxHeight="350">
+      stylesheets="@/style.css"
+      maxWidth="480" maxHeight="360">
 
-    <padding><Insets top="30" right="50" bottom="30" left="50"/></padding>
+    <padding>
+        <Insets top="40" bottom="40" right="60" left="60"/>
+    </padding>
 
-    <Label fx:id="resultTitle" text="VOUS AVEZ PERDU !"
-           style="-fx-text-fill: #ff5555; -fx-font-size: 38px; -fx-font-family: 'Monospaced'; -fx-font-weight: bold; -fx-effect: glow(0.8);"/>
+    <Label fx:id="resultTitle" text="Vous avez perdu" styleClass="gameover-title"/>
 
-    <VBox spacing="15" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.05); -fx-padding: 20; -fx-background-radius: 10;">
+    <VBox spacing="14" alignment="CENTER" styleClass="gameover-stats-pane">
+        <padding><Insets top="16" bottom="16" left="24" right="24"/></padding>
         <HBox spacing="20" alignment="CENTER_LEFT">
-            <Label text="⏱ TEMPS SURVÉCU :" style="-fx-text-fill: #aaa; -fx-font-size: 16px; -fx-font-family: 'Monospaced';"/>
-            <Label fx:id="timeLabel" text="00:00" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+            <Label text="Temps survécu :" styleClass="gameover-stat-key" minWidth="150"/>
+            <Label fx:id="timeLabel" text="00:00" styleClass="gameover-stat-value"/>
         </HBox>
-
         <HBox spacing="20" alignment="CENTER_LEFT">
-            <Label text="⚔️ NOMBRE DE KILLS :" style="-fx-text-fill: #aaa; -fx-font-size: 16px; -fx-font-family: 'Monospaced';"/>
-            <Label fx:id="killsLabel" text="0" style="-fx-text-fill: #ff3333; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+            <Label text="Kills :" styleClass="gameover-stat-key" minWidth="150"/>
+            <Label fx:id="killsLabel" text="0" styleClass="gameover-stat-value"
+                   style="-fx-text-fill: #e08080;"/>
         </HBox>
     </VBox>
 
-    <Button text="RETOUR AU MENU" onAction="#onReturnMenu"
-            style="-fx-background-color: #333; -fx-text-fill: white; -fx-border-color: #555; -fx-border-radius: 5; -fx-cursor: hand; -fx-font-family: 'Monospaced'; -fx-font-weight: bold; -fx-padding: 10 20 10 20;"/>
+    <Button text="Retour au menu" onAction="#onReturnMenu"
+            maxWidth="Infinity" styleClass="button-secondary"/>
 </VBox>

@@ -1,61 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Spinner?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="clientside.controllers.GameConfigController">
+<!--
+  Formulaire de config : contenu compact centré.
+  Padding latéral très large, spacing vertical aéré.
+-->
+<VBox alignment="CENTER" spacing="22.0"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="clientside.controllers.GameConfigController"
+      maxWidth="Infinity" maxHeight="Infinity"
+      stylesheets="@/style.css"
+      style="-fx-background-color: #faf8f5;">
+
     <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        <Insets top="80.0" bottom="80.0" left="360.0" right="360.0"/>
     </padding>
 
-    <Label text="Configuration de la Partie Locale">
-        <font>
-            <Font name="System Bold" size="22.0" />
-        </font>
-    </Label>
+    <Label text="Configuration" styleClass="title-section"/>
 
-    <Separator prefWidth="200.0" />
+    <Separator/>
 
-    <HBox alignment="CENTER" spacing="20">
-        <VBox spacing="5">
-            <Label text="Taille de la carte :" style="-fx-font-weight: bold;" />
-            <ComboBox fx:id="mapSizeBox" prefWidth="150.0" />
+    <HBox alignment="CENTER" spacing="32">
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label text="Taille de la carte" styleClass="label"/>
+            <ComboBox fx:id="mapSizeBox" maxWidth="Infinity"/>
         </VBox>
-        <VBox spacing="5">
-            <Label text="Adversaires (IA) :" style="-fx-font-weight: bold;" />
-            <Spinner fx:id="botCountSpinner" prefWidth="100.0" />
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label text="Adversaires (IA)" styleClass="label"/>
+            <Spinner fx:id="botCountSpinner" maxWidth="Infinity"/>
         </VBox>
     </HBox>
 
-    <HBox alignment="CENTER" spacing="20">
-        <VBox spacing="5">
-            <Label text="💣 Bombes initiales :" style="-fx-font-weight: bold;" />
-            <Spinner fx:id="bombCountSpinner" prefWidth="100.0" />
+    <HBox alignment="CENTER" spacing="32">
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label text="Bombes initiales" styleClass="label"/>
+            <Spinner fx:id="bombCountSpinner" maxWidth="Infinity"/>
         </VBox>
-        <VBox spacing="5">
-            <Label text="⏱️ Durée (sec) :" style="-fx-font-weight: bold;" />
-            <Spinner fx:id="timeSpinner" prefWidth="100.0" />
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label text="Durée (sec)" styleClass="label"/>
+            <Spinner fx:id="timeSpinner" maxWidth="Infinity"/>
         </VBox>
     </HBox>
 
-    <VBox alignment="CENTER" spacing="5">
-        <Label text="Niveau de difficulté :" style="-fx-font-weight: bold;" />
-        <ComboBox fx:id="difficultyBox" prefWidth="150.0" />
+    <VBox spacing="8">
+        <Label text="Difficulté" styleClass="label"/>
+        <ComboBox fx:id="difficultyBox" maxWidth="Infinity"/>
     </VBox>
 
-    <Separator prefWidth="200.0" />
+    <Separator/>
 
-    <HBox alignment="CENTER" spacing="20.0">
-        <Button fx:id="backButton" mnemonicParsing="false" onAction="#onBackButtonClick" text="Retour" />
-        <Button fx:id="startButton" mnemonicParsing="false" onAction="#onStartButtonClick"
-                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"
-                text="▶ Lancer la partie" />
+    <HBox alignment="CENTER" spacing="16.0">
+        <Button fx:id="backButton" onAction="#onBackButtonClick" text="Retour" styleClass="button-secondary"/>
+        <Button fx:id="startButton" onAction="#onStartButtonClick" text="Lancer la partie"
+                styleClass="button-primary" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
     </HBox>
 </VBox>

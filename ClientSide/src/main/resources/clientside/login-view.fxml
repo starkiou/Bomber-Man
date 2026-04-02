@@ -4,47 +4,69 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<GridPane alignment="CENTER" hgap="30.0" vgap="20.0" xmlns="http://javafx.com/javafx"
+<!--
+  Page 2 colonnes : padding latéral modéré pour laisser les colonnes respirer,
+  mais pas trop large car le contenu est déjà dense (TextField + character picker).
+  On retire les prefWidth fixes sur les colonnes pour qu'elles occupent l'espace disponible.
+-->
+<GridPane alignment="CENTER" hgap="40.0" vgap="24.0"
+          xmlns="http://javafx.com/javafx"
           xmlns:fx="http://javafx.com/fxml"
           fx:controller="clientside.controllers.LoginController"
-          prefHeight="600.0" prefWidth="800.0">
+          maxWidth="Infinity" maxHeight="Infinity"
+          stylesheets="@/style.css"
+          style="-fx-background-color: #faf8f5;">
 
     <padding>
-        <Insets top="30" right="30" bottom="30" left="30"/>
+        <Insets top="60.0" bottom="60.0" left="120.0" right="120.0"/>
     </padding>
 
-    <VBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="0">
-        <Label text="Nom :" />
-        <TextField fx:id="usernameField" prefWidth="200.0" promptText="Ton pseudo..."/>
+    <columnConstraints>
+        <ColumnConstraints hgrow="ALWAYS" percentWidth="55"/>
+        <ColumnConstraints hgrow="ALWAYS" percentWidth="45"/>
+    </columnConstraints>
+
+    <rowConstraints>
+        <RowConstraints vgrow="ALWAYS"/>
+        <RowConstraints vgrow="ALWAYS"/>
+        <RowConstraints minHeight="50" vgrow="NEVER"/>
+    </rowConstraints>
+
+    <!-- Pseudo -->
+    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+        <Label text="Pseudo" styleClass="label"/>
+        <TextField fx:id="usernameField" maxWidth="Infinity" promptText="Ton pseudo…"/>
     </VBox>
 
-    <VBox spacing="10" style="-fx-border-color: black; -fx-border-width: 2; -fx-padding: 15;"
+    <!-- Serveur -->
+    <VBox spacing="14" styleClass="server-box"
           GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.rowSpan="2">
-        <Label text="Select Server" style="-fx-font-weight: bold;"/>
-        <TextField fx:id="ipAddressField" promptText="IP Address"/>
-        <TextField fx:id="serverPortField" promptText="Port"/>
-        <Button text="Connect" onAction="#onConnectButtonClick" maxWidth="Infinity"/>
+        <Label text="Serveur" styleClass="title-section"/>
+        <TextField fx:id="ipAddressField" maxWidth="Infinity" promptText="Adresse IP"/>
+        <TextField fx:id="serverPortField" maxWidth="Infinity" promptText="Port"/>
+        <Button text="Se connecter" onAction="#onConnectButtonClick"
+                maxWidth="Infinity" styleClass="button-online"/>
     </VBox>
 
-    <VBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="1">
-        <Label text="Sélection perso :" />
-        <fx:include source="character-selection.fxml" />
+    <!-- Personnage -->
+    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+        <Label text="Personnage" styleClass="label"/>
+        <fx:include source="character-selection.fxml"/>
     </VBox>
 
+    <!-- Retour -->
     <HBox alignment="BOTTOM_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="2">
-        <Button text="Retour" onAction="#onBackClick" />
+        <Button text="Retour" onAction="#onBackClick" styleClass="button-secondary"/>
     </HBox>
 
-    <HBox alignment="BOTTOM_RIGHT" spacing="15" GridPane.columnIndex="1" GridPane.rowIndex="2">
-        <Label fx:id="debugText" text="Offline" textFill="GRAY"/>
-
-        <Button text="PLAY OFFLINE" onAction="#onPlayOfflineClick"
-                prefWidth="130.0" prefHeight="40.0"
-                style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-
-        <Button fx:id="playOnlineButton" text="PLAY ONLINE" onAction="#onPlayOnlineClick"
-                disable="true" prefWidth="130.0" prefHeight="40.0"
-                style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-background-color: #2ecc71; -fx-text-fill: white;"/>
+    <!-- Jouer -->
+    <HBox alignment="BOTTOM_RIGHT" spacing="14" GridPane.columnIndex="1" GridPane.rowIndex="2">
+        <Label fx:id="debugText" text="Hors ligne" styleClass="label-debug"/>
+        <Button text="Hors ligne" onAction="#onPlayOfflineClick"
+                prefWidth="140.0" prefHeight="42.0" styleClass="button"/>
+        <Button fx:id="playOnlineButton" text="En ligne" onAction="#onPlayOnlineClick"
+                disable="true" prefWidth="140.0" prefHeight="42.0"
+                styleClass="button-online"/>
     </HBox>
 
 </GridPane>

@@ -12,6 +12,8 @@ public class Bomberman extends Application {
         LogManager.getInstance().info("Démarrage de l'application client");
         SceneManager.getInstance().setStage(stage);
         stage.setTitle("Bomberman \uD83D\uDCA3");
+        stage.setFullScreen(true);
+        stage.setFullScreenExitHint("");
 
         SceneManager.getInstance().loadScene("home-view.fxml");
 

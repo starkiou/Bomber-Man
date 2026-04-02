@@ -4,22 +4,31 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx"
+<!--
+  Liste de lobbies : la ListView doit occuper tout l'espace restant (vgrow=ALWAYS).
+  Padding latéral modéré car la liste a besoin de largeur pour être lisible.
+-->
+<VBox alignment="CENTER" spacing="16.0"
+      xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="clientside.controllers.LobbyListController"
-      prefHeight="600.0" prefWidth="800.0">
+      maxWidth="Infinity" maxHeight="Infinity"
+      stylesheets="@/style.css"
+      style="-fx-background-color: #faf8f5;">
 
-    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+    <padding>
+        <Insets top="48.0" bottom="36.0" left="100.0" right="100.0"/>
+    </padding>
 
-    <Label text="Liste des Parties" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+    <Label text="Parties disponibles" styleClass="title-section"/>
 
-    <HBox spacing="10" alignment="CENTER">
-        <Button text="Rafraîchir" onAction="#onRefreshClick"/>
-        <Button text="Créer une Room" onAction="#onCreateRoomClick" style="-fx-background-color: #2ecc71; -fx-text-fill: white;"/>
-        <Button fx:id="joinButton" text="Rejoindre" onAction="#onJoinClick" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Button text="Rafraîchir" onAction="#onRefreshClick" styleClass="button-secondary"/>
+        <Button text="Créer une room" onAction="#onCreateRoomClick" styleClass="button-primary"/>
+        <Button fx:id="joinButton" text="Rejoindre" onAction="#onJoinClick" styleClass="button-online"/>
     </HBox>
 
-    <ListView fx:id="roomListView" prefHeight="400.0" prefWidth="750.0" />
+    <ListView fx:id="roomListView" VBox.vgrow="ALWAYS" maxWidth="Infinity"/>
 
-    <Button text="Retour" onAction="#onBackClick" style="-fx-text-fill: red;"/>
+    <Button text="Retour" onAction="#onBackClick" styleClass="button-secondary" alignment="CENTER_LEFT"/>
 </VBox>

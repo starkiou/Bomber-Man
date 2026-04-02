@@ -1,0 +1,154 @@
+/* ============================================================
+   BOMBERMAN — Nordic Pastel Edition
+   Couleurs : Vert #cad7c5 | Crème #fdf5f0 | Bleu #cedce7
+              Gris #d8d3c9 | Saumon #e2978d | Texte #2c3e50
+   ============================================================ */
+
+/* ── ROOT / SCÈNE ────────────────────────────────────────────── */
+.root {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-background-color: #fdf5f0; /* Fond Crème */
+}
+
+/* ── FOND MENU ─────────────────────────────────────────────── */
+.root-menu {
+    -fx-background-color: #fdf5f0;
+}
+
+/* ── LABELS ──────────────────────────────────────────────────── */
+.label {
+    -fx-text-fill: #2c3e50; /* Texte Bleu-Gris très foncé (presque noir) */
+}
+
+/* Titre principal BOMBERMAN */
+.title-main {
+    -fx-font-size: 54px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e2978d; /* Accent Saumon */
+    -fx-padding: 0 0 25 0;
+}
+
+/* Titres de section */
+.title-section {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-border-color: #cad7c5; /* Souligné vert pastel */
+    -fx-border-width: 0 0 3 0;
+}
+
+.label-info {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 13px;
+}
+
+/* ── BOUTONS ─────────────────────────────────────────────────── */
+/* Base commune */
+.button {
+    -fx-background-color: #cedce7; /* Bleu Pastel */
+    -fx-text-fill: #2c3e50; /* Texte Noir */
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+    -fx-padding: 12 30;
+    -fx-border-color: rgba(0,0,0,0.05);
+    -fx-border-width: 1px;
+}
+
+.button:hover {
+    -fx-background-color: #bdcdd9; /* Bleu un peu plus foncé */
+}
+
+/* Bouton PLAY / ACTION PRINCIPALE */
+.button-primary {
+    -fx-background-color: #cad7c5; /* Vert Pastel */
+    -fx-text-fill: #2c3e50;
+}
+
+.button-primary:hover {
+    -fx-background-color: #b8c8b3;
+}
+
+/* Bouton RETOUR / DISCRET */
+.button-secondary {
+    -fx-background-color: #d8d3c9; /* Gris/Beige Pastel */
+}
+
+/* Bouton QUITTER / DANGER */
+.button-danger {
+    -fx-background-color: #e2978d; /* Saumon */
+}
+
+.button-danger:hover {
+    -fx-background-color: #d1867c;
+}
+
+/* ── INPUTS (TextField & ComboBox) ───────────────────────────── */
+.text-field, .combo-box {
+    -fx-background-color: white;
+    -fx-text-fill: #2c3e50;
+    -fx-prompt-text-fill: #bdc3c7;
+    -fx-background-radius: 6px;
+    -fx-border-color: #d8d3c9;
+    -fx-border-width: 1px;
+    -fx-padding: 10;
+}
+
+.text-field:focused {
+    -fx-border-color: #e2978d;
+}
+
+/* ── LIST VIEW ───────────────────────────────────────────────── */
+.list-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-color: #cedce7;
+    -fx-border-width: 2px;
+}
+
+.list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 12;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #cedce7;
+    -fx-text-fill: #2c3e50;
+}
+
+/* ── HUD JEU (Clair) ────────────────────────────────────────── */
+.hud-bar {
+    -fx-background-color: #fdf5f0;
+    -fx-border-color: #d8d3c9;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 15;
+}
+
+.timer-label {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e2978d;
+}
+
+/* ── GAME OVER ────────────────────────────────────────────────── */
+.gameover-pane {
+    -fx-background-color: white;
+    -fx-background-radius: 15px;
+    -fx-border-color: #cedce7;
+    -fx-border-width: 4px;
+    -fx-padding: 50;
+}
+
+.gameover-title-win {
+    -fx-text-fill: #cad7c5; /* Vert gagnant */
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+}
+
+.gameover-title {
+    -fx-text-fill: #e2978d; /* Saumon perdant */
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+}

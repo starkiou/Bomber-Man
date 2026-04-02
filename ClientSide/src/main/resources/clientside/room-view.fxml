@@ -3,32 +3,36 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+<!--
+  Salle d'attente : la ListView doit prendre tout l'espace vertical disponible.
+  Padding latéral large, VBox.vgrow=ALWAYS sur la liste.
+-->
+<VBox alignment="CENTER" spacing="16.0"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="clientside.controllers.RoomViewController"
-      prefHeight="600.0" prefWidth="800.0">
+      maxWidth="Infinity" maxHeight="Infinity"
+      stylesheets="@/style.css"
+      style="-fx-background-color: #faf8f5;">
+
     <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        <Insets top="48.0" bottom="36.0" left="160.0" right="160.0"/>
     </padding>
 
-    <Label text="Salle d'attente">
-        <font><Font name="System Bold" size="22.0" /></font>
-    </Label>
+    <Label text="Salle d'attente" styleClass="title-section"/>
+    <Label fx:id="roomInfoLabel" text="" styleClass="label-info"/>
 
-    <Label fx:id="roomInfoLabel" text="" style="-fx-font-size: 13px; -fx-text-fill: #555;" />
+    <Separator/>
 
-    <Separator prefWidth="300.0" />
+    <Label text="Joueurs" styleClass="label"/>
+    <ListView fx:id="playerListView" VBox.vgrow="ALWAYS" maxWidth="Infinity"/>
 
-    <Label text="Joueurs :" style="-fx-font-weight: bold;" />
-    <ListView fx:id="playerListView" prefHeight="250.0" prefWidth="500.0" />
-
-    <HBox alignment="CENTER" spacing="15.0">
+    <HBox alignment="CENTER" spacing="16.0">
         <Button fx:id="readyButton" text="Je suis prêt" onAction="#onReadyClick"
-                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" prefWidth="150.0"/>
+                prefWidth="180.0" styleClass="button-success"/>
         <Button fx:id="launchButton" text="Lancer la partie" onAction="#onLaunchClick"
-                style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;" prefWidth="150.0"/>
+                prefWidth="180.0" styleClass="button-primary"/>
     </HBox>
 
-    <Button text="Quitter la room" onAction="#onLeaveClick" style="-fx-text-fill: red;" />
+    <Button text="Quitter la room" onAction="#onLeaveClick" styleClass="button-danger"/>
 </VBox>
