@@ -1,6 +1,8 @@
 package org.example;
 
+
 import java.io.IOException;
+import model.logger.LogManager;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,30 +20,50 @@ import network.message.MessageType;
 import network.message.RoomInfoDTO;
 
 public class ServerManager {
+
 	private List<ClientHandler> listClient = Collections.synchronizedList(new ArrayList<ClientHandler>());
 	private Map<Integer, RoomThread> roomMap = Collections.synchronizedMap(new HashMap<>());
 	public MessageFactory factory = new MessageFactory();
+	
+	private static ServerManager instance;
+	
 
 	private ServerClientMessageHandler serverMessageHandler;
 	private AcceptConnectionThread acceptConnectionThread;
 	private int nextRoomId = 1;
 	private int nextClientId = 1;
-
-    public ServerManager(int port) {
+	
+    private ServerManager(int port) {
+    	instance = this;
     	System.out.println("Lancement d'un serveur sur le port : "+port);
-    	try {
-			acceptConnectionThread = new AcceptConnectionThread(this, port);
-			acceptConnectionThread.start();
-	    	this.setServerMessageHandler(new ServerClientMessageHandler(this));
-	        System.out.println("Serveur lancé sur le port : "+port);
-		} catch (IOException e) {
-			e.printStackTrace();
-	        System.out.println("Echec de lancement de serveur sur le port : "+port);
-		}
+    	LogManager.getInstance().info("Démarrage du serveur sur le port "+port);
+    	acceptConnectionThread = new AcceptConnectionThread(this, port);
+		acceptConnectionThread.start();
+		this.setServerMessageHandler(new ServerClientMessageHandler());
+		System.out.println("Serveur lancé sur le port : "+port);
+    	
+
+    }
+    
+    public static synchronized ServerManager init(int port) {
+        if (instance == null) {
+            instance = new ServerManager(port);
+        }
+        return instance;
+    }
+    
+    
+    
+    public static ServerManager getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("ServerManager uninitialized !");
+        }
+        return instance;
+
     }
 
     public synchronized void addClientWithSocket(Socket socket) {
-    	ClientHandler clientHandler = new ClientHandler(socket, this, nextClientId);
+    	ClientHandler clientHandler = new ClientHandler(socket, nextClientId);
     	nextClientId++;
     	listClient.add(clientHandler);
     	clientHandler.start();
@@ -116,5 +138,13 @@ public class ServerManager {
 		}
 		roomInfosJson.put("rooms", array);
 		client.addMessage(factory.make(MessageType.ROOM_LIST_UPDATE, roomInfosJson));
+	}
+	
+	public void removeRoom(RoomThread room) {
+		this.getRooms().remove(room);
+	}
+	
+	public static void reset() {
+	    instance = null;
 	}
 }

@@ -6,9 +6,10 @@ public class MessageFactory {
 	public Message make(MessageType type, JSONObject jsonObject) {
 		switch(type) {
 		case BOMB_PLACE:
-			break;
+			//TODO
+			return null;
 		case CHAT:
-			break;
+			return new ChatMessage(jsonObject);
 		case CONNECTION:
 			return new ConnectionMessage(jsonObject);
 			
@@ -16,13 +17,8 @@ public class MessageFactory {
 			break;
 		case GET_ROOM_LIST_UPDATE:
 			return new GetRoomListUpdateMessage();
-
-			
-		
 		case MOVE:
 			return new PlayActionMessage(jsonObject);
-		case READY_UPDATE:
-			return new ReadyUpdateMessage(jsonObject);
 		case ROOM_CREATION:
 			return new RoomCreationMessage(jsonObject);
 
@@ -43,12 +39,25 @@ public class MessageFactory {
 		case REFUSED_ROOM_CREATION:
 			return new RoomRefusedCreationMessage(jsonObject);
 		case ACCEPTED_ROOM_CREATION:
-			// FIX était RoomAcceptedJoinMessage par erreur
+
 			return new RoomAcceptedCreationMessage(jsonObject);
+		case CLIENT_READY_CORRECT_UPDATE:
+			return new ClientCorrectReadyUpdateMessage(jsonObject);
+		case READY_CLIENT:
+			return new ClientReadyMessage(jsonObject);
+		case ROOM_CORRECT_QUIT:
+			return new RoomCorrectQuitMessage(jsonObject);
+		case ROOM_QUIT:
+			return new RoomQuitMessage(jsonObject);
+
+			
 		case LAUNCH_GAME:
 			return new LaunchGameMessage(jsonObject);
+
 		default:
 			break;
+		
+		
 
 		
 		

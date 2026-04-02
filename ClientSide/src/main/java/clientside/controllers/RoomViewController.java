@@ -8,9 +8,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import network.message.ClientInfoDTO;
+import network.message.ClientReadyMessage;
 import network.message.LaunchGameMessage;
 import network.message.Message;
-import network.message.ReadyUpdateMessage;
 import network.message.RoomStatusMessage;
 
 public class RoomViewController {
@@ -62,7 +62,7 @@ public class RoomViewController {
     @FXML
     private void onReadyClick() {
         localReady = !localReady;
-        NetworkManager.getInstance().sendMessage(new ReadyUpdateMessage(localReady));
+        NetworkManager.getInstance().sendMessage(new ClientReadyMessage(localReady));
         readyButton.setText(localReady ? "Annuler le prêt" : "Je suis prêt");
         readyButton.setStyle(localReady
             ? "-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold;"

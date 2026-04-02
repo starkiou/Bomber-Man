@@ -5,15 +5,18 @@ import org.json.JSONObject;
 
 import model.maze.CellType;
 import model.maze.MazeFactory;
+import network.message.ClientCorrectReadyUpdateMessage;
 import network.message.ClientInfoDTO;
+import network.message.ClientReadyMessage;
 import network.message.ConnectionMessage;
 import network.message.LaunchGameMessage;
 import network.message.Message;
 import network.message.MessageFactory;
 import network.message.MessageType;
 import network.message.PlayActionMessage;
-import network.message.ReadyUpdateMessage;
 import network.message.RoomAcceptedCreationMessage;
+import network.message.RoomCorrectQuitMessage;
+import network.message.RoomInfoDTO;
 import network.message.RoomAcceptedJoinMessage;
 import network.message.RoomCreationMessage;
 import network.message.RoomJoiningMessage;
@@ -57,11 +60,7 @@ public class ServerClientMessageHandler {
 					sender.getRoom().broadcast(message);
 				}
 				break;
-			case READY_UPDATE:
-				ReadyUpdateMessage readyMsg = (ReadyUpdateMessage) message;
-				sender.setReady(readyMsg.isReady());
-				// NOTE pas besoin de broadcast explicite, RoomThread le fait toutes les 200ms
-				break;
+
 			case LAUNCH_GAME:
 				if (sender.getRoom() != null) {
 					// vérif que tout le monde est prêt
@@ -81,6 +80,15 @@ public class ServerClientMessageHandler {
 				break;
 			case ROOM_UPDATE:
 				break;
+			case ROOM_QUIT:
+				sender.getRoom().removeClient(sender);
+				sender.addMessage(new RoomCorrectQuitMessage());
+				break;
+			case READY_CLIENT:
+				ClientReadyMessage clientReadyMessage = (ClientReadyMessage) message;
+				sender.setReady(clientReadyMessage.isReady());
+				System.out.println(sender.getPseudo()+" PRÊT");
+				sender.addMessage(new ClientCorrectReadyUpdateMessage());
 			default:
 				break;
 		}
@@ -103,7 +111,9 @@ public class ServerClientMessageHandler {
 		}
 	}
 
-	public ServerClientMessageHandler(ServerManager serverManager) {
-		this.serverManager = serverManager;
+	
+	public ServerClientMessageHandler() {
+		this.serverManager = ServerManager.getInstance();
+
 	}
 }

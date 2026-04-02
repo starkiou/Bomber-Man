@@ -1,5 +1,6 @@
 package org.example;
 
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -8,10 +9,13 @@ import java.util.LinkedList;
 import java.util.Queue;
 import network.message.Message;
 import network.message.MessageSerializer;
+import network.message.RoomQuitMessage;
+
 import java.nio.ByteBuffer;
 
 public class ClientHandler extends Thread {
 	private Socket socket;
+
 	
 	private ServerManager serverManager;
 	
@@ -28,20 +32,22 @@ public class ClientHandler extends Thread {
     public InputStream in;
     public OutputStream out;
     
+
 	private boolean isReady = false; //maybe need to be moved into roomThread
 	
 	private String pseudo;
 
 	private int skinId; 
 
+
 	
-	public ClientHandler(Socket socket, ServerManager serverManager, int clientId){
+	public ClientHandler(Socket socket, int clientId){
 		this.socket=socket;
-		this.serverManager=serverManager;
+		this.serverManager=ServerManager.getInstance();
 		this.clientId=clientId;
 		
 		
-		
+
 	}
 	
 	
@@ -163,6 +169,7 @@ public class ClientHandler extends Thread {
 	        if (mustContinueListen) e.printStackTrace();
 	    } finally {
 	        closeConnection();
+	        this.serverManager.getServerMessageHandler().handle(this, new RoomQuitMessage());
 	        serverManager.removeClient(this);
 	    }
 	}
