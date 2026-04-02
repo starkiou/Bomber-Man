@@ -60,10 +60,7 @@ public class RoomThread extends Thread {
 	    while (isWaiting) {
 	        this.updateReadyToLaunch();
 	        
-	        if (listClient.isEmpty()) {
-	            ServerManager.getInstance().removeRoom(this);
-	            return;
-	        }
+	        
 
 	        if (readyToLaunch && readyStartTime != -1) {
 	            long elapsed = System.currentTimeMillis() - readyStartTime;
@@ -190,8 +187,18 @@ public class RoomThread extends Thread {
 	
 	public void removeClient(ClientHandler client) {
 		this.listClient.remove(client);
+		if(this.listClient.isEmpty()) {
+			ServerManager.getInstance().getRooms().remove(this);
+		}
 	}
 	
+	public List<ClientHandler> getListClient(){
+		return this.listClient;
+	}
+	
+	public boolean getReadyToLaunch() {
+		return this.readyToLaunch;
+	}
 	
 	
 }

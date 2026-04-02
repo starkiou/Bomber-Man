@@ -144,4 +144,8 @@ public class ServerManager {
 	public void removeRoom(RoomThread room) {
 		this.getRooms().remove(room);
 	}
+	
+	public static void reset() {
+	    instance = null;
+	}
 }
