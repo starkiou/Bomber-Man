@@ -16,7 +16,6 @@ public class GameConfigController {
 
     @FXML private ComboBox<String> mapSizeBox;
     @FXML private Spinner<Integer> botCountSpinner;
-    @FXML private ComboBox<String> difficultyBox;
     @FXML private Spinner<Integer> bombCountSpinner;
     @FXML private Spinner<Integer> timeSpinner;
     @FXML private VBox botStrategyContainer;
@@ -51,10 +50,6 @@ public class GameConfigController {
         mapSizeBox.getItems().clear();
         mapSizeBox.getItems().addAll("Petite (11x11)", "Moyenne (15x15)", "Grande (19x19)");
         mapSizeBox.setValue("Moyenne (15x15)");
-
-        difficultyBox.getItems().clear();
-        difficultyBox.getItems().addAll("Facile", "Normal", "Difficile", "Extrême");
-        difficultyBox.setValue("Normal");
 
         // --- 2. Initialisation des Spinners (Indispensable pour l'affichage) ---
         // Format : new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, defaut)
