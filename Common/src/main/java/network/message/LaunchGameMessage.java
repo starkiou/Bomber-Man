@@ -7,25 +7,34 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 // envoyé par client -> serveur (vide) pour demander le lancement
-// envoyé par serveur -> tous les clients (avec config complète)
+// envoyé par serveur -> chaque client (avec config complète + son propre playerId)
 public class LaunchGameMessage implements Message {
     private List<ClientInfoDTO> players = new ArrayList<>();
     private int botCount;
     private CellType[][] grid;
+    /** ID du joueur local pour ce client (0 = non assigné / message trigger). */
+    private int myPlayerId = 0;
 
     // constructeur vide = trigger client -> serveur
     public LaunchGameMessage() {}
 
-    // constructeur serveur -> clients
-    public LaunchGameMessage(List<ClientInfoDTO> players, int botCount, CellType[][] grid) {
+    // constructeur serveur -> clients (avec playerId personnalisé)
+    public LaunchGameMessage(List<ClientInfoDTO> players, int botCount, CellType[][] grid, int myPlayerId) {
         this.players = players;
         this.botCount = botCount;
         this.grid = grid;
+        this.myPlayerId = myPlayerId;
+    }
+
+    // constructeur legacy sans myPlayerId (myPlayerId restera 0)
+    public LaunchGameMessage(List<ClientInfoDTO> players, int botCount, CellType[][] grid) {
+        this(players, botCount, grid, 0);
     }
 
     public LaunchGameMessage(JSONObject json) {
         this.players = new ArrayList<>();
         this.botCount = json.optInt("botCount", 0);
+        this.myPlayerId = json.optInt("myPlayerId", 0);
 
         if (json.has("players")) {
             JSONArray arr = json.getJSONArray("players");
@@ -50,6 +59,7 @@ public class LaunchGameMessage implements Message {
     public JSONObject getData() {
         JSONObject obj = new JSONObject();
         obj.put("botCount", botCount);
+        obj.put("myPlayerId", myPlayerId);
 
         JSONArray arr = new JSONArray();
         for (ClientInfoDTO p : players) arr.put(p.toJson());
@@ -74,4 +84,5 @@ public class LaunchGameMessage implements Message {
     public List<ClientInfoDTO> getPlayers() { return players; }
     public int getBotCount() { return botCount; }
     public CellType[][] getGrid() { return grid; }
+    public int getMyPlayerId() { return myPlayerId; }
 }

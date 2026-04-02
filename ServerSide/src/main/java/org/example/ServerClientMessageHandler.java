@@ -65,11 +65,16 @@ public class ServerClientMessageHandler {
 				if (sender.getRoom() != null) {
 					// vérif que tout le monde est prêt
 					if (!sender.getRoom().isReadyToLaunch()) break;
-					// génère la grille côté serveur, envoyée à tous les clients
+					// génère la grille côté serveur
 					CellType[][] grid = MazeFactory.createMaze(MazeFactory.Algorithm.EXHAUSTIVE, 15, 11);
 					List<ClientInfoDTO> playerList = sender.getRoom().getClientInfoList();
 					int bots = sender.getRoom().getBotCount();
-					sender.getRoom().broadcast(new LaunchGameMessage(playerList, bots, grid));
+					// Envoie un message personnalisé à chaque client avec son propre playerId
+					List<ClientHandler> clients = sender.getRoom().getListClient();
+					for (int i = 0; i < clients.size(); i++) {
+						int pid = i + 1;
+						clients.get(i).addMessage(new LaunchGameMessage(playerList, bots, grid, pid));
+					}
 					sender.getRoom().setInGame(true);
 					sender.getRoom().stopWaiting();
 					this.serverManager.updateRoomsListOfClients();

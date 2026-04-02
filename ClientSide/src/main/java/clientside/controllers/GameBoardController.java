@@ -173,26 +173,33 @@ public class GameBoardController {
             currentWidth  = grid[0].length;
             currentHeight = grid.length;
 
-            String myNick = NetworkManager.getInstance().getNickname();
             List<ClientInfoDTO> roomPlayers = config.getPlayers();
-            boolean foundMe = false;
 
             for (int i = 0; i < roomPlayers.size() && spawnIdx < spawnPos.length; i++) {
                 int pid   = i + 1;
                 int[] pos = spawnPos[spawnIdx++];
                 players.add(new Player(pid, pos[0], pos[1], 3, 1.0, 1));
-
                 playerSkinMap.put(pid, roomPlayers.get(i).getCharacterId());
-
-                if (myNick != null && roomPlayers.get(i).getPseudo() != null &&
-                        myNick.trim().equalsIgnoreCase(roomPlayers.get(i).getPseudo().trim())) {
-                    myPlayerId = pid;
-                    foundMe = true;
-                }
             }
 
-            if (!foundMe) {
-                System.err.println("⚠️ Attention: Pseudo non trouvé (" + myNick + "). myPlayerId forcé à 1 !");
+            // Le serveur indique directement quel playerId est le nôtre
+            if (config.getMyPlayerId() > 0) {
+                myPlayerId = config.getMyPlayerId();
+            } else {
+                // Fallback : recherche par pseudo (ancien comportement)
+                String myNick = NetworkManager.getInstance().getNickname();
+                boolean foundMe = false;
+                for (int i = 0; i < roomPlayers.size(); i++) {
+                    if (myNick != null && roomPlayers.get(i).getPseudo() != null &&
+                            myNick.trim().equalsIgnoreCase(roomPlayers.get(i).getPseudo().trim())) {
+                        myPlayerId = i + 1;
+                        foundMe = true;
+                        break;
+                    }
+                }
+                if (!foundMe) {
+                    System.err.println("⚠️ Attention: Pseudo non trouvé (" + myNick + "). myPlayerId forcé à 1 !");
+                }
             }
 
         } else {
