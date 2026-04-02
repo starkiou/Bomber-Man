@@ -1,12 +1,12 @@
 package clientside.network;
 
+import network.message.Message;
+import network.message.MessageSerializer;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-
-import network.message.Message;
-import network.message.MessageSerializer;
 
 public class NetworkListener implements Runnable {
     private final Socket socket;

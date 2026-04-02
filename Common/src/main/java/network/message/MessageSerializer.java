@@ -1,9 +1,9 @@
 package network.message;
 
+import org.json.JSONObject;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-
-import org.json.JSONObject;
 
 public class MessageSerializer {
 	private MessageFactory messageFactory = new MessageFactory();

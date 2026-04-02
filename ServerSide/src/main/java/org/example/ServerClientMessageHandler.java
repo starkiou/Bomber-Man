@@ -1,21 +1,11 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import network.message.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import network.message.ConnectionMessage;
-import network.message.RoomCreationMessage;
-import network.message.RoomListUpdateMessage;
-import network.message.RoomRefusedCreationMessage;
-import network.message.Message;
-import network.message.MessageFactory;
-import network.message.MessageType;
-import network.message.RoomAcceptedCreationMessage;
-import network.message.RoomInfoDTO;
-import network.message.RoomJoiningMessage;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServerClientMessageHandler {
 	private ServerManager serverManager;

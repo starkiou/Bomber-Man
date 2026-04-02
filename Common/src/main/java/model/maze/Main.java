@@ -1,8 +1,5 @@
 package model.maze;
 
-import model.maze.CellType;
-import model.maze.MazeFactory;
-
 public class Main {
     public static void main(String[] args) {
         int width = 11;

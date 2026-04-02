@@ -1,20 +1,12 @@
 package org.example;
 
+import network.message.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-
-import network.message.ConnectionMessage;
-import network.message.GetRoomListUpdateMessage;
-import network.message.Message;
-import network.message.MessageSerializer;
-import network.message.MessageType;
-import network.message.RoomCreationMessage;
-import network.message.RoomInfoDTO;
-import network.message.RoomJoiningMessage;
-import network.message.RoomListUpdateMessage;
 
 /**
  * Test manuel : lance le serveur (Main.java) AVANT d'exécuter ce test.

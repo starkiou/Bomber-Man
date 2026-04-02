@@ -4,11 +4,7 @@ import model.entity.Bomb;
 import model.entity.Player;
 import model.maze.CellType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Immutable snapshot of the game state captured at a single tick.
@@ -29,7 +25,8 @@ public final class GameSnapshot {
             int y,
             boolean isDead,
             int hp,
-            int currentBombs
+            int currentBombs,
+            int maxBombs
     ) {}
 
     /** Lightweight representation of an active bomb at snapshot time. */
@@ -105,7 +102,7 @@ public final class GameSnapshot {
         for (Player p : players) {
             playerStates.add(new PlayerState(
                     p.getId(), p.getX(), p.getY(),
-                    p.isDead(), p.getHp(), p.getCurrentBombs()
+                    p.isDead(), p.getHp(), p.getCurrentBombs(), p.getMaxBombs()
             ));
         }
 
