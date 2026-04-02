@@ -139,4 +139,8 @@ public class ServerManager {
 	    
 	    this.broadCastToAllClient(factory.make(MessageType.ROOM_LIST_UPDATE, roomInfosJson));
 	}
+	
+	public void removeRoom(RoomThread room) {
+		this.getRooms().remove(room);
+	}
 }

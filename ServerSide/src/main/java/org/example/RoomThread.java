@@ -61,9 +61,7 @@ public class RoomThread extends Thread {
 	        this.updateReadyToLaunch();
 	        
 	        if (listClient.isEmpty()) {
-	            readyToLaunch = false;
-	            readyStartTime = -1;
-	            
+	            ServerManager.getInstance().removeRoom(this);
 	            return;
 	        }
 
