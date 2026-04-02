@@ -136,7 +136,7 @@ public class RoomThread extends Thread {
 	            readyStartTime = System.currentTimeMillis();
 	        }
 	    } else {
-	        readyStartTime = -1; // reset si quelqu’un n’est plus prêt
+	        readyStartTime = -1;
 	    }
 	}
 	

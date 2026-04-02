@@ -40,6 +40,7 @@ public class ServerManager {
 	
 	
     private ServerManager(int port) {
+    	instance = this;
     	System.out.println("Lancement d'un serveur sur le port : "+port);
     	LogManager.getInstance().info("Démarrage du serveur sur le port "+port);
     	acceptConnectionThread = new AcceptConnectionThread(this, port);
