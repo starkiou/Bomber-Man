@@ -172,6 +172,7 @@ public class Game implements Runnable {
         if (gameOver) return;
         Player p = players.get(playerId);
         if (p == null || p.isDead()) return;
+        LogManager.getInstance().info("Player " + playerId + " action: " + action);
         synchronized (stateLock) {
             switch (action) {
                 case MOVE_UP -> processMovement(p, Direction.UP);
@@ -188,6 +189,7 @@ public class Game implements Runnable {
         switch (d) { case UP->ny--; case DOWN->ny++; case LEFT->nx--; case RIGHT->nx++; }
         if (isInBounds(nx, ny) && grid[ny][nx] == CellType.EMPTY && !isBombAt(nx, ny)) {
             p.setX(nx); p.setY(ny);
+            LogManager.getInstance().info("Player " + p.getId() + " moved " + d + " to (" + nx + ", " + ny + ")");
         }
     }
 
