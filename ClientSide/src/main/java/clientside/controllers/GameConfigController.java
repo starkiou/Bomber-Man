@@ -64,6 +64,6 @@ public class GameConfigController {
 
     @FXML
     void onBackButtonClick(ActionEvent event) {
-        SceneManager.getInstance().loadScene("connection-choice.fxml");
+        SceneManager.getInstance().loadScene("login-view.fxml");
     }
 }

@@ -27,6 +27,9 @@ import network.message.LaunchGameMessage;
 import network.message.Message;
 import network.message.PlayActionMessage;
 
+// Si ton serveur envoie l'état du jeu complet, décommente cette ligne :
+// import network.message.GameStateMessage;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -45,10 +48,11 @@ public class GameBoardController {
     private static final int DIR_RIGHT = 3;
 
     private Image wallImg, floorImg, brickImg;
-    private final Image[][] playerSprites = new Image[4][3];
-    private final Image[][] botSprites    = new Image[4][3];
     private final Image[]   bombIdleFrames   = new Image[28];
     private final Image[][] explosionFrames  = new Image[7][14];
+
+    // NOUVEAU : Cache pour stocker les skins individuellement pour chaque ID
+    private final Map<Integer, Image[][]> entitySpritesCache = new HashMap<>();
 
     private final Map<Integer, PlayerVisual> playerVisuals  = new HashMap<>();
     private final Map<Integer, ImageView>    bombViews      = new HashMap<>();
@@ -108,8 +112,17 @@ public class GameBoardController {
 
     private void onMessageReceived(Message msg) {
         if (msg instanceof PlayActionMessage pam) {
-            game.handleAction(pam.getPlayerID(), pam.getActionType());
+            if (game != null) {
+                game.handleAction(pam.getPlayerID(), pam.getActionType());
+            }
         }
+        // Si ton serveur est "Authoritative" et envoie des snapshots au lieu des actions,
+        // décommente le bloc ci-dessous et l'importation en haut du fichier :
+        /*
+        else if (msg instanceof GameStateMessage gsm) {
+            Platform.runLater(() -> drawMap(gsm.getSnapshot()));
+        }
+        */
     }
 
     // ── Chargement des sprites ───────────────────────────────────────────────
@@ -118,17 +131,6 @@ public class GameBoardController {
         wallImg  = img("/sprites/output/walls/block_07.png");
         floorImg = img("/sprites/output/ground/ground_06.png");
         brickImg = img("/sprites/output/walls/block_08.png");
-
-        int    charId = NetworkManager.getInstance().getSelectedCharacterId();
-        String botId  = String.valueOf(ThreadLocalRandom.current().nextInt(1, 35));
-        String[] dirs = {"D", "N", "W", "E"};
-
-        for (int d = 0; d < 4; d++) {
-            for (int f = 0; f < 3; f++) {
-                playerSprites[d][f] = img("/sprites/output/characters/" + charId + "/" + dirs[d] + "_" + f + ".png");
-                botSprites[d][f]    = img("/sprites/output/characters/" + botId  + "/" + dirs[d] + "_" + f + ".png");
-            }
-        }
 
         for (int i = 0; i < 28; i++)
             bombIdleFrames[i] = img("/sprites/output/bomb/B2_" + i + ".png");
@@ -140,6 +142,25 @@ public class GameBoardController {
 
     private Image img(String path) {
         return new Image(Objects.requireNonNull(getClass().getResourceAsStream(path)));
+    }
+
+    // NOUVEAU : Charge dynamiquement un skin pour une entité spécifique
+    private Image[][] getOrLoadSprites(int entityId) {
+        return entitySpritesCache.computeIfAbsent(entityId, id -> {
+            Image[][] sprites = new Image[4][3];
+            // Ton skin local vs Un skin aléatoire pour chaque autre joueur/bot
+            String skinId = (id == myPlayerId)
+                    ? String.valueOf(NetworkManager.getInstance().getSelectedCharacterId())
+                    : String.valueOf(ThreadLocalRandom.current().nextInt(1, 35));
+
+            String[] dirs = {"D", "N", "W", "E"};
+            for (int d = 0; d < 4; d++) {
+                for (int f = 0; f < 3; f++) {
+                    sprites[d][f] = img("/sprites/output/characters/" + skinId + "/" + dirs[d] + "_" + f + ".png");
+                }
+            }
+            return sprites;
+        });
     }
 
     // ── Démarrage de la partie ───────────────────────────────────────────────
@@ -166,13 +187,26 @@ public class GameBoardController {
 
             String myNick = NetworkManager.getInstance().getNickname();
             List<ClientInfoDTO> roomPlayers = config.getPlayers();
+            boolean foundMe = false;
+
             for (int i = 0; i < roomPlayers.size() && spawnIdx < spawnPos.length; i++) {
                 int pid   = i + 1;
                 int[] pos = spawnPos[spawnIdx++];
                 players.add(new Player(pid, pos[0], pos[1], 3, 1.0, 1));
-                if (myNick != null && myNick.equals(roomPlayers.get(i).getPseudo()))
+
+                // CORRECTION : Ignorer la casse et les espaces vides pour être sûr de trouver le bon joueur
+                if (myNick != null && roomPlayers.get(i).getPseudo() != null &&
+                        myNick.trim().equalsIgnoreCase(roomPlayers.get(i).getPseudo().trim())) {
                     myPlayerId = pid;
+                    foundMe = true;
+                }
             }
+
+            // Log d'erreur si l'ID n'a pas pu être assigné
+            if (!foundMe) {
+                System.err.println("⚠️ Attention: Pseudo non trouvé (" + myNick + "). myPlayerId forcé à 1 !");
+            }
+
         } else {
             // ── Mode solo hors-ligne : config locale ─────────────────────────
             isOnline = false;
@@ -256,8 +290,8 @@ public class GameBoardController {
         for (int x = 0; x < currentWidth; x++)
             for (int y = 0; y < currentHeight; y++)
                 tileViews[x][y].setImage(
-                    grid[y][x] == CellType.WALL  ? wallImg  :
-                    grid[y][x] == CellType.BRICK ? brickImg : floorImg);
+                        grid[y][x] == CellType.WALL  ? wallImg  :
+                                grid[y][x] == CellType.BRICK ? brickImg : floorImg);
 
         renderDynamicObjects(snap);
         renderPlayers(snap);
@@ -265,7 +299,7 @@ public class GameBoardController {
         // HUD timer
         long rem = snap.getRemainingSeconds();
         timerLabel.setText(rem < 0 ? "--:--"
-            : String.format("%02d:%02d", rem / 60, rem % 60));
+                : String.format("%02d:%02d", rem / 60, rem % 60));
     }
 
     private void renderDynamicObjects(GameSnapshot snap) {
@@ -316,8 +350,9 @@ public class GameBoardController {
 
             if (p.isDead()) continue;
 
+            // CORRECTION: Assignation du skin unique dynamiquement
             PlayerVisual pv = playerVisuals.computeIfAbsent(p.id(),
-                id -> new PlayerVisual(id == myPlayerId ? playerSprites : botSprites));
+                    id -> new PlayerVisual(getOrLoadSprites(id)));
 
             double nx = p.x() * TILE_SIZE;
             double ny = p.y() * TILE_SIZE;
