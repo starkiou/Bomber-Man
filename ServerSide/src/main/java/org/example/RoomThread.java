@@ -13,16 +13,16 @@ public class RoomThread extends Thread {
 
     public MessageFactory factory = new MessageFactory();
 
-    public boolean isWaiting = true;
+    public volatile boolean isWaiting = true;
 
     public final int id;
 
-    private long readyStartTime = -1;
+    private volatile long readyStartTime = -1;
     private static final int TIME_BEFORE_LAUNCH = 10000;
 
-    private boolean readyToLaunch = false;
+    private volatile boolean readyToLaunch = false;
 
-    private boolean inGame = false;
+    private volatile boolean inGame = false;
 
     private int maxPlayer;
     private String roomName;
@@ -100,7 +100,8 @@ public class RoomThread extends Thread {
             try {
                 sleep(200);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
+                break;
             }
         }
     }
@@ -112,8 +113,10 @@ public class RoomThread extends Thread {
     private void updateReadyToLaunch() {
         if (listClient.isEmpty()) { readyToLaunch = false; readyStartTime = -1; return; }
         readyToLaunch = true;
-        for (ClientHandler client : listClient) {
-            if (!client.isReady()) { readyToLaunch = false; break; }
+        synchronized (listClient) {
+            for (ClientHandler client : listClient) {
+                if (!client.isReady()) { readyToLaunch = false; break; }
+            }
         }
         if (readyToLaunch) {
             if (readyStartTime == -1) readyStartTime = System.currentTimeMillis();
@@ -127,14 +130,18 @@ public class RoomThread extends Thread {
     // liste des clients sous forme DTO pour le LaunchGameMessage
     public List<ClientInfoDTO> getClientInfoList() {
         List<ClientInfoDTO> list = new ArrayList<>();
-        for (ClientHandler c : listClient)
-            list.add(new ClientInfoDTO(c.getClientId(), c.isReady(), c.getPseudo(), c.getCharacterId())); // Ajout de l'ID du skin ici
+        synchronized (listClient) {
+            for (ClientHandler c : listClient)
+                list.add(new ClientInfoDTO(c.getClientId(), c.isReady(), c.getPseudo(), c.getCharacterId())); // Ajout de l'ID du skin ici
+        }
         return list;
     }
 
     public synchronized void broadcast(Message message) {
-        for(ClientHandler client : listClient) {
-            client.addMessage(message);
+        synchronized (listClient) {
+            for(ClientHandler client : listClient) {
+                client.addMessage(message);
+            }
         }
     }
 
@@ -168,7 +175,7 @@ public class RoomThread extends Thread {
     public void removeClient(ClientHandler client) {
         this.listClient.remove(client);
         if(this.listClient.isEmpty()) {
-            ServerManager.getInstance().getRooms().remove(this);
+            ServerManager.getInstance().removeRoom(this);
         }
     }
 

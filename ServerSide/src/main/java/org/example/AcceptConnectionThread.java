@@ -9,8 +9,8 @@ import model.logger.LogManager;
 public class AcceptConnectionThread extends Thread {
 
 
-	private boolean mustContinueAccept = true;
-	private ServerManager serverMain; 
+	private volatile boolean mustContinueAccept = true;
+	private ServerManager serverMain;
 	private ServerSocket serverSocket;
 	
 	
@@ -37,9 +37,21 @@ public class AcceptConnectionThread extends Thread {
 	
 	public void stopAcceptation() {
 		this.mustContinueAccept=false;
+		// Ferme le socket pour débloquer accept() et éviter une fuite de descripteur.
+		if (serverSocket != null && !serverSocket.isClosed()) {
+			try {
+				serverSocket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-	
+
 	public void run() {
+		if (serverSocket == null) {
+			LogManager.getInstance().error("Le serveur n'a pas pu démarrer : socket non initialisé.");
+			return;
+		}
 		try {
 			System.out.println("Début d'écoute de connexion");
 			while(mustContinueAccept) {
@@ -47,9 +59,12 @@ public class AcceptConnectionThread extends Thread {
 				this.serverMain.addClientWithSocket(socket);
 			}
 			System.out.println("Fin d'écoute de connexion");
-			
+
 		} catch (IOException e) {
-			e.printStackTrace();
+			// Ne signale l'erreur que si l'arrêt n'est pas volontaire.
+			if (mustContinueAccept) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

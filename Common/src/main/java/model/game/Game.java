@@ -203,7 +203,20 @@ public class Game implements Runnable {
         if (gameDurationMs < 0) return; // unlimited
         long remMs = Math.max(0, gameDurationMs - (System.currentTimeMillis() - startTimeMs));
         this.remainingSeconds = remMs / 1000;
-        if (remMs <= 0) gameOver = true;
+        if (remMs <= 0 && !gameOver) {
+            // Fin au temps : on désigne le survivant (ou match nul) et on notifie.
+            List<Player> alive = players.values().stream()
+                    .filter(p -> !p.isDead())
+                    .toList();
+            gameOver = true;
+            winnerId = (alive.size() == 1) ? alive.get(0).getId() : -1;
+            String result = (winnerId == -1)
+                    ? "Draw — time is up."
+                    : "Player " + winnerId + " wins on time!";
+            log.info("Game over. " + result);
+            notifyGameOver(winnerId);
+            stop();
+        }
     }
 
     /** Ticks each living player (handles bomb regen timer internally). */

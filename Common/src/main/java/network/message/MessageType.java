@@ -36,6 +36,6 @@ public enum MessageType {
         for (MessageType type : values()) {
             if (type.getId() == id) return type;
         }
-        throw new IllegalArgumentException("ID de MessageType inconnu : " + id);
+        return null;
     }
 }

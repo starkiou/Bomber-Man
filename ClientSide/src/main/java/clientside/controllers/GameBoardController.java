@@ -172,7 +172,7 @@ public class GameBoardController {
         List<Player> players = new ArrayList<>();
         int botCount;
 
-        int[][] spawnPos = {{1, 1}, {13, 9}, {13, 1}, {1, 9}};
+        int[][] spawnPos;
         int spawnIdx = 0;
 
         if (config != null && config.getGrid() != null && !config.getPlayers().isEmpty()) {
@@ -181,6 +181,7 @@ public class GameBoardController {
             botCount = config.getBotCount();
             currentWidth  = grid[0].length;
             currentHeight = grid.length;
+            spawnPos = cornerSpawns(currentWidth, currentHeight);
 
             String myNick = NetworkManager.getInstance().getNickname();
             List<ClientInfoDTO> roomPlayers = config.getPlayers();
@@ -211,6 +212,7 @@ public class GameBoardController {
         } else {
             isOnline = false;
             configureDimensions();
+            spawnPos = cornerSpawns(currentWidth, currentHeight);
             grid     = MazeFactory.createMaze(MazeFactory.Algorithm.EXHAUSTIVE, currentWidth, currentHeight);
             botCount = GameConfigController.selectedBots;
             myPlayerId = 1;
@@ -244,8 +246,13 @@ public class GameBoardController {
     private void configureDimensions() {
         String size = GameConfigController.selectedMapSize;
         if (size != null && size.contains("Petite"))      { currentWidth = 11; currentHeight = 11; }
-        else if (size != null && size.contains("Grande")) { currentWidth = 19; currentHeight = 15; }
-        else                                               { currentWidth = 15; currentHeight = 11; }
+        else if (size != null && size.contains("Grande")) { currentWidth = 19; currentHeight = 19; }
+        else                                               { currentWidth = 15; currentHeight = 15; }
+    }
+
+    /** Positions de spawn aux quatre coins, adaptées aux dimensions réelles de la carte. */
+    private int[][] cornerSpawns(int w, int h) {
+        return new int[][] { {1, 1}, {w - 2, h - 2}, {w - 2, 1}, {1, h - 2} };
     }
 
     private void initBackgroundGrid() {
@@ -275,6 +282,10 @@ public class GameBoardController {
             StackPane root = (StackPane) gameGrid.getScene().getRoot();
             root.getChildren().add(overlay);
             overlay.toFront();
+
+            // La partie est terminée : on détache ce contrôleur du flux réseau
+            // pour éviter qu'un contrôleur fantôme continue de traiter les messages.
+            NetworkManager.getInstance().setMessageHandler(null);
         } catch (IOException e) {
             e.printStackTrace();
         }

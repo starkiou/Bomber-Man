@@ -14,7 +14,7 @@ public class MessageFactory {
 			return new ConnectionMessage(jsonObject);
 			
 		case GAME_STATE:
-			break;
+			return new GameStateMessage(jsonObject);
 		case GET_ROOM_LIST_UPDATE:
 			return new GetRoomListUpdateMessage();
 		case MOVE:

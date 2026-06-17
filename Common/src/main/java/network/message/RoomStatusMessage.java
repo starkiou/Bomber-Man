@@ -24,6 +24,7 @@ public class RoomStatusMessage implements Message {
         this.clients = new ArrayList<>();
         JSONArray clientsArray = dataJson.getJSONArray("clients");
         this.roomId = dataJson.getInt("roomId");
+        this.isWaiting = dataJson.optBoolean("isWaiting", true);
         for (int i = 0; i < clientsArray.length(); i++) {
             this.clients.add(new ClientInfoDTO(clientsArray.getJSONObject(i)));
         }
@@ -57,5 +58,9 @@ public class RoomStatusMessage implements Message {
     
     public long getCountdown() {
         return countdown;
+    }
+
+    public boolean isWaiting() {
+        return isWaiting;
     }
 }

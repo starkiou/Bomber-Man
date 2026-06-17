@@ -14,8 +14,8 @@ public class GameOverController {
         timeLabel.setText(time);
         killsLabel.setText(String.valueOf(kills));
 
-        if (title.contains("PERDU")) resultTitle.setStyle("-fx-text-fill: #ff5555;");
-        else resultTitle.setStyle("-fx-text-fill: #55ff55;");
+        if (title.contains("VICTOIRE")) resultTitle.setStyle("-fx-text-fill: #55ff55;");
+        else resultTitle.setStyle("-fx-text-fill: #ff5555;");
     }
 
     @FXML

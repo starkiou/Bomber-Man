@@ -42,8 +42,8 @@ public class RandomFusionGenerator implements MazeGenerator {
         Collections.shuffle(walls);
 
         for (int[] w : walls) {
-            SetCell s1 = sets[w[3]][w[4]].find();
-            SetCell s2 = sets[w[5]][w[6]].find();
+            SetCell s1 = sets[w[2]][w[3]].find();
+            SetCell s2 = sets[w[4]][w[5]].find();
 
             if (s1 != s2) {
                 grid[w[1]][w[0]] = CellType.EMPTY; // On casse le mur

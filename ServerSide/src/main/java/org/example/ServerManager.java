@@ -100,8 +100,10 @@ public class ServerManager {
 	}
 
 	public void broadCastToAllClient(Message message) {
-		for(ClientHandler client : listClient) {
-			client.addMessage(message);
+		synchronized (listClient) {
+			for(ClientHandler client : listClient) {
+				client.addMessage(message);
+			}
 		}
 	}
 
@@ -122,8 +124,10 @@ public class ServerManager {
 	public void updateRoomsListOfClients() {
 		JSONObject roomInfosJson = new JSONObject();
 		JSONArray array = new JSONArray();
-		for (RoomThread room : this.getRooms()) {
-			array.put(buildRoomJson(room));
+		synchronized (roomMap) {
+			for (RoomThread room : roomMap.values()) {
+				array.put(buildRoomJson(room));
+			}
 		}
 		roomInfosJson.put("rooms", array);
 		this.broadCastToAllClient(factory.make(MessageType.ROOM_LIST_UPDATE, roomInfosJson));
@@ -133,15 +137,19 @@ public class ServerManager {
 	public void sendRoomsListToClient(ClientHandler client) {
 		JSONObject roomInfosJson = new JSONObject();
 		JSONArray array = new JSONArray();
-		for (RoomThread room : this.getRooms()) {
-			array.put(buildRoomJson(room));
+		synchronized (roomMap) {
+			for (RoomThread room : roomMap.values()) {
+				array.put(buildRoomJson(room));
+			}
 		}
 		roomInfosJson.put("rooms", array);
 		client.addMessage(factory.make(MessageType.ROOM_LIST_UPDATE, roomInfosJson));
 	}
-	
+
 	public void removeRoom(RoomThread room) {
-		this.getRooms().remove(room);
+		synchronized (roomMap) {
+			roomMap.values().remove(room);
+		}
 	}
 	
 	public static void reset() {

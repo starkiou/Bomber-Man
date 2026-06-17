@@ -86,14 +86,18 @@ public class ServerClientMessageHandler {
 			case ROOM_UPDATE:
 				break;
 			case ROOM_QUIT:
-				sender.getRoom().removeClient(sender);
-				sender.addMessage(new RoomCorrectQuitMessage());
+				if (sender.getRoom() != null) {
+					sender.getRoom().removeClient(sender);
+					sender.setRoom(null);
+					sender.addMessage(new RoomCorrectQuitMessage());
+				}
 				break;
 			case READY_CLIENT:
 				ClientReadyMessage clientReadyMessage = (ClientReadyMessage) message;
 				sender.setReady(clientReadyMessage.isReady());
 				System.out.println(sender.getPseudo()+" PRÊT");
 				sender.addMessage(new ClientCorrectReadyUpdateMessage());
+				break;
 			default:
 				break;
 		}

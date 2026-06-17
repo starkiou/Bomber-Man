@@ -19,7 +19,7 @@ public class PlayActionMessage implements Message  {
 		this.playerID = dataJson.getInt("playerID");
 		
 		String actionTexte = dataJson.getString("actionType");
-		this.actionType = actionType.valueOf(actionTexte);
+		this.actionType = ActionType.valueOf(actionTexte);
 	}
 	
 	public int getPlayerID() {

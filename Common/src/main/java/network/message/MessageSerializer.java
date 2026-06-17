@@ -26,18 +26,27 @@ public class MessageSerializer {
 	public Message deserialize(byte[] byteObject) {
 		ByteBuffer buffer = ByteBuffer.wrap(byteObject);
 
+        if (buffer.remaining() < 1 + 4) {
+            return null;
+        }
+
         byte typeByte = buffer.get();
         int length = buffer.getInt();
+
+        if (length < 0 || length > buffer.remaining()) {
+            return null;
+        }
 
         byte[] dataBytes = new byte[length];
         buffer.get(dataBytes);
 
         JSONObject dataJson = new JSONObject(new String(dataBytes, StandardCharsets.UTF_8));
         MessageType type = MessageType.fromId(typeByte);
+        if (type == null) {
+            return null;
+        }
 
         return messageFactory.make(type, dataJson);
-    
-		
 	};
 	
 	

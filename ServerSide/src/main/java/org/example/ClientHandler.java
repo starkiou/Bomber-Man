@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import network.message.Message;
 import network.message.MessageSerializer;
 import network.message.RoomQuitMessage;
@@ -22,18 +23,18 @@ public class ClientHandler extends Thread {
 	private int clientId;
 	
 	private final MessageSerializer serializer = new MessageSerializer();
-	
-	private final Queue<Message> messageQueue = new LinkedList<>();
-    
-    private boolean mustContinueListen = true;
-    
+
+	private final BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<>();
+
+    private volatile boolean mustContinueListen = true;
+
     private RoomThread room = null;
-    
+
     public InputStream in;
     public OutputStream out;
-    
 
-	private boolean isReady = false; //maybe need to be moved into roomThread
+
+	private volatile boolean isReady = false; //maybe need to be moved into roomThread
 	
 	private String pseudo;
 
@@ -112,19 +113,19 @@ public class ClientHandler extends Thread {
 
 	
 	public void addMessage(Message message) {
-	    synchronized (messageQueue) {
-	        messageQueue.add(message);
-	    }
+	    messageQueue.offer(message);
 	}
-	
+
 	private void startSendingInAnotherThread() {
 		new Thread(() -> {
             while (mustContinueListen) {
-                Message message = null;
-                synchronized (messageQueue) {
-                    if (!messageQueue.isEmpty()) {
-                        message = messageQueue.poll();
-                    }
+                Message message;
+                try {
+                    // Bloque jusqu'à ce qu'un message arrive (plus de busy-wait CPU).
+                    message = messageQueue.poll(200, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
                 }
                 if (message != null) {
                     try {
@@ -132,7 +133,9 @@ public class ClientHandler extends Thread {
                         out.write(data);
                         out.flush();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        // Flux rompu : on arrête proprement le client au lieu de boucler.
+                        closeConnection();
+                        break;
                     }
                 }
             }
