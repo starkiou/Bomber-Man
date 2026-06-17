@@ -40,9 +40,12 @@ public class SceneManager {
             }
 
             // 3. Charger le CSS si nécessaire
-            String css = getClass().getResource("/style.css").toExternalForm();
-            if (!stage.getScene().getStylesheets().contains(css)) {
-                stage.getScene().getStylesheets().add(css);
+            var cssUrl = getClass().getResource("/style.css");
+            if (cssUrl != null) {
+                String css = cssUrl.toExternalForm();
+                if (!stage.getScene().getStylesheets().contains(css)) {
+                    stage.getScene().getStylesheets().add(css);
+                }
             }
 
             // 4. On s'assure qu'on est en plein écran (ne fera rien si déjà actif)

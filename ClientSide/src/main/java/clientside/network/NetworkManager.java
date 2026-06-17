@@ -14,20 +14,20 @@ public class NetworkManager {
     private static NetworkManager instance;
     private Socket socket;
     private OutputStream out;
-    private boolean connected = false;
+    private volatile boolean connected = false;
 
     private String nickname;
     private int selectedCharacterId = 0;
     private int currentRoomId = -1;
     private boolean isHost = false;
 
-    private Consumer<Message> currentMessageHandler;
+    private volatile Consumer<Message> currentMessageHandler;
     private LaunchGameMessage pendingLaunch;
 
     private final MessageSerializer serializer = new MessageSerializer();
 
     // Singleton
-    public static NetworkManager getInstance() {
+    public static synchronized NetworkManager getInstance() {
         if (instance == null) instance = new NetworkManager();
         return instance;
     }

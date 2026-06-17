@@ -47,24 +47,23 @@ public class LoginController {
 
         Task<Boolean> connectionTask = new Task<>() {
             @Override
-            protected Boolean call() {
-                try {
-                    int port = Integer.parseInt(portStr);
-                    NetworkManager.getInstance().connect(ipAddress, port, username);
-                    return true;
-                } catch (Exception e) {
-                    return false;
-                }
+            protected Boolean call() throws Exception {
+                // On laisse l'exception remonter pour pouvoir afficher la cause réelle.
+                int port = Integer.parseInt(portStr);
+                NetworkManager.getInstance().connect(ipAddress, port, username);
+                return true;
             }
         };
 
         connectionTask.setOnSucceeded(e -> {
-            if (connectionTask.getValue()) {
-                updateDebugStatus("Connecté !", Color.GREEN);
-                playOnlineButton.setDisable(false); // Active le bouton Online
-            } else {
-                updateDebugStatus("Échec connexion.", Color.RED);
-            }
+            updateDebugStatus("Connecté !", Color.GREEN);
+            playOnlineButton.setDisable(false); // Active le bouton Online
+        });
+
+        connectionTask.setOnFailed(e -> {
+            Throwable ex = connectionTask.getException();
+            String reason = (ex != null && ex.getMessage() != null) ? ex.getMessage() : "erreur inconnue";
+            updateDebugStatus("Échec connexion : " + reason, Color.RED);
         });
 
         new Thread(connectionTask).start();
