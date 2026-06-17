@@ -5,9 +5,7 @@ import model.entity.Direction;
 import model.entity.Player;
 import model.maze.CellType;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 
 public class TacticalAI extends AIPlayer{
@@ -105,15 +103,13 @@ public class TacticalAI extends AIPlayer{
 
     private Direction repositionForBomb(CellType[][] grid, List<Bomb> bombs, Set<String> dangerZone, Player enemy) {
         int w = grid[0].length, h = grid.length;
-        int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        Direction[] dirEnum = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
 
         int bestDir = -1;
         int bestScore = Integer.MAX_VALUE;
 
         for (int d = 0; d < 4; d++) {
-            int nx = getX() + dirs[d][0];
-            int ny = getY() + dirs[d][1];
+            int nx = getX() + DIRS[d][0];
+            int ny = getY() + DIRS[d][1];
             if (!inBounds(nx, ny, w, h)) continue;
             if (grid[ny][nx] != CellType.EMPTY) continue;
             if (isInDanger(nx, ny, dangerZone)) continue;
@@ -127,46 +123,18 @@ public class TacticalAI extends AIPlayer{
                 bestDir = d;
             }
         }
-        return bestDir >= 0 ? dirEnum[bestDir] : null;
+        return bestDir >= 0 ? DIR_ENUM[bestDir] : null;
     }
 
     // ─── BFS with avoiding danger ────────────────────────────────────────
 
     private Direction bfsTowardAvoidingDanger(int startX, int startY, int targetX, int targetY, CellType[][] grid, Set<String> dangerZone) {
-        int w = grid[0].length, h = grid.length;
-        boolean[][] visited = new boolean[w][h];
-        Queue<int[]> queue = new LinkedList<>();
-        int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        Direction[] dirEnum = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
-
-        visited[startX][startY] = true;
-        for (int d = 0; d < 4; d++) {
-            int nx = startX + dirs[d][0];
-            int ny = startY + dirs[d][1];
-            if (!inBounds(nx, ny, w, h)) continue;
-            if (grid[ny][nx] != CellType.EMPTY) continue;
-            if (isInDanger(nx, ny, dangerZone)) continue;
-            if (!visited[nx][ny]) {
-                visited[nx][ny] = true;
-                queue.add(new int[]{nx, ny, d});
-            }
-        }
-        while (!queue.isEmpty()) {
-            int[] cur = queue.poll();
-            if (cur[0] == targetX && cur[1] == targetY) return dirEnum[cur[2]];
-            for (int[] d : dirs) {
-                int nx = cur[0] + d[0];
-                int ny = cur[1] + d[1];
-                if (!inBounds(nx, ny, w, h)) continue;
-                if (grid[ny][nx] != CellType.EMPTY) continue;
-                if (isInDanger(nx, ny, dangerZone)) continue;
-                if (!visited[nx][ny]) {
-                    visited[nx][ny] = true;
-                    queue.add(new int[]{nx, ny, cur[2]});
-                }
-            }
-        }
-        return bfsToward(startX, startY, targetX, targetY, grid);
+        Direction safe = bfsFirstStep(startX, startY,
+                (x, y) -> grid[y][x] == CellType.EMPTY && !isInDanger(x, y, dangerZone),
+                (x, y) -> x == targetX && y == targetY,
+                grid);
+        // À défaut d'un chemin sûr, on accepte un chemin quelconque.
+        return safe != null ? safe : bfsToward(startX, startY, targetX, targetY, grid);
     }
 
     // ─── utilities ─────────────────────────────────────────────────────────

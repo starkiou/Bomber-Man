@@ -88,15 +88,13 @@ public class SurvivalistAI extends AIPlayer{
 
     private Direction bfsAwayFrom(int fx, int fy, CellType[][] grid, Set<String> dangerZone) {
         int w = grid[0].length, h = grid.length;
-        int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        Direction[] dirEnum = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
 
         int bestDir = -1;
         int bestDist = manhattan(getX(), getY(), fx, fy);
 
         for (int d = 0; d < 4; d++) {
-            int nx = getX() + dirs[d][0];
-            int ny = getY() + dirs[d][1];
+            int nx = getX() + DIRS[d][0];
+            int ny = getY() + DIRS[d][1];
             if (!inBounds(nx, ny, w, h)) continue;
             if (grid[ny][nx] != CellType.EMPTY) continue;
             if (isInDanger(nx, ny, dangerZone)) continue;
@@ -106,45 +104,14 @@ public class SurvivalistAI extends AIPlayer{
                 bestDir = d;
             }
         }
-        return bestDir >= 0 ? dirEnum[bestDir] : null;
+        return bestDir >= 0 ? DIR_ENUM[bestDir] : null;
     }
 
     private Direction bfsTowardSafe(int startX, int startY, int targetX, int targetY, CellType[][] grid, Set<String> dangerZone) {
-        int w = grid[0].length, h = grid.length;
-        boolean[][] visited = new boolean[w][h];
-        java.util.Queue<int[]> queue = new java.util.LinkedList<>();
-        int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        Direction[] dirEnum = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
-
-        visited[startX][startY] = true;
-        for (int d = 0; d < 4; d++) {
-            int nx = startX + dirs[d][0];
-            int ny = startY + dirs[d][1];
-            if (!inBounds(nx, ny, w, h)) continue;
-            if (grid[ny][nx] != CellType.EMPTY) continue;
-            if (isInDanger(nx, ny, dangerZone)) continue;
-            if (!visited[nx][ny]) {
-                visited[nx][ny] = true;
-                queue.add(new int[]{nx, ny, d});
-            }
-        }
-        while (!queue.isEmpty()) {
-            int[] cur = queue.poll();
-            int cx = cur[0], cy = cur[1], firstDir = cur[2];
-            if (cx == targetX && cy == targetY) return dirEnum[firstDir];
-            for (int[] d : dirs) {
-                int nx = cx + d[0];
-                int ny = cy + d[1];
-                if (!inBounds(nx, ny, w, h)) continue;
-                if (grid[ny][nx] != CellType.EMPTY) continue;
-                if (isInDanger(nx, ny, dangerZone)) continue;
-                if (!visited[nx][ny]) {
-                    visited[nx][ny] = true;
-                    queue.add(new int[]{nx, ny, firstDir});
-                }
-            }
-        }
-        return null;
+        return bfsFirstStep(startX, startY,
+                (x, y) -> grid[y][x] == CellType.EMPTY && !isInDanger(x, y, dangerZone),
+                (x, y) -> x == targetX && y == targetY,
+                grid);
     }
 
     private int getCurrentBombRadius() {

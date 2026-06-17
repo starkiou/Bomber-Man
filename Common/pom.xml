@@ -20,19 +20,14 @@
 
     <dependencies>
         <dependency>
+            <!-- Agrégateur : api + engine + params, indispensable pour que surefire
+                 exécute réellement les tests JUnit 5. -->
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.0</version>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-        
         <dependency>
 		    <groupId>org.json</groupId>
 		    <artifactId>json</artifactId>

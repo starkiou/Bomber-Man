@@ -22,43 +22,86 @@ public abstract class AIPlayer extends Player {
 
     public abstract AIAction computeAction(CellType[][] grid, List<Player> players, List<Bomb> bombs);
 
-    // ─── BFS ─────────────────────────────────────────────────────────────────
+    // ─── BFS core ────────────────────────────────────────────────────────────
 
-    protected Direction bfsToward(int startX, int startY, int targetX, int targetY, CellType[][] grid) {
-        if (startX == targetX && startY == targetY) return null;
+    /** Quatre directions cardinales (ordre : haut, bas, gauche, droite). */
+    protected static final int[][] DIRS = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+    protected static final Direction[] DIR_ENUM = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
 
-        int h = grid.length;
-        int w = grid[0].length;
+    /** Test sur une cellule (coordonnées x,y). */
+    @FunctionalInterface
+    protected interface CellTest {
+        boolean test(int x, int y);
+    }
+
+    /**
+     * BFS générique : renvoie la première direction à prendre depuis (sx,sy) pour
+     * atteindre une cellule satisfaisant {@code isGoal}, en ne traversant que des
+     * cellules satisfaisant {@code canEnter}. {@code null} si aucun chemin.
+     */
+    protected Direction bfsFirstStep(int sx, int sy, CellTest canEnter, CellTest isGoal, CellType[][] grid) {
+        int h = grid.length, w = grid[0].length;
         boolean[][] visited = new boolean[w][h];
         Queue<int[]> queue = new LinkedList<>();
+        visited[sx][sy] = true;
 
-        int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        Direction[] dirEnum = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
-
-        visited[startX][startY] = true;
         for (int d = 0; d < 4; d++) {
-            int nx = startX + dirs[d][0];
-            int ny = startY + dirs[d][1];
-            if (inBounds(nx, ny, w, h) && grid[ny][nx] == CellType.EMPTY && !visited[nx][ny]) {
+            int nx = sx + DIRS[d][0], ny = sy + DIRS[d][1];
+            if (inBounds(nx, ny, w, h) && !visited[nx][ny] && canEnter.test(nx, ny)) {
                 visited[nx][ny] = true;
+                if (isGoal.test(nx, ny)) return DIR_ENUM[d];
                 queue.add(new int[]{nx, ny, d});
             }
         }
-
         while (!queue.isEmpty()) {
             int[] cur = queue.poll();
-            int cx = cur[0], cy = cur[1], firstDir = cur[2];
-            if (cx == targetX && cy == targetY) return dirEnum[firstDir];
-            for (int[] d : dirs) {
-                int nx = cx + d[0];
-                int ny = cy + d[1];
-                if (inBounds(nx, ny, w, h) && grid[ny][nx] == CellType.EMPTY && !visited[nx][ny]) {
+            for (int d = 0; d < 4; d++) {
+                int nx = cur[0] + DIRS[d][0], ny = cur[1] + DIRS[d][1];
+                if (inBounds(nx, ny, w, h) && !visited[nx][ny] && canEnter.test(nx, ny)) {
                     visited[nx][ny] = true;
-                    queue.add(new int[]{nx, ny, firstDir});
+                    if (isGoal.test(nx, ny)) return DIR_ENUM[cur[2]];
+                    queue.add(new int[]{nx, ny, cur[2]});
                 }
             }
         }
         return null;
+    }
+
+    /**
+     * BFS générique booléen : {@code true} s'il existe une cellule atteignable
+     * (départ inclus) satisfaisant {@code isGoal}, en ne traversant que des
+     * cellules {@code canEnter}.
+     */
+    protected boolean bfsAnyReachable(int sx, int sy, CellTest canEnter, CellTest isGoal, CellType[][] grid) {
+        int h = grid.length, w = grid[0].length;
+        boolean[][] visited = new boolean[w][h];
+        Queue<int[]> queue = new LinkedList<>();
+        visited[sx][sy] = true;
+        if (isGoal.test(sx, sy)) return true;
+        queue.add(new int[]{sx, sy});
+
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            for (int[] dir : DIRS) {
+                int nx = cur[0] + dir[0], ny = cur[1] + dir[1];
+                if (inBounds(nx, ny, w, h) && !visited[nx][ny] && canEnter.test(nx, ny)) {
+                    visited[nx][ny] = true;
+                    if (isGoal.test(nx, ny)) return true;
+                    queue.add(new int[]{nx, ny});
+                }
+            }
+        }
+        return false;
+    }
+
+    // ─── BFS ─────────────────────────────────────────────────────────────────
+
+    protected Direction bfsToward(int startX, int startY, int targetX, int targetY, CellType[][] grid) {
+        if (startX == targetX && startY == targetY) return null;
+        return bfsFirstStep(startX, startY,
+                (x, y) -> grid[y][x] == CellType.EMPTY,
+                (x, y) -> x == targetX && y == targetY,
+                grid);
     }
 
     protected Direction bfsTowardBrick(int startX, int startY, int targetX, int targetY, CellType[][] grid) {
@@ -69,18 +112,15 @@ public abstract class AIPlayer extends Player {
         boolean[][] visited = new boolean[w][h];
         Queue<int[]> queue = new LinkedList<>();
 
-        int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        Direction[] dirEnum = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
-
         visited[startX][startY] = true;
         for (int d = 0; d < 4; d++) {
-            int nx = startX + dirs[d][0];
-            int ny = startY + dirs[d][1];
+            int nx = startX + DIRS[d][0];
+            int ny = startY + DIRS[d][1];
             if (!inBounds(nx, ny, w, h) || visited[nx][ny]) continue;
             CellType cell = grid[ny][nx];
             if (cell == CellType.WALL) continue;
             visited[nx][ny] = true;
-            if (nx == targetX && ny == targetY) return dirEnum[d];
+            if (nx == targetX && ny == targetY) return DIR_ENUM[d];
             if (cell == CellType.EMPTY) queue.add(new int[]{nx, ny, d});
         }
 
@@ -88,13 +128,13 @@ public abstract class AIPlayer extends Player {
             int[] cur = queue.poll();
             int cx = cur[0], cy = cur[1], firstDir = cur[2];
             for (int d = 0; d < 4; d++) {
-                int nx = cx + dirs[d][0];
-                int ny = cy + dirs[d][1];
+                int nx = cx + DIRS[d][0];
+                int ny = cy + DIRS[d][1];
                 if (!inBounds(nx, ny, w, h) || visited[nx][ny]) continue;
                 CellType cell = grid[ny][nx];
                 if (cell == CellType.WALL) continue;
                 visited[nx][ny] = true;
-                if (nx == targetX && ny == targetY) return dirEnum[firstDir];
+                if (nx == targetX && ny == targetY) return DIR_ENUM[firstDir];
                 if (cell == CellType.EMPTY) queue.add(new int[]{nx, ny, firstDir});
             }
         }
@@ -119,71 +159,20 @@ public abstract class AIPlayer extends Player {
     }
 
     protected Direction fleeToSafety(int startX, int startY, CellType[][] grid, Set<String> dangerZone) {
-        if (!isInDanger(startX, startY, dangerZone)){
+        if (!isInDanger(startX, startY, dangerZone)) {
             return null;
         }
-
-        int h = grid.length;
-        int w = grid[0].length;
-        boolean[][] visited = new boolean[w][h];
-        Queue<int[]> queue = new LinkedList<>();
-
-        int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        Direction[] dirEnum = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
-
-        visited[startX][startY] = true;
-
-        for (int d = 0; d < 4; d++) {
-            int nx = startX + dirs[d][0];
-            int ny = startY + dirs[d][1];
-            if (inBounds(nx, ny, w, h) && grid[ny][nx] == CellType.EMPTY && !visited[nx][ny]) {
-                visited[nx][ny] = true;
-                queue.add(new int[]{nx, ny, d});
-            }
-        }
-
-        while (!queue.isEmpty()) {
-            int[] cur = queue.poll();
-            int cx = cur[0], cy = cur[1], firstDir = cur[2];
-            if (!isInDanger(cx, cy, dangerZone)){
-                return dirEnum[firstDir];
-            }
-            for (int[] d : dirs) {
-                int nx = cx + d[0];
-                int ny = cy + d[1];
-                if (inBounds(nx, ny, w, h) && grid[ny][nx] == CellType.EMPTY && !visited[nx][ny]) {
-                    visited[nx][ny] = true;
-                    queue.add(new int[]{nx, ny, firstDir});
-                }
-            }
-        }
-        return null;
+        return bfsFirstStep(startX, startY,
+                (x, y) -> grid[y][x] == CellType.EMPTY,
+                (x, y) -> !isInDanger(x, y, dangerZone),
+                grid);
     }
 
     protected boolean hasEscapeRoute(int x, int y, CellType[][] grid, Set<String> futureDanger) {
-        int h = grid.length;
-        int w = grid[0].length;
-        int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        boolean[][] visited = new boolean[w][h];
-        Queue<int[]> queue = new LinkedList<>();
-        visited[x][y] = true;
-        queue.add(new int[]{x, y});
-
-        while (!queue.isEmpty()) {
-            int[] cur = queue.poll();
-            if (!isInDanger(cur[0], cur[1], futureDanger)){
-                return true;
-            }
-            for (int[] d : dirs) {
-                int nx = cur[0] + d[0];
-                int ny = cur[1] + d[1];
-                if (inBounds(nx, ny, w, h) && grid[ny][nx] == CellType.EMPTY && !visited[nx][ny]) {
-                    visited[nx][ny] = true;
-                    queue.add(new int[]{nx, ny});
-                }
-            }
-        }
-        return false;
+        return bfsAnyReachable(x, y,
+                (nx, ny) -> grid[ny][nx] == CellType.EMPTY,
+                (cx, cy) -> !isInDanger(cx, cy, futureDanger),
+                grid);
     }
 
     // ─── Cooldowns ───────────────────────────────────────────────────────────────

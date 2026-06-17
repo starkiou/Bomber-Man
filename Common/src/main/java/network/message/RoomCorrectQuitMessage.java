@@ -2,25 +2,16 @@ package network.message;
 
 import org.json.JSONObject;
 
-public class RoomCorrectQuitMessage implements Message {
-	
-	
-	public RoomCorrectQuitMessage() {
-		
-	}
-	
-	public RoomCorrectQuitMessage(JSONObject dataJson) {
+public class RoomCorrectQuitMessage extends AbstractEmptyMessage {
 
+	public RoomCorrectQuitMessage() {
 	}
-	
-	@Override
-	public JSONObject getData() {
-	    return new JSONObject();
+
+	public RoomCorrectQuitMessage(JSONObject dataJson) {
 	}
 
 	@Override
 	public MessageType getMessageType() {
 		return MessageType.ROOM_CORRECT_QUIT;
 	}
-
 }
