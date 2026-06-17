@@ -53,12 +53,7 @@ public class Player extends Entity {
             if (grid[nextY][nextX] == CellType.EMPTY) {
                 this.x = nextX;
                 this.y = nextY;
-                System.out.println("Déplacement réussi en : " + x + ", " + y);
-            } else {
-                System.out.println("C'est un mur !");
             }
-        } else {
-            System.out.println("Hors des limites du labyrinthe !");
         }
     }
 
@@ -94,7 +89,6 @@ public class Player extends Entity {
 
         if (currentTime - lastBombRegenTime >= REGEN_TIME_MS) {
             currentBombs++;
-            System.out.println("Bombe récupérée ! Total : " + currentBombs);
             lastBombRegenTime = currentTime;
         }
     }

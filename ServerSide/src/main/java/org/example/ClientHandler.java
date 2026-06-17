@@ -28,7 +28,7 @@ public class ClientHandler extends Thread {
 
     private volatile boolean mustContinueListen = true;
 
-    private RoomThread room = null;
+    private volatile RoomThread room = null;
 
     public InputStream in;
     public OutputStream out;
@@ -61,8 +61,6 @@ public class ClientHandler extends Thread {
 
 	    } catch (IOException e) {
 	        System.out.println("Client a l'adresse " + socket.getInetAddress() + " deconnecte.");
-	    } finally {
-	    	
 	    }
 	}
 	
@@ -74,10 +72,6 @@ public class ClientHandler extends Thread {
 
 	public void setReady(boolean isReady) {
 		this.isReady = isReady;
-	}
-	
-	public void stopThread() {
-		this.closeConnection();
 	}
 	
 	private void closeConnection() {
@@ -95,7 +89,7 @@ public class ClientHandler extends Thread {
 		return room;
 	}
 
-	public synchronized void setRoom(RoomThread room) {
+	public void setRoom(RoomThread room) {
 		this.room = room;
 	}
 	

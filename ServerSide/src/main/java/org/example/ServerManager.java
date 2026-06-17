@@ -5,7 +5,6 @@ import java.io.IOException;
 import model.logger.LogManager;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +16,6 @@ import org.json.JSONObject;
 import network.message.Message;
 import network.message.MessageFactory;
 import network.message.MessageType;
-import network.message.RoomInfoDTO;
 
 public class ServerManager {
 
@@ -79,10 +77,6 @@ public class ServerManager {
     	this.updateRoomsListOfClients();
     }
 
-    public synchronized Collection<RoomThread> getRooms() {
-        return roomMap.values();
-    }
-
     public RoomThread getRoomsById(int id) {
         return roomMap.get(id);
     }
@@ -121,7 +115,8 @@ public class ServerManager {
 		return roomJson;
 	}
 
-	public void updateRoomsListOfClients() {
+	/** Construit le message {"rooms":[...]} décrivant toutes les rooms. */
+	private Message buildRoomsListMessage() {
 		JSONObject roomInfosJson = new JSONObject();
 		JSONArray array = new JSONArray();
 		synchronized (roomMap) {
@@ -130,20 +125,16 @@ public class ServerManager {
 			}
 		}
 		roomInfosJson.put("rooms", array);
-		this.broadCastToAllClient(factory.make(MessageType.ROOM_LIST_UPDATE, roomInfosJson));
+		return factory.make(MessageType.ROOM_LIST_UPDATE, roomInfosJson);
+	}
+
+	public void updateRoomsListOfClients() {
+		this.broadCastToAllClient(buildRoomsListMessage());
 	}
 
 	/** Envoie la liste des rooms à un seul client (réponse à GET_ROOM_LIST_UPDATE) */
 	public void sendRoomsListToClient(ClientHandler client) {
-		JSONObject roomInfosJson = new JSONObject();
-		JSONArray array = new JSONArray();
-		synchronized (roomMap) {
-			for (RoomThread room : roomMap.values()) {
-				array.put(buildRoomJson(room));
-			}
-		}
-		roomInfosJson.put("rooms", array);
-		client.addMessage(factory.make(MessageType.ROOM_LIST_UPDATE, roomInfosJson));
+		client.addMessage(buildRoomsListMessage());
 	}
 
 	public void removeRoom(RoomThread room) {

@@ -1,31 +1,19 @@
 package org.example;
 
-import java.util.List;
-import org.json.JSONObject;
-
-import model.maze.CellType;
-import model.maze.MazeFactory;
 import network.message.ClientCorrectReadyUpdateMessage;
-import network.message.ClientInfoDTO;
 import network.message.ClientReadyMessage;
 import network.message.ConnectionMessage;
-import network.message.LaunchGameMessage;
 import network.message.Message;
-import network.message.MessageFactory;
-import network.message.MessageType;
-import network.message.PlayActionMessage;
 import network.message.RoomAcceptedCreationMessage;
 import network.message.RoomCorrectQuitMessage;
-import network.message.RoomInfoDTO;
 import network.message.RoomAcceptedJoinMessage;
 import network.message.RoomCreationMessage;
 import network.message.RoomJoiningMessage;
 import network.message.RoomRefusedCreationMessage;
+import network.message.RoomRefusedJoinMessage;
 
 public class ServerClientMessageHandler {
 	private ServerManager serverManager;
-
-	public MessageFactory factory = new MessageFactory();
 
 	public synchronized void handle(ClientHandler sender, Message message) {
 		switch(message.getMessageType()) {
@@ -63,21 +51,9 @@ public class ServerClientMessageHandler {
 
 			case LAUNCH_GAME:
 				if (sender.getRoom() != null) {
-					// vérif que tout le monde est prêt
+					// vérif que tout le monde est prêt, puis lancement centralisé
 					if (!sender.getRoom().isReadyToLaunch()) break;
-					// génère la grille côté serveur
-					CellType[][] grid = MazeFactory.createMaze(MazeFactory.Algorithm.EXHAUSTIVE, 15, 11);
-					List<ClientInfoDTO> playerList = sender.getRoom().getClientInfoList();
-					int bots = sender.getRoom().getBotCount();
-					// Envoie un message personnalisé à chaque client avec son propre playerId
-					List<ClientHandler> clients = sender.getRoom().getListClient();
-					for (int i = 0; i < clients.size(); i++) {
-						int pid = i + 1;
-						clients.get(i).addMessage(new LaunchGameMessage(playerList, bots, grid, pid));
-					}
-					sender.getRoom().setInGame(true);
-					sender.getRoom().stopWaiting();
-					this.serverManager.updateRoomsListOfClients();
+					sender.getRoom().launchGame();
 				}
 				break;
 			case ROOM_JOIN:
@@ -95,7 +71,6 @@ public class ServerClientMessageHandler {
 			case READY_CLIENT:
 				ClientReadyMessage clientReadyMessage = (ClientReadyMessage) message;
 				sender.setReady(clientReadyMessage.isReady());
-				System.out.println(sender.getPseudo()+" PRÊT");
 				sender.addMessage(new ClientCorrectReadyUpdateMessage());
 				break;
 			default:
@@ -108,9 +83,9 @@ public class ServerClientMessageHandler {
 		int roomId = messageRoomJoining.getIdRoom();
 		RoomThread room = this.serverManager.getRoomsById(roomId);
 		if(room == null || room.isInGame() || room.isFull()) {
-			JSONObject json = new JSONObject();
-			json.put("roomId", roomId);
-			sender.addMessage(factory.make(MessageType.REFUSED_ROOM_JOIN, json));
+			// On construit le message directement : la fabrique attend la clé
+			// "idRoom", pas "roomId" (sinon JSONException côté client).
+			sender.addMessage(new RoomRefusedJoinMessage(roomId));
 		} else {
 			room.addClient(sender);
 			sender.setRoom(room);

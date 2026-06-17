@@ -19,7 +19,6 @@ public class AggressiveAI extends AIPlayer{
     @Override
     public AIAction computeAction(CellType[][] grid, List<Player> players, List<Bomb> bombs) {
 
-        Set<String> dangerZone = computeDangerZone(grid, bombs);
         Player enemy = nearestEnemy(players);
 
         // ── 1. Flee enemies bombs ───────────────────────────────────────

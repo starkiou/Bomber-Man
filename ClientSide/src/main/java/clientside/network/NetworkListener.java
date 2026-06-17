@@ -49,8 +49,6 @@ public class NetworkListener implements Runnable {
     }
 
     private void handleMessage(Message msg) {
-        System.out.println("Message reçu du serveur : " + msg.getMessageType());
-
         // On transmet au contrôleur qui écoute actuellement.
         // Capture locale pour éviter qu'un autre thread mette le handler à null
         // entre le test et l'appel.

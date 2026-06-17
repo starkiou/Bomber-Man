@@ -16,10 +16,6 @@ public class TacticalAI extends AIPlayer{
 
     private static final int COMBAT_RANGE = 5;
 
-    // ─── Internal state ────────────────────────────────────────────────────────
-
-    private boolean retreating = false;
-
     public TacticalAI(int id, int x, int y, int hp, double speed, int maxBombs) {
         super(id, x, y, hp, speed, maxBombs);
     }
@@ -31,12 +27,9 @@ public class TacticalAI extends AIPlayer{
 
         // ── 1. Flee if possible ───────────────────────────────────────
         if (isInDanger(getX(), getY(), dangerZone)) {
-            retreating = true;
             Direction flee = fleeToSafety(getX(), getY(), grid, dangerZone);
             return new AIAction(flee, false);
         }
-
-        retreating = false;
 
         Player enemy = nearestEnemy(players);
         if (enemy == null) return new AIAction(null, false);
@@ -75,7 +68,6 @@ public class TacticalAI extends AIPlayer{
         Set<String> futureZone = dangerIfBombAt(getX(), getY(), DEFAULT_BOMB_RADIUS, grid, bombs);
 
         if (hasEscapeRoute(getX(), getY(), grid, futureZone)) {
-            retreating = true;
             return new AIAction(null, true);
         }
 

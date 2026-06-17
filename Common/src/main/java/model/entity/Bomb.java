@@ -59,7 +59,6 @@ public class Bomb extends Entity {
 
     private void explode() {
         this.exploded = true;
-        System.out.println("BOOM ! La bombe " + id + " explose avec un rayon de " + radius);
     }
 
     // ─── Explosion Logic ──────────────────────────────────────────────────────

@@ -7,7 +7,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.TilePane;
 import javafx.scene.paint.Color;
 
 public class LoginController {
@@ -17,9 +16,6 @@ public class LoginController {
     @FXML private TextField serverPortField;
     @FXML private Label debugText;
     @FXML private Button playOnlineButton;
-    @FXML private TilePane spriteContainer;
-
-    private String selectedSprite = "default_bomber.png";
 
     @FXML
     public void initialize() {

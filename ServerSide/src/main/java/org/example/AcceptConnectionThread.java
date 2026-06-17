@@ -16,14 +16,6 @@ public class AcceptConnectionThread extends Thread {
 	
 	
 	
-	public AcceptConnectionThread(ServerManager serverMain, ServerSocket serverSocket) {
-		this.serverSocket=serverSocket;
-		this.serverMain=serverMain;
-	}
-
-
-		
-
 	public AcceptConnectionThread(ServerManager serverMain, int port) {
 		try {
 			this.serverSocket=new ServerSocket(port);

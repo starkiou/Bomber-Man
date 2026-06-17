@@ -13,9 +13,7 @@ public class HomeController {
 
     @FXML
     private void onSettingsClick() {
-        // TODO CONFIG DU JEU
-        System.out.println("Ouverture des paramètres...");
-        // SceneManager.getInstance().loadScene("settings-view.fxml");
+        // TODO: écran de configuration du jeu (non implémenté)
     }
 
     @FXML

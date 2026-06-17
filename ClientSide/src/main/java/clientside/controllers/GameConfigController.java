@@ -57,8 +57,6 @@ public class GameConfigController {
         selectedMapSize = mapSizeBox.getValue();
         selectedDifficulty = difficultyBox.getValue();
 
-        System.out.println("🚀 Config : Map=" + selectedMapSize + " | Bots=" + selectedBots + " | Time=" + selectedTime + "s");
-
         SceneManager.getInstance().loadScene("game-board.fxml");
     }
 

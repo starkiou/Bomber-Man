@@ -34,7 +34,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class GameBoardController {
 
     @FXML private GridPane gameGrid;
-    @FXML private Label hpLabel, bombsLabel, timerLabel;
+    @FXML private Label hpLabel, bombsLabel, timerLabel, modeLabel;
 
     private static final int TILE_SIZE = 40;
 
@@ -233,6 +233,8 @@ public class GameBoardController {
             int[] pos = spawnPos[spawnIdx++];
             game.addBot(AIFactory.create(Strategy.SURVIVALIST, bid, pos[0], pos[1], 3, 1.0, 1));
         }
+
+        modeLabel.setText(isOnline ? "EN LIGNE" : "HORS LIGNE");
 
         game.addListener(new GameStateListener() {
             @Override public void onGameStateUpdate(GameSnapshot snap) { Platform.runLater(() -> drawMap(snap)); }

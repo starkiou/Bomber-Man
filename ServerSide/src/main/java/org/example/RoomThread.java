@@ -1,5 +1,7 @@
 package org.example;
 
+import model.maze.CellType;
+import model.maze.MazeFactory;
 import network.message.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -56,9 +58,8 @@ public class RoomThread extends Thread {
                 long elapsed = System.currentTimeMillis() - readyStartTime;
 
                 if (elapsed >= TIME_BEFORE_LAUNCH) {
-                    System.out.println("Lancement de la partie !");
-                    this.stopWaiting();
-                    this.setInGame(true);
+                    // Le compte à rebours est terminé : on lance réellement la partie.
+                    this.launchGame();
                     break;
                 }
             }
@@ -137,6 +138,32 @@ public class RoomThread extends Thread {
         return list;
     }
 
+    /**
+     * Lance réellement la partie : génère la grille, envoie à chaque client un
+     * LaunchGameMessage personnalisé (avec son playerId positionnel) et marque la
+     * room en jeu. Appelée à la fois par le bouton explicite (LAUNCH_GAME) et par
+     * le compte à rebours automatique. Idempotente.
+     */
+    public synchronized void launchGame() {
+        if (inGame) return; // déjà lancée
+
+        CellType[][] grid = MazeFactory.createMaze(MazeFactory.Algorithm.EXHAUSTIVE, 15, 11);
+        List<ClientInfoDTO> playerList = getClientInfoList();
+
+        // Snapshot cohérent de la liste des clients (évite une course sur les index).
+        List<ClientHandler> snapshot;
+        synchronized (listClient) {
+            snapshot = new ArrayList<>(listClient);
+        }
+        for (int i = 0; i < snapshot.size(); i++) {
+            snapshot.get(i).addMessage(new LaunchGameMessage(playerList, botCount, grid, i + 1));
+        }
+
+        setInGame(true);
+        stopWaiting();
+        ServerManager.getInstance().updateRoomsListOfClients();
+    }
+
     public synchronized void broadcast(Message message) {
         synchronized (listClient) {
             for(ClientHandler client : listClient) {
@@ -157,16 +184,11 @@ public class RoomThread extends Thread {
         return maxPlayer;
     }
 
-    public void setMaxPlayer(int maxPlayer) {
-        this.maxPlayer = maxPlayer;
-    }
-
     public int getPlayerCount() {
         return this.listClient.size();
     }
 
     public String getRoomName() { return roomName; }
-    public void setRoomName(String roomName) { this.roomName = roomName; }
     public String getMapSize() { return mapSize; }
     public String getDifficulty() { return difficulty; }
     public int getBotCount() { return botCount; }
@@ -176,14 +198,10 @@ public class RoomThread extends Thread {
         this.listClient.remove(client);
         if(this.listClient.isEmpty()) {
             ServerManager.getInstance().removeRoom(this);
+            // La room est vide : on arrête sa boucle pour ne pas laisser le thread
+            // tourner dans le vide (broadcast à personne toutes les 200 ms).
+            this.stopWaiting();
         }
     }
 
-    public List<ClientHandler> getListClient(){
-        return this.listClient;
-    }
-
-    public boolean getReadyToLaunch() {
-        return this.readyToLaunch;
-    }
 }
