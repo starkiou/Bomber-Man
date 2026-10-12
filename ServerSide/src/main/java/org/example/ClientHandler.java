@@ -163,7 +163,8 @@ public class ClientHandler extends Thread {
 	            }
 	        }
 	    } catch (IOException e) {
-	        if (mustContinueListen) e.printStackTrace();
+	        // Une déconnexion côté client est un événement normal, pas une erreur
+	        if (mustContinueListen) System.out.println("Client " + clientId + " deconnecte.");
 	    } finally {
 	        closeConnection();
 	        this.serverManager.getServerMessageHandler().handle(this, new RoomQuitMessage());
