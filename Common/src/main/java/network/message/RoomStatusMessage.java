@@ -12,6 +12,8 @@ public class RoomStatusMessage implements Message {
     private int roomId;
     private boolean isWaiting;
     private long countdown;
+    /** Identifiant du client hôte de la room, ou -1 s'il est inconnu. */
+    private int hostId = -1;
 
     public RoomStatusMessage(int roomId, boolean isWaiting, List<ClientInfoDTO> clients, long countdown) {
         this.roomId = roomId;
@@ -25,6 +27,7 @@ public class RoomStatusMessage implements Message {
         JSONArray clientsArray = dataJson.getJSONArray("clients");
         this.roomId = dataJson.getInt("roomId");
         this.isWaiting = dataJson.optBoolean("isWaiting", true);
+        this.hostId = dataJson.optInt("hostId", -1);
         for (int i = 0; i < clientsArray.length(); i++) {
             this.clients.add(new ClientInfoDTO(clientsArray.getJSONObject(i)));
         }
@@ -42,6 +45,7 @@ public class RoomStatusMessage implements Message {
         JSONObject obj = new JSONObject();
         obj.put("roomId", this.roomId);
         obj.put("isWaiting", this.isWaiting);
+        obj.put("hostId", this.hostId);
         JSONArray array = new JSONArray();
         for (ClientInfoDTO client : this.clients) {
             array.put(client.toJson());
@@ -58,6 +62,10 @@ public class RoomStatusMessage implements Message {
     
     public long getCountdown() {
         return countdown;
+    }
+
+    public int getHostId() {
+        return hostId;
     }
 
     public boolean isWaiting() {

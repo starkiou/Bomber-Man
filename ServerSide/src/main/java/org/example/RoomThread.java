@@ -26,6 +26,12 @@ public class RoomThread extends Thread {
 
     private volatile boolean inGame = false;
 
+    /** Nombre total de personnages sur une carte, joueurs et bots confondus. */
+    public static final int MAX_CHARACTERS = 4;
+
+    /** Créateur de la room ; seul lui peut lancer la partie avant la fin du décompte. */
+    private volatile ClientHandler host = null;
+
     private int maxPlayer;
     private String roomName;
     private String mapSize;
@@ -33,12 +39,13 @@ public class RoomThread extends Thread {
     private int botCount;
 
     public RoomThread(int maxPlayer, int id, String roomName, String mapSize, String difficulty, int botCount) {
-        this.maxPlayer = maxPlayer;
         this.id = id;
         this.roomName = roomName;
         this.mapSize = mapSize;
         this.difficulty = difficulty;
-        this.botCount = botCount;
+        // Les bots occupent des places : il reste au moins une place pour un joueur
+        this.botCount = Math.max(0, Math.min(botCount, MAX_CHARACTERS - 1));
+        this.maxPlayer = Math.max(1, Math.min(maxPlayer, MAX_CHARACTERS - this.botCount));
     }
 
     public int getRoomId() {
@@ -47,6 +54,11 @@ public class RoomThread extends Thread {
 
     public void addClient(ClientHandler clientHandler) {
         listClient.add(clientHandler);
+        if (host == null) host = clientHandler;
+    }
+
+    public boolean isHost(ClientHandler client) {
+        return client != null && client == host;
     }
 
     @Override
@@ -67,6 +79,8 @@ public class RoomThread extends Thread {
             JSONObject json = new JSONObject();
             json.put("roomId", this.getRoomId());
             json.put("isWaiting", this.isWaiting);
+            ClientHandler currentHost = this.host;
+            json.put("hostId", currentHost != null ? currentHost.getClientId() : -1);
 
             if (readyStartTime != -1) {
                 long remaining = TIME_BEFORE_LAUNCH - (System.currentTimeMillis() - readyStartTime);
@@ -196,6 +210,12 @@ public class RoomThread extends Thread {
 
     public void removeClient(ClientHandler client) {
         this.listClient.remove(client);
+        if (client == host) {
+            // L'hôte est parti : le plus ancien joueur restant prend sa place
+            synchronized (listClient) {
+                host = listClient.isEmpty() ? null : listClient.get(0);
+            }
+        }
         if(this.listClient.isEmpty()) {
             ServerManager.getInstance().removeRoom(this);
             // La room est vide : on arrête sa boucle pour ne pas laisser le thread

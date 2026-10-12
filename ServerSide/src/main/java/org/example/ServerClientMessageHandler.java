@@ -51,7 +51,8 @@ public class ServerClientMessageHandler {
 
 			case LAUNCH_GAME:
 				if (sender.getRoom() != null) {
-					// vérif que tout le monde est prêt, puis lancement centralisé
+					// seul l'hôte peut lancer, et seulement si tout le monde est prêt
+					if (!sender.getRoom().isHost(sender)) break;
 					if (!sender.getRoom().isReadyToLaunch()) break;
 					sender.getRoom().launchGame();
 				}
@@ -82,7 +83,7 @@ public class ServerClientMessageHandler {
 		RoomJoiningMessage messageRoomJoining = (RoomJoiningMessage) message;
 		int roomId = messageRoomJoining.getIdRoom();
 		RoomThread room = this.serverManager.getRoomsById(roomId);
-		if(room == null || room.isInGame() || room.isFull()) {
+		if(room == null || room.isInGame() || room.isFull() || sender.getRoom() != null) {
 			// On construit le message directement : la fabrique attend la clé
 			// "idRoom", pas "roomId" (sinon JSONException côté client).
 			sender.addMessage(new RoomRefusedJoinMessage(roomId));

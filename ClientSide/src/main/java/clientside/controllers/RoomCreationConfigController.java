@@ -59,8 +59,8 @@ public class RoomCreationConfigController {
         int botCount = botCountSpinner.getValue();
 
         errorLabel.setText("");
-        // NOTE maxPlayer fixé à 4, à exposer en option si besoin
-        NetworkManager.getInstance().sendMessage(new RoomCreationMessage(4, name, mapSize, difficulty, botCount));
+        // 4 personnages au plus sur la carte : chaque bot prend une place de joueur
+        NetworkManager.getInstance().sendMessage(new RoomCreationMessage(4 - botCount, name, mapSize, difficulty, botCount));
     }
 
     @FXML

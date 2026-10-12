@@ -26,9 +26,11 @@ public class RoomViewController {
     public void initialize() {
         NetworkManager.getInstance().setMessageHandler(this::onMessageReceived);
         roomInfoLabel.setText("Room #" + NetworkManager.getInstance().getCurrentRoomId()
-            + (NetworkManager.getInstance().isHost() ? "  (vous êtes le créateur)" : ""));
+            + (NetworkManager.getInstance().isHost() ? "  (vous êtes l'hôte)" : ""));
         // désactivé par défaut, activé quand tous prêts
         launchButton.setDisable(true);
+        launchButton.setVisible(NetworkManager.getInstance().isHost());
+        launchButton.setManaged(NetworkManager.getInstance().isHost());
     }
 
     private void onMessageReceived(Message msg) {
@@ -36,9 +38,16 @@ public class RoomViewController {
             RoomStatusMessage status = (RoomStatusMessage) msg;
             Platform.runLater(() -> {
                 updatePlayerList(status);
-                // activer lancer seulement si tous prêts et au moins 1 joueur
+                // L'hôte peut changer si le créateur quitte la room
+                boolean host = isLocalPlayerHost(status);
+                NetworkManager.getInstance().setHost(host);
+                roomInfoLabel.setText("Room #" + NetworkManager.getInstance().getCurrentRoomId()
+                    + (host ? "  (vous êtes l'hôte)" : ""));
+                // activer lancer seulement pour l'hôte, si tous prêts et au moins 1 joueur
                 boolean allReady = !status.getClients().isEmpty()
                     && status.getClients().stream().allMatch(ClientInfoDTO::isReady);
+                launchButton.setVisible(host);
+                launchButton.setManaged(host);
                 launchButton.setDisable(!allReady);
             });
         } else if (msg instanceof LaunchGameMessage) {
@@ -49,11 +58,24 @@ public class RoomViewController {
         }
     }
 
+    /** Le serveur désigne l'hôte par son identifiant ; on se reconnaît par le pseudo, comme en jeu. */
+    private boolean isLocalPlayerHost(RoomStatusMessage status) {
+        String myNick = NetworkManager.getInstance().getNickname();
+        if (myNick == null) return false;
+        for (ClientInfoDTO client : status.getClients()) {
+            if (client.getClientId() == status.getHostId()) {
+                return client.getPseudo() != null && myNick.trim().equalsIgnoreCase(client.getPseudo().trim());
+            }
+        }
+        return false;
+    }
+
     private void updatePlayerList(RoomStatusMessage status) {
         playerListView.getItems().clear();
         for (ClientInfoDTO client : status.getClients()) {
-            String line = String.format("%s  —  %s",
+            String line = String.format("%s%s  —  %s",
                 client.getPseudo() != null ? client.getPseudo() : "Joueur #" + client.getClientId(),
+                client.getClientId() == status.getHostId() ? "  (hôte)" : "",
                 client.isReady() ? "Prêt" : "Pas prêt");
             playerListView.getItems().add(line);
         }
