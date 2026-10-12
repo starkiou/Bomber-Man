@@ -44,7 +44,7 @@
         <!-- Grille — occupe tout l'espace vertical -->
         <VBox VBox.vgrow="ALWAYS" alignment="CENTER">
             <padding><Insets top="32" bottom="32" left="40" right="40"/></padding>
-            <ScrollPane fitToHeight="true" fitToWidth="true"
+            <ScrollPane fitToHeight="true" fitToWidth="true" focusTraversable="false"
                         VBox.vgrow="ALWAYS" styleClass="scroll-pane">
                 <GridPane fx:id="gameGrid" alignment="CENTER" styleClass="game-grid"/>
             </ScrollPane>

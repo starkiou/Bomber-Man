@@ -1,5 +1,6 @@
 package clientside.controllers;
 
+import clientside.SceneManager;
 import clientside.network.NetworkManager;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -7,6 +8,7 @@ import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,6 +20,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.aiPlayer.AIFactory;
 import model.entity.Player;
@@ -42,7 +45,10 @@ public class GameBoardController {
     @FXML private GridPane gameGrid;
     @FXML private Label hpLabel, bombsLabel, timerLabel, modeLabel;
 
-    private static final int TILE_SIZE = 40;
+    private static final int MAX_TILE_SIZE = 40;
+    private static final int MIN_TILE_SIZE = 16;
+    /** Côté d'une case en pixels, réduit si la carte ne tient pas dans la fenêtre. */
+    private int tileSize = MAX_TILE_SIZE;
 
     /** Délai entre deux déplacements d'une case quand une touche reste enfoncée. */
     private static final long MOVE_INTERVAL_MS = 150;
@@ -92,8 +98,13 @@ public class GameBoardController {
     private long    lastMoveSentMs = 0;
     private AnimationTimer inputTimer;
     private Scene   boundScene;
+    private final EventHandler<KeyEvent> pressFilter   = this::handleKeyPress;
+    private final EventHandler<KeyEvent> releaseFilter = this::handleKeyRelease;
 
     private boolean gameOverShown = false;
+
+    /** Vrai quand une bombe ou une explosion vient d'être ajoutée par-dessus les personnages. */
+    private boolean playersNeedFront = false;
 
     // ── Sprite d'animation de mouvement ──────────────────────────────────────
 
@@ -109,8 +120,8 @@ public class GameBoardController {
         PlayerVisual(Image[][] sprites) {
             this.sprites = sprites;
             this.view    = new ImageView(sprites[DIR_DOWN][0]);
-            this.view.setFitWidth(TILE_SIZE);
-            this.view.setFitHeight(TILE_SIZE);
+            this.view.setFitWidth(tileSize);
+            this.view.setFitHeight(tileSize);
             this.transition = new TranslateTransition(Duration.millis(150), view);
             this.transition.setOnFinished(e -> {
                 isMoving = false;
@@ -298,12 +309,23 @@ public class GameBoardController {
         return new int[][] { {1, 1}, {w - 2, h - 2}, {w - 2, 1}, {1, h - 2} };
     }
 
+    /** Réduit les cases pour que toute la carte tienne dans la fenêtre, HUD et marges déduits. */
+    private void fitTileSizeToWindow() {
+        Stage stage = SceneManager.getInstance().getStage();
+        if (stage == null || Double.isNaN(stage.getWidth()) || Double.isNaN(stage.getHeight())) return;
+        double availableWidth  = stage.getWidth() - 140;
+        double availableHeight = stage.getHeight() - 230;
+        int fit = (int) Math.floor(Math.min(availableWidth / currentWidth, availableHeight / currentHeight));
+        tileSize = Math.max(MIN_TILE_SIZE, Math.min(MAX_TILE_SIZE, fit));
+    }
+
     private void initBackgroundGrid() {
+        fitTileSizeToWindow();
         for (int x = 0; x < currentWidth; x++) {
             for (int y = 0; y < currentHeight; y++) {
                 ImageView iv = new ImageView();
-                iv.setFitWidth(TILE_SIZE);
-                iv.setFitHeight(TILE_SIZE);
+                iv.setFitWidth(tileSize);
+                iv.setFitHeight(tileSize);
                 tileViews[x][y] = iv;
                 gameGrid.add(iv, x, y);
             }
@@ -378,13 +400,14 @@ public class GameBoardController {
             long firstSeen = bombFirstSeen.computeIfAbsent(b.id(), id -> System.currentTimeMillis());
             int frame = (int) ((System.currentTimeMillis() - firstSeen) / 100 % 28);
             ImageView v = bombViews.computeIfAbsent(b.id(), id -> {
-                ImageView iv = new ImageView(); iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
+                ImageView iv = new ImageView(); iv.setFitWidth(tileSize); iv.setFitHeight(tileSize);
                 gameGrid.add(iv, 0, 0);
+                playersNeedFront = true;
                 return iv;
             });
             v.setImage(bombIdleFrames[frame]);
-            v.setTranslateX(b.x() * TILE_SIZE);
-            v.setTranslateY(b.y() * TILE_SIZE);
+            v.setTranslateX(b.x() * tileSize);
+            v.setTranslateY(b.y() * tileSize);
         }
 
         bombViews.keySet().removeIf(id -> {
@@ -399,8 +422,9 @@ public class GameBoardController {
         for (var e : snap.getExplosions()) {
             String key = e.x() + "_" + e.y(); activeExplosions.add(key);
             ImageView v = explosionViews.computeIfAbsent(key, k -> {
-                ImageView iv = new ImageView(); iv.setFitWidth(TILE_SIZE); iv.setFitHeight(TILE_SIZE);
+                ImageView iv = new ImageView(); iv.setFitWidth(tileSize); iv.setFitHeight(tileSize);
                 gameGrid.add(iv, 0, 0);
+                playersNeedFront = true;
                 return iv;
             });
             // Types du moteur : 0 centre ; 1 et 5 bras droit, 6 et 7 bras gauche ;
@@ -416,8 +440,8 @@ public class GameBoardController {
             v.setScaleY(e.spriteType() == 2 || e.spriteType() == 3 ? -1 : 1);
             int frame = (int) Math.min(e.ageMs() / 100, EXPLOSION_FRAMES - 1);
             v.setImage(explosionFrames[visualType][frame]);
-            v.setTranslateX(e.x() * TILE_SIZE);
-            v.setTranslateY(e.y() * TILE_SIZE);
+            v.setTranslateX(e.x() * tileSize);
+            v.setTranslateY(e.y() * tileSize);
         }
         explosionViews.keySet().removeIf(k -> {
             if (activeExplosions.contains(k)) return false;
@@ -444,8 +468,8 @@ public class GameBoardController {
             PlayerVisual pv = playerVisuals.computeIfAbsent(p.id(),
                     id -> new PlayerVisual(getOrLoadSprites(id)));
 
-            double nx = p.x() * TILE_SIZE;
-            double ny = p.y() * TILE_SIZE;
+            double nx = p.x() * tileSize;
+            double ny = p.y() * tileSize;
 
             if (pv.targetX < 0) {
                 pv.view.setTranslateX(nx); pv.view.setTranslateY(ny);
@@ -466,6 +490,14 @@ public class GameBoardController {
                 int frame = (int) ((System.currentTimeMillis() / 100) % 2) + 1;
                 pv.view.setImage(pv.sprites[pv.currentDir][frame]);
             }
+        }
+
+        if (playersNeedFront) {
+            // Les personnages restent visibles au-dessus des bombes qu'ils posent
+            for (PlayerVisual pv : playerVisuals.values()) {
+                if (!pv.dying) pv.view.toFront();
+            }
+            playersNeedFront = false;
         }
 
         playerVisuals.keySet().removeIf(id -> {
@@ -496,9 +528,10 @@ public class GameBoardController {
 
     private void bindKeyboard(Scene scene) {
         boundScene = scene;
-        scene.getRoot().requestFocus();
-        scene.setOnKeyPressed(this::handleKeyPress);
-        scene.setOnKeyReleased(this::handleKeyRelease);
+        // Des filtres plutôt que des gestionnaires : le ScrollPane du plateau consomme
+        // les flèches et Espace quand il a le focus, et le jeu ne les recevait plus.
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, pressFilter);
+        scene.addEventFilter(KeyEvent.KEY_RELEASED, releaseFilter);
 
         // Une touche maintenue déplace à vitesse constante, sans dépendre de la
         // répétition automatique du clavier.
@@ -519,8 +552,8 @@ public class GameBoardController {
         if (inputTimer != null) inputTimer.stop();
         heldMoves.clear();
         if (boundScene != null) {
-            boundScene.setOnKeyPressed(null);
-            boundScene.setOnKeyReleased(null);
+            boundScene.removeEventFilter(KeyEvent.KEY_PRESSED, pressFilter);
+            boundScene.removeEventFilter(KeyEvent.KEY_RELEASED, releaseFilter);
         }
     }
 
@@ -541,12 +574,13 @@ public class GameBoardController {
                 bombKeyHeld = true;
                 sendAction(ActionType.PLACE_BOMB);
             }
+            event.consume();
             return;
         }
         ActionType move = moveFor(event.getCode());
-        if (move != null && !heldMoves.contains(move)) {
-            heldMoves.addFirst(move);
-        }
+        if (move == null) return;
+        if (!heldMoves.contains(move)) heldMoves.addFirst(move);
+        event.consume();
     }
 
     private void handleKeyRelease(KeyEvent event) {

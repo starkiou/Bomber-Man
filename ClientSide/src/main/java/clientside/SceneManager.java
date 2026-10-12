@@ -25,6 +25,10 @@ public class SceneManager {
         this.stage.setFullScreenExitHint(""); // Enlever le texte "Appuyez sur ESC"
     }
 
+    public Stage getStage() {
+        return stage;
+    }
+
     public void loadScene(String fxmlFile) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/clientside/" + fxmlFile));
