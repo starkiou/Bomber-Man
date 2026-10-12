@@ -1,6 +1,6 @@
-# Bomberman — SAÉ S4 Groupe B
+# Bomberman
 
-Jeu Bomberman multijoueur en temps réel développé en Java 25 / JavaFX 21 dans le cadre de la SAÉ 4.
+Jeu Bomberman multijoueur en temps réel, développé en Java 25 / JavaFX 21. Projet d'équipe de 2e année de BUT Informatique (SAÉ S4, IUT de Caen).
 
 ## Présentation
 
@@ -9,7 +9,7 @@ Clone personnalisé de Bomberman jouable en solo contre des IA ou en ligne contr
 ## Prérequis
 
 - Java 25+
-- Maven 3.8+
+- Maven n'a pas besoin d'être installé : le wrapper `mvnw` est fourni
 - JavaFX 21.0.6 (fourni via les dépendances Maven)
 
 ## Architecture
@@ -136,4 +136,18 @@ Trois stratégies basées sur un algorithme BFS pour le pathfinding :
 
 ## Équipe
 
-Groupe B — SAÉ S4 — IUT Informatique de Caen
+Groupe B — SAÉ S4 — IUT Informatique de Caen. Le jeu a été écrit en équipe en quatre jours, du 29 mars au 2 avril 2026.
+
+## Ma contribution
+
+Ce dépôt est ma copie personnelle du projet.
+
+**Pendant le projet**, je me suis occupé des entités du jeu (joueur, bombes, collisions, explosions) et de tout le module d'IA : les trois stratégies et leur recherche de chemin par parcours en largeur.
+
+**Après le rendu**, j'ai repris le projet pour l'auditer et le corriger :
+
+- **Juin 2026** : correction de bugs de réseau et de concurrence, factorisation du BFS des bots, suppression de messages dupliqués, remise en état des tests.
+- **Octobre 2026** : la partie est désormais simulée par le serveur. Avant, il se contentait de relayer les touches et chaque client simulait sa propre partie, si bien que les écrans divergeaient.
+- Corrections de jeu : bots qui contournent les bombes et fuient les leurs, vitesse de déplacement constante, sprites mal associés, écran de fin, clavier inopérant en ligne.
+- Salons : hôte seul à lancer la partie, quatre personnages au plus, taille de carte, durée, nombre de bombes et chat.
+- Tests ajoutés sur l'IA, le décompte des kills et la sérialisation de l'état de jeu.
