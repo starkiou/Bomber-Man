@@ -128,12 +128,15 @@ public class GameBoardController {
 
         NetworkManager.getInstance().setMessageHandler(this::onMessageReceived);
 
-        Platform.runLater(() -> {
-            if (gameGrid.getScene() != null) {
-                bindKeyboard(gameGrid.getScene());
-                gameGrid.getScene().getRoot().requestFocus();
-            }
-        });
+        // Le plateau n'est pas encore attaché à la scène pendant le chargement du FXML :
+        // on branche le clavier dès qu'il l'est, sans dépendre de l'ordre des runLater.
+        if (gameGrid.getScene() != null) {
+            bindKeyboard(gameGrid.getScene());
+        } else {
+            gameGrid.sceneProperty().addListener((obs, oldScene, scene) -> {
+                if (scene != null && boundScene == null) bindKeyboard(scene);
+            });
+        }
     }
 
     private void onMessageReceived(Message msg) {
@@ -260,7 +263,9 @@ public class GameBoardController {
         int duration = isOnline ? -1 : GameConfigController.selectedTime;
         game = new Game(grid, players, duration);
 
-        int botStartId = players.size() + 1;
+        // Les identifiants des joueurs en ligne viennent du serveur et ne partent pas de 1 :
+        // les bots prennent la suite du plus grand pour ne jamais remplacer un joueur.
+        int botStartId = players.stream().mapToInt(Player::getId).max().orElse(0) + 1;
         for (int i = 0; i < botCount && spawnIdx < spawnPos.length; i++) {
             int bid   = botStartId + i;
             int[] pos = spawnPos[spawnIdx++];
@@ -512,6 +517,7 @@ public class GameBoardController {
 
     private void bindKeyboard(Scene scene) {
         boundScene = scene;
+        scene.getRoot().requestFocus();
         scene.setOnKeyPressed(this::handleKeyPress);
         scene.setOnKeyReleased(this::handleKeyRelease);
 
