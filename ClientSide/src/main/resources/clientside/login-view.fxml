@@ -27,8 +27,8 @@
     </columnConstraints>
 
     <rowConstraints>
-        <RowConstraints vgrow="ALWAYS"/>
-        <RowConstraints vgrow="ALWAYS"/>
+        <RowConstraints vgrow="NEVER"/>
+        <RowConstraints vgrow="ALWAYS" minHeight="120"/>
         <RowConstraints minHeight="50" vgrow="NEVER"/>
     </rowConstraints>
 
@@ -51,7 +51,10 @@
     <!-- Personnage -->
     <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
         <Label text="Personnage" styleClass="label"/>
-        <fx:include source="character-selection.fxml"/>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" minHeight="0"
+                    style="-fx-background-color: transparent; -fx-background: transparent;">
+            <fx:include source="character-selection.fxml"/>
+        </ScrollPane>
     </VBox>
 
     <!-- Retour -->
@@ -62,10 +65,10 @@
     <!-- Jouer -->
     <HBox alignment="BOTTOM_RIGHT" spacing="14" GridPane.columnIndex="1" GridPane.rowIndex="2">
         <Label fx:id="debugText" text="Hors ligne" styleClass="label-debug"/>
-        <Button text="Hors ligne" onAction="#onPlayOfflineClick"
+        <Button text="Hors ligne" onAction="#onPlayOfflineClick" minWidth="140.0"
                 prefWidth="140.0" prefHeight="42.0" styleClass="button"/>
         <Button fx:id="playOnlineButton" text="En ligne" onAction="#onPlayOnlineClick"
-                disable="true" prefWidth="140.0" prefHeight="42.0"
+                disable="true" minWidth="140.0" prefWidth="140.0" prefHeight="42.0"
                 styleClass="button-online"/>
     </HBox>
 
