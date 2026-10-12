@@ -177,7 +177,8 @@ public class RoomThread extends Thread {
     public synchronized void launchGame() {
         if (inGame) return; // déjà lancée
 
-        CellType[][] grid = MazeFactory.createMaze(MazeFactory.Algorithm.EXHAUSTIVE, 15, 11);
+        int size = mapSide(mapSize);
+        CellType[][] grid = MazeFactory.createMaze(MazeFactory.Algorithm.EXHAUSTIVE, size, size);
         int w = grid[0].length, h = grid.length;
         int[][] spawns = { {1, 1}, {w - 2, h - 2}, {w - 2, 1}, {1, h - 2} };
 
@@ -232,6 +233,26 @@ public class RoomThread extends Thread {
         stopWaiting();
         newGame.start();
         ServerManager.getInstance().updateRoomsListOfClients();
+    }
+
+    /** Côté de la carte, en cases, pour le libellé choisi à la création (mêmes tailles qu'en solo). */
+    static int mapSide(String mapSize) {
+        if (mapSize != null && mapSize.contains("Petite")) return 11;
+        if (mapSize != null && mapSize.contains("Grande")) return 19;
+        return 15;
+    }
+
+    /** Longueur maximale d'un message de chat. */
+    private static final int MAX_CHAT_LENGTH = 200;
+
+    /** Diffuse un message de chat à la room, signé du pseudo connu du serveur. */
+    public void handleChat(ClientHandler sender, String content) {
+        if (content == null) return;
+        String text = content.strip();
+        if (text.isEmpty()) return;
+        if (text.length() > MAX_CHAT_LENGTH) text = text.substring(0, MAX_CHAT_LENGTH);
+        String pseudo = sender.getPseudo() != null ? sender.getPseudo() : "Joueur #" + sender.getClientId();
+        broadcast(new ChatMessage(pseudo, text));
     }
 
     /** Applique l'action d'un joueur à la partie. Un client ne commande que son propre personnage. */

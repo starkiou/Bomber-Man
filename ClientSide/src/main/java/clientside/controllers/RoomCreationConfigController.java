@@ -29,7 +29,7 @@ public class RoomCreationConfigController {
 
     @FXML
     public void initialize() {
-        mapSizeBox.getItems().addAll("Petite (10x10)", "Moyenne (15x15)", "Grande (20x20)");
+        mapSizeBox.getItems().addAll("Petite (11x11)", "Moyenne (15x15)", "Grande (19x19)");
         mapSizeBox.setValue("Moyenne (15x15)");
         difficultyBox.getItems().addAll("Facile", "Normal", "Difficile", "Extrême");
         difficultyBox.setValue("Normal");

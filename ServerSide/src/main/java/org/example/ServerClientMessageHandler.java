@@ -1,5 +1,6 @@
 package org.example;
 
+import network.message.ChatMessage;
 import network.message.ClientCorrectReadyUpdateMessage;
 import network.message.ClientReadyMessage;
 import network.message.ConnectionMessage;
@@ -21,6 +22,10 @@ public class ServerClientMessageHandler {
 			case BOMB_PLACE:
 				break;
 			case CHAT:
+				// le pseudo affiché est celui que le serveur connaît, pas celui du message
+				if (sender.getRoom() != null) {
+					sender.getRoom().handleChat(sender, ((ChatMessage) message).getContent());
+				}
 				break;
 			case CONNECTION:
 				ConnectionMessage messageConnection = (ConnectionMessage) message;

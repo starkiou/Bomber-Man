@@ -108,6 +108,7 @@ Trois stratégies basées sur un algorithme BFS pour le pathfinding :
 - Un client ne commande que son propre personnage, et pas plus vite qu'une case toutes les 120 ms.
 - 20 types de messages.
 - Gestion des salons (rooms) : 4 personnages au plus, bots compris ; seul l'hôte lance la partie.
+- Trois tailles de carte au choix à la création d'une room, et un chat dans la salle d'attente.
 - Un joueur qui se déconnecte en pleine partie est éliminé, la partie continue pour les autres.
 
 ---

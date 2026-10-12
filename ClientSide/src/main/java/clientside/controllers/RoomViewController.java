@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import network.message.ChatMessage;
 import network.message.ClientInfoDTO;
 import network.message.ClientReadyMessage;
 import network.message.LaunchGameMessage;
@@ -19,6 +21,8 @@ public class RoomViewController {
     @FXML private Label roomInfoLabel;
     @FXML private Button readyButton;
     @FXML private Button launchButton;
+    @FXML private ListView<String> chatListView;
+    @FXML private TextField chatField;
 
     private boolean localReady = false;
 
@@ -49,6 +53,12 @@ public class RoomViewController {
                 launchButton.setVisible(host);
                 launchButton.setManaged(host);
                 launchButton.setDisable(!allReady);
+            });
+        } else if (msg instanceof ChatMessage) {
+            ChatMessage chat = (ChatMessage) msg;
+            Platform.runLater(() -> {
+                chatListView.getItems().add(chat.getSender() + " : " + chat.getContent());
+                chatListView.scrollTo(chatListView.getItems().size() - 1);
             });
         } else if (msg instanceof LaunchGameMessage) {
             LaunchGameMessage launch = (LaunchGameMessage) msg;
@@ -89,6 +99,15 @@ public class RoomViewController {
         readyButton.setStyle(localReady
             ? "-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold;"
             : "-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+    }
+
+    @FXML
+    private void onSendChat() {
+        String text = chatField.getText();
+        if (text == null || text.isBlank()) return;
+        NetworkManager.getInstance().sendMessage(
+            new ChatMessage(NetworkManager.getInstance().getNickname(), text.strip()));
+        chatField.clear();
     }
 
     @FXML
