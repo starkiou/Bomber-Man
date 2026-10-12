@@ -1,6 +1,10 @@
 package clientside.controllers;
 
 import clientside.network.NetworkManager;
+import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -9,6 +13,8 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -38,20 +44,31 @@ public class GameBoardController {
 
     private static final int TILE_SIZE = 40;
 
+    /** Délai entre deux déplacements d'une case quand une touche reste enfoncée. */
+    private static final long MOVE_INTERVAL_MS = 150;
+
+    // La planche d'explosions contient une animation de 7 images par ligne :
+    // ligne 0 = centre, ligne 2 = flamme horizontale, ligne 3 = flamme verticale.
+    private static final int EXPLOSION_FRAMES = 7;
+    private static final int[] EXPLOSION_ROWS = {0, 2, 3};
+    private static final int EXPLO_CENTER = 0, EXPLO_HORIZONTAL = 1, EXPLO_VERTICAL = 2;
+
     // Directions
     private static final int DIR_DOWN  = 0;
     private static final int DIR_UP    = 1;
     private static final int DIR_LEFT  = 2;
     private static final int DIR_RIGHT = 3;
+    /** Ligne des images de mort dans le tableau de sprites d'un personnage. */
+    private static final int DEATH_ROW = 4;
+    private static final int DEATH_FRAME_MS = 200;
 
     private Image wallImg, floorImg, brickImg;
     private final Image[] bombIdleFrames = new Image[28];
-    private final Image[][] explosionFrames  = new Image[7][14];
+    private final Image[][] explosionFrames  = new Image[3][EXPLOSION_FRAMES];
 
     // Caches et Mappings
     private final Map<Integer, Image[][]> entitySpritesCache = new HashMap<>();
     private final Map<Integer, Integer>   playerSkinMap      = new HashMap<>();
-    private static final int[] EXPLO_MAP = {0, 1, 3, 4, 5, 2, 6};
 
     private final Map<Integer, PlayerVisual> playerVisuals = new HashMap<>();
     private final Map<Integer, ImageView>    bombViews     = new HashMap<>();
@@ -67,6 +84,15 @@ public class GameBoardController {
     private boolean isOnline   = false;
     private int     myPlayerId = 1;
 
+    // Clavier : directions maintenues, la plus récente en tête
+    private final Deque<ActionType> heldMoves = new ArrayDeque<>();
+    private boolean bombKeyHeld = false;
+    private long    lastMoveSentMs = 0;
+    private AnimationTimer inputTimer;
+    private Scene   boundScene;
+
+    private boolean gameOverShown = false;
+
     // ── Sprite d'animation de mouvement ──────────────────────────────────────
 
     private class PlayerVisual {
@@ -76,6 +102,7 @@ public class GameBoardController {
         double targetX = -1, targetY = -1;
         int  currentDir = DIR_DOWN;
         boolean isMoving = false;
+        boolean dying = false;
 
         PlayerVisual(Image[][] sprites) {
             this.sprites = sprites;
@@ -103,7 +130,7 @@ public class GameBoardController {
 
         Platform.runLater(() -> {
             if (gameGrid.getScene() != null) {
-                gameGrid.getScene().setOnKeyPressed(this::handleKeyPress);
+                bindKeyboard(gameGrid.getScene());
                 gameGrid.getScene().getRoot().requestFocus();
             }
         });
@@ -128,9 +155,9 @@ public class GameBoardController {
             bombIdleFrames[i] = img("/sprites/output/bomb/B2_" + i + ".png");
         }
 
-        for (int t = 0; t < 7; t++) {
-            for (int f = 0; f < 14; f++) {
-                explosionFrames[t][f] = img("/sprites/output/explosions/explosion_" + t + "_" + f + ".png");
+        for (int t = 0; t < EXPLOSION_ROWS.length; t++) {
+            for (int f = 0; f < EXPLOSION_FRAMES; f++) {
+                explosionFrames[t][f] = img("/sprites/output/explosions/explosion_" + EXPLOSION_ROWS[t] + "_" + f + ".png");
             }
         }
     }
@@ -141,7 +168,7 @@ public class GameBoardController {
 
     private Image[][] getOrLoadSprites(int entityId) {
         return entitySpritesCache.computeIfAbsent(entityId, id -> {
-            Image[][] sprites = new Image[4][3];
+            Image[][] sprites = new Image[5][3];
 
             String skinId;
             if (id == myPlayerId) {
@@ -149,11 +176,17 @@ public class GameBoardController {
             } else if (playerSkinMap.containsKey(id)) {
                 skinId = String.valueOf(playerSkinMap.get(id));
             } else {
-                skinId = String.valueOf(ThreadLocalRandom.current().nextInt(1, 35));
+                int random;
+                do {
+                    random = ThreadLocalRandom.current().nextInt(1, 35);
+                } while (CharacterSelectionController.BROKEN_SKINS.contains(random));
+                skinId = String.valueOf(random);
             }
 
-            String[] dirs = {"D", "N", "W", "E"};
-            for (int d = 0; d < 4; d++) {
+            // S = face (vers le bas), N = dos, W = gauche, E = droite.
+            // Les fichiers D_* sont l'animation de mort (DEATH_ROW), pas la direction « down ».
+            String[] dirs = {"S", "N", "W", "E", "D"};
+            for (int d = 0; d < dirs.length; d++) {
                 for (int f = 0; f < 3; f++) {
                     sprites[d][f] = img("/sprites/output/characters/" + skinId + "/" + dirs[d] + "_" + f + ".png");
                 }
@@ -231,18 +264,44 @@ public class GameBoardController {
         for (int i = 0; i < botCount && spawnIdx < spawnPos.length; i++) {
             int bid   = botStartId + i;
             int[] pos = spawnPos[spawnIdx++];
-            game.addBot(AIFactory.create(Strategy.SURVIVALIST, bid, pos[0], pos[1], 3, 1.0, 1));
+            game.addBot(AIFactory.create(randomBotStrategy(), bid, pos[0], pos[1], 3, 1.0, 1));
         }
 
         modeLabel.setText(isOnline ? "EN LIGNE" : "HORS LIGNE");
 
         game.addListener(new GameStateListener() {
             @Override public void onGameStateUpdate(GameSnapshot snap) { Platform.runLater(() -> drawMap(snap)); }
-            @Override public void onPlayerDied(int id) {}
-            @Override public void onGameOver(int winnerId) { Platform.runLater(() -> showGameOverScreen(winnerId)); }
+            @Override public void onPlayerDied(int id) {
+                // En solo, la partie s'arrête dès que le joueur est éliminé
+                if (!isOnline && id == myPlayerId) {
+                    game.stop();
+                    Platform.runLater(() -> scheduleGameOverScreen(-1));
+                }
+            }
+            @Override public void onGameOver(int winnerId) { Platform.runLater(() -> scheduleGameOverScreen(winnerId)); }
         });
 
         game.start();
+    }
+
+    /**
+     * Tire au sort la stratégie d'un bot. Plus la difficulté choisie dans le menu
+     * est élevée, plus les stratégies offensives sont probables.
+     */
+    private Strategy randomBotStrategy() {
+        String difficulty = GameConfigController.selectedDifficulty;
+        // Poids en pourcentage : {survivaliste, tactique, agressif}
+        int[] weights;
+        if (difficulty == null)                    weights = new int[]{25, 50, 25};
+        else if (difficulty.contains("Facile"))    weights = new int[]{70, 30, 0};
+        else if (difficulty.contains("Difficile")) weights = new int[]{10, 40, 50};
+        else if (difficulty.contains("Extr"))      weights = new int[]{0, 25, 75};
+        else                                       weights = new int[]{25, 50, 25};
+
+        int roll = ThreadLocalRandom.current().nextInt(100);
+        if (roll < weights[0]) return Strategy.SURVIVALIST;
+        if (roll < weights[0] + weights[1]) return Strategy.TACTICAL;
+        return Strategy.AGGRESSIVE;
     }
 
     private void configureDimensions() {
@@ -271,7 +330,17 @@ public class GameBoardController {
 
     // ── Fin de partie ────────────────────────────────────────────────────────
 
+    /** Affiche l'écran de fin après un court délai, le temps que l'animation de mort se joue. */
+    private void scheduleGameOverScreen(int winnerId) {
+        PauseTransition delay = new PauseTransition(Duration.millis(3 * DEATH_FRAME_MS + 300));
+        delay.setOnFinished(e -> showGameOverScreen(winnerId));
+        delay.play();
+    }
+
     private void showGameOverScreen(int winnerId) {
+        if (gameOverShown) return;
+        gameOverShown = true;
+        unbindKeyboard();
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/clientside/game-over.fxml"));
             Parent overlay = loader.load();
@@ -279,7 +348,11 @@ public class GameBoardController {
             GameOverController ctrl = loader.getController();
             long elapsed = System.currentTimeMillis() - startTime;
             String timeStr = String.format("%02d:%02d", elapsed / 60000, (elapsed / 1000) % 60);
-            ctrl.setStats(winnerId == myPlayerId ? "VICTOIRE !" : "DÉFAITE...", timeStr, 0);
+            boolean iAmAlive = game.getSnapshot().getPlayers().stream()
+                    .anyMatch(p -> p.id() == myPlayerId && !p.isDead());
+            String title = winnerId == myPlayerId ? "VICTOIRE !"
+                    : (winnerId == -1 && iAmAlive) ? "ÉGALITÉ" : "DÉFAITE...";
+            ctrl.setStats(title, timeStr, game.getKills(myPlayerId));
 
             StackPane root = (StackPane) gameGrid.getScene().getRoot();
             root.getChildren().add(overlay);
@@ -346,8 +419,18 @@ public class GameBoardController {
                 gameGrid.add(iv, 0, 0);
                 return iv;
             });
-            int visualType = EXPLO_MAP[e.spriteType()];
-            int frame = (int) Math.min(e.ageMs() / 50, 13);
+            // Types du moteur : 0 centre ; 1 et 5 bras droit, 6 et 7 bras gauche ;
+            // 2 et 3 bras du haut, 4 et 8 bras du bas.
+            int visualType = switch (e.spriteType()) {
+                case 0          -> EXPLO_CENTER;
+                case 1, 5, 6, 7 -> EXPLO_HORIZONTAL;
+                default         -> EXPLO_VERTICAL;
+            };
+            // Les images sont dessinées vers la gauche et vers le bas : on les
+            // retourne pour les bras opposés, afin que la flamme parte de la bombe.
+            v.setScaleX(e.spriteType() == 1 || e.spriteType() == 5 ? -1 : 1);
+            v.setScaleY(e.spriteType() == 2 || e.spriteType() == 3 ? -1 : 1);
+            int frame = (int) Math.min(e.ageMs() / 100, EXPLOSION_FRAMES - 1);
             v.setImage(explosionFrames[visualType][frame]);
             v.setTranslateX(e.x() * TILE_SIZE);
             v.setTranslateY(e.y() * TILE_SIZE);
@@ -368,7 +451,11 @@ public class GameBoardController {
                 bombsLabel.setText(p.currentBombs() + "/" + p.maxBombs());
             }
 
-            if (p.isDead()) continue;
+            if (p.isDead()) {
+                PlayerVisual dead = playerVisuals.get(p.id());
+                if (dead != null && !dead.dying) playDeath(dead);
+                continue;
+            }
 
             PlayerVisual pv = playerVisuals.computeIfAbsent(p.id(),
                     id -> new PlayerVisual(getOrLoadSprites(id)));
@@ -405,20 +492,89 @@ public class GameBoardController {
         });
     }
 
+    /** Joue les trois images de mort du personnage, puis le retire du plateau. */
+    private void playDeath(PlayerVisual pv) {
+        pv.dying = true;
+        pv.isMoving = false;
+        pv.transition.stop();
+
+        Timeline death = new Timeline();
+        for (int f = 0; f < 3; f++) {
+            Image frame = pv.sprites[DEATH_ROW][f];
+            death.getKeyFrames().add(new KeyFrame(Duration.millis(f * DEATH_FRAME_MS), e -> pv.view.setImage(frame)));
+        }
+        death.getKeyFrames().add(new KeyFrame(Duration.millis(3 * DEATH_FRAME_MS),
+                e -> gameGrid.getChildren().remove(pv.view)));
+        death.play();
+    }
+
     // ── Clavier ──────────────────────────────────────────────────────────────
 
-    private void handleKeyPress(KeyEvent event) {
-        if (game == null) return;
-        ActionType action = switch (event.getCode()) {
+    private void bindKeyboard(Scene scene) {
+        boundScene = scene;
+        scene.setOnKeyPressed(this::handleKeyPress);
+        scene.setOnKeyReleased(this::handleKeyRelease);
+
+        // Une touche maintenue déplace à vitesse constante, sans dépendre de la
+        // répétition automatique du clavier.
+        inputTimer = new AnimationTimer() {
+            @Override public void handle(long now) {
+                ActionType move = heldMoves.peekFirst();
+                long nowMs = System.currentTimeMillis();
+                if (move != null && nowMs - lastMoveSentMs >= MOVE_INTERVAL_MS) {
+                    lastMoveSentMs = nowMs;
+                    sendAction(move);
+                }
+            }
+        };
+        inputTimer.start();
+    }
+
+    private void unbindKeyboard() {
+        if (inputTimer != null) inputTimer.stop();
+        heldMoves.clear();
+        if (boundScene != null) {
+            boundScene.setOnKeyPressed(null);
+            boundScene.setOnKeyReleased(null);
+        }
+    }
+
+    private ActionType moveFor(KeyCode code) {
+        return switch (code) {
             case Z, UP    -> ActionType.MOVE_UP;
             case S, DOWN  -> ActionType.MOVE_DOWN;
             case Q, LEFT  -> ActionType.MOVE_LEFT;
             case D, RIGHT -> ActionType.MOVE_RIGHT;
-            case SPACE    -> ActionType.PLACE_BOMB;
             default       -> null;
         };
-        if (action == null) return;
+    }
 
+    private void handleKeyPress(KeyEvent event) {
+        if (game == null) return;
+        if (event.getCode() == KeyCode.SPACE) {
+            // Une bombe par appui, même si la touche reste enfoncée
+            if (!bombKeyHeld) {
+                bombKeyHeld = true;
+                sendAction(ActionType.PLACE_BOMB);
+            }
+            return;
+        }
+        ActionType move = moveFor(event.getCode());
+        if (move != null && !heldMoves.contains(move)) {
+            heldMoves.addFirst(move);
+        }
+    }
+
+    private void handleKeyRelease(KeyEvent event) {
+        if (event.getCode() == KeyCode.SPACE) {
+            bombKeyHeld = false;
+            return;
+        }
+        ActionType move = moveFor(event.getCode());
+        if (move != null) heldMoves.remove(move);
+    }
+
+    private void sendAction(ActionType action) {
         if (isOnline) {
             NetworkManager.getInstance().sendMessage(new PlayActionMessage(myPlayerId, action));
         } else {

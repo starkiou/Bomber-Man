@@ -8,7 +8,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
 
+import java.util.Set;
+
 public class CharacterSelectionController {
+
+    /** Skins dont les images sont mal découpées dans la planche de sprites. */
+    public static final Set<Integer> BROKEN_SKINS = Set.of(6, 9);
 
     @FXML private TilePane spriteContainer;
 
@@ -17,6 +22,7 @@ public class CharacterSelectionController {
         spriteContainer.getChildren().clear();
 
         for (int i = 0; i <= 34; i++) {
+            if (BROKEN_SKINS.contains(i)) continue;
             final int charId = i;
             try {
                 String imagePath = "/sprites/output/characters/" + i + "/R_0.png";
