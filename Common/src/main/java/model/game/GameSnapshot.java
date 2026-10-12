@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Immutable snapshot of the game state captured at a single tick.
@@ -30,7 +31,8 @@ public final class GameSnapshot {
             boolean isDead,
             int hp,
             int currentBombs,
-            int maxBombs
+            int maxBombs,
+            int kills
     ) {}
 
     /** Lightweight representation of an active bomb at snapshot time. */
@@ -102,6 +104,7 @@ public final class GameSnapshot {
             Collection<Player> players,
             List<Bomb> bombs,
             List<long[]> explosionCells,
+            Map<Integer, Integer> kills,
             CellType[][] grid,
             boolean gameOver,
             int winnerId,
@@ -111,7 +114,8 @@ public final class GameSnapshot {
         for (Player p : players) {
             playerStates.add(new PlayerState(
                     p.getId(), p.getX(), p.getY(),
-                    p.isDead(), p.getHp(), p.getCurrentBombs(), p.getMaxBombs()
+                    p.isDead(), p.getHp(), p.getCurrentBombs(), p.getMaxBombs(),
+                    kills.getOrDefault(p.getId(), 0)
             ));
         }
 
@@ -138,6 +142,22 @@ public final class GameSnapshot {
         }
 
         return new GameSnapshot(playerStates, bombStates, explosionStates, gridCopy, now, gameOver, winnerId, remainingSeconds);
+    }
+
+    /**
+     * Rebuilds a snapshot from already-captured state, e.g. one received from the server.
+     * The lists and the grid are owned by the snapshot from this point on.
+     */
+    public static GameSnapshot of(
+            List<PlayerState> players,
+            List<BombState> bombs,
+            List<ExplosionState> explosions,
+            CellType[][] grid,
+            boolean gameOver,
+            int winnerId,
+            long remainingSeconds
+    ) {
+        return new GameSnapshot(players, bombs, explosions, grid, System.currentTimeMillis(), gameOver, winnerId, remainingSeconds);
     }
 
     // ── Getters ───────────────────────────────────────────────────────

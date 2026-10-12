@@ -4,6 +4,7 @@ import network.message.ClientCorrectReadyUpdateMessage;
 import network.message.ClientReadyMessage;
 import network.message.ConnectionMessage;
 import network.message.Message;
+import network.message.PlayActionMessage;
 import network.message.RoomAcceptedCreationMessage;
 import network.message.RoomCorrectQuitMessage;
 import network.message.RoomAcceptedJoinMessage;
@@ -43,9 +44,9 @@ public class ServerClientMessageHandler {
 			case ROOM_LIST_UPDATE:
 				break;
 			case MOVE:
-				// relay action à tous les joueurs de la room
+				// le serveur applique l'action à sa partie ; l'identifiant envoyé est ignoré
 				if (sender.getRoom() != null && sender.getRoom().isInGame()) {
-					sender.getRoom().broadcast(message);
+					sender.getRoom().handlePlayerAction(sender, ((PlayActionMessage) message).getActionType());
 				}
 				break;
 

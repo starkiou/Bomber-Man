@@ -20,7 +20,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import model.aiPlayer.AIFactory;
-import model.aiPlayer.Strategy;
 import model.entity.Player;
 import model.game.Game;
 import model.game.GameSnapshot;
@@ -29,6 +28,7 @@ import model.maze.CellType;
 import model.maze.MazeFactory;
 import network.message.ActionType;
 import network.message.ClientInfoDTO;
+import network.message.GameStateMessage;
 import network.message.LaunchGameMessage;
 import network.message.Message;
 import network.message.PlayActionMessage;
@@ -75,7 +75,9 @@ public class GameBoardController {
     private final Map<Integer, Long>         bombFirstSeen = new HashMap<>();
     private final Map<String,  ImageView>    explosionViews = new HashMap<>();
 
+    /** Partie simulée localement ; {@code null} en ligne, où le serveur simule. */
     private Game    game;
+    private GameSnapshot lastSnapshot;
     private int     currentWidth, currentHeight;
     private ImageView[][] tileViews;
     private long    startTime;
@@ -139,11 +141,14 @@ public class GameBoardController {
         }
     }
 
+    /** En ligne, le serveur simule la partie : on affiche chaque état qu'il envoie. */
     private void onMessageReceived(Message msg) {
-        if (msg instanceof PlayActionMessage pam) {
-            if (game != null) {
-                game.handleAction(pam.getPlayerID(), pam.getActionType());
-            }
+        if (msg instanceof GameStateMessage state) {
+            GameSnapshot snap = state.getSnapshot();
+            Platform.runLater(() -> {
+                drawMap(snap);
+                if (snap.isGameOver()) scheduleGameOverScreen(snap.getWinnerId());
+            });
         }
     }
 
@@ -178,6 +183,13 @@ public class GameBoardController {
                 skinId = String.valueOf(NetworkManager.getInstance().getSelectedCharacterId());
             } else if (playerSkinMap.containsKey(id)) {
                 skinId = String.valueOf(playerSkinMap.get(id));
+            } else if (isOnline) {
+                // Bot en ligne : skin déduit de l'identifiant, identique chez tous les joueurs
+                List<Integer> usable = new ArrayList<>();
+                for (int skin = 1; skin <= 34; skin++) {
+                    if (!CharacterSelectionController.BROKEN_SKINS.contains(skin)) usable.add(skin);
+                }
+                skinId = String.valueOf(usable.get(Math.floorMod(id * 7, usable.size())));
             } else {
                 int random;
                 do {
@@ -219,31 +231,18 @@ public class GameBoardController {
             currentHeight = grid.length;
             spawnPos = cornerSpawns(currentWidth, currentHeight);
 
-            String myNick = NetworkManager.getInstance().getNickname();
-            List<ClientInfoDTO> roomPlayers = config.getPlayers();
-            boolean foundMe = false;
-
-            for (int i = 0; i < roomPlayers.size() && spawnIdx < spawnPos.length; i++) {
-                // 1. RÉCUPÉRER LE VRAI ID DU SERVEUR
-                int pid = roomPlayers.get(i).getClientId();
-
-                int[] pos = spawnPos[spawnIdx++];
-
-                // 2. CRÉER L'ENTITÉ AVEC LE VRAI ID
-                players.add(new Player(pid, pos[0], pos[1], 3, 1.0, 1));
-                playerSkinMap.put(pid, roomPlayers.get(i).getCharacterId());
-
-                // 3. IDENTIFIER NOTRE PROPRE JOUEUR
-                if (myNick != null && roomPlayers.get(i).getPseudo() != null &&
-                        myNick.trim().equalsIgnoreCase(roomPlayers.get(i).getPseudo().trim())) {
-                    myPlayerId = pid;
-                    foundMe = true;
-                }
+            // Le serveur nous donne notre identifiant et le skin de chaque joueur
+            myPlayerId = config.getMyPlayerId();
+            for (ClientInfoDTO roomPlayer : config.getPlayers()) {
+                playerSkinMap.put(roomPlayer.getClientId(), roomPlayer.getCharacterId());
             }
 
-            if (!foundMe) {
-                System.err.println("⚠️ Attention: Pseudo non trouvé (" + myNick + "). myPlayerId forcé à 1 !");
-            }
+            tileViews = new ImageView[currentWidth][currentHeight];
+            gameGrid.getChildren().clear();
+            initBackgroundGrid();
+            modeLabel.setText("EN LIGNE");
+            // Pas de moteur local : la partie est simulée par le serveur
+            return;
 
         } else {
             isOnline = false;
@@ -260,25 +259,23 @@ public class GameBoardController {
         gameGrid.getChildren().clear();
         initBackgroundGrid();
 
-        int duration = isOnline ? -1 : GameConfigController.selectedTime;
-        game = new Game(grid, players, duration);
+        game = new Game(grid, players, GameConfigController.selectedTime);
 
-        // Les identifiants des joueurs en ligne viennent du serveur et ne partent pas de 1 :
-        // les bots prennent la suite du plus grand pour ne jamais remplacer un joueur.
-        int botStartId = players.stream().mapToInt(Player::getId).max().orElse(0) + 1;
+        int botStartId = players.size() + 1;
+
         for (int i = 0; i < botCount && spawnIdx < spawnPos.length; i++) {
             int bid   = botStartId + i;
             int[] pos = spawnPos[spawnIdx++];
-            game.addBot(AIFactory.create(randomBotStrategy(), bid, pos[0], pos[1], 3, 1.0, 1));
+            game.addBot(AIFactory.create(AIFactory.randomStrategy(GameConfigController.selectedDifficulty), bid, pos[0], pos[1], 3, 1.0, 1));
         }
 
-        modeLabel.setText(isOnline ? "EN LIGNE" : "HORS LIGNE");
+        modeLabel.setText("HORS LIGNE");
 
         game.addListener(new GameStateListener() {
             @Override public void onGameStateUpdate(GameSnapshot snap) { Platform.runLater(() -> drawMap(snap)); }
             @Override public void onPlayerDied(int id) {
                 // En solo, la partie s'arrête dès que le joueur est éliminé
-                if (!isOnline && id == myPlayerId) {
+                if (id == myPlayerId) {
                     game.stop();
                     Platform.runLater(() -> scheduleGameOverScreen(-1));
                 }
@@ -287,26 +284,6 @@ public class GameBoardController {
         });
 
         game.start();
-    }
-
-    /**
-     * Tire au sort la stratégie d'un bot. Plus la difficulté choisie dans le menu
-     * est élevée, plus les stratégies offensives sont probables.
-     */
-    private Strategy randomBotStrategy() {
-        String difficulty = GameConfigController.selectedDifficulty;
-        // Poids en pourcentage : {survivaliste, tactique, agressif}
-        int[] weights;
-        if (difficulty == null)                    weights = new int[]{25, 50, 25};
-        else if (difficulty.contains("Facile"))    weights = new int[]{70, 30, 0};
-        else if (difficulty.contains("Difficile")) weights = new int[]{10, 40, 50};
-        else if (difficulty.contains("Extr"))      weights = new int[]{0, 25, 75};
-        else                                       weights = new int[]{25, 50, 25};
-
-        int roll = ThreadLocalRandom.current().nextInt(100);
-        if (roll < weights[0]) return Strategy.SURVIVALIST;
-        if (roll < weights[0] + weights[1]) return Strategy.TACTICAL;
-        return Strategy.AGGRESSIVE;
     }
 
     private void configureDimensions() {
@@ -353,11 +330,12 @@ public class GameBoardController {
             GameOverController ctrl = loader.getController();
             long elapsed = System.currentTimeMillis() - startTime;
             String timeStr = String.format("%02d:%02d", elapsed / 60000, (elapsed / 1000) % 60);
-            boolean iAmAlive = game.getSnapshot().getPlayers().stream()
-                    .anyMatch(p -> p.id() == myPlayerId && !p.isDead());
+            GameSnapshot.PlayerState me = lastSnapshot == null ? null : lastSnapshot.getPlayers().stream()
+                    .filter(p -> p.id() == myPlayerId).findFirst().orElse(null);
+            boolean iAmAlive = me != null && !me.isDead();
             String title = winnerId == myPlayerId ? "VICTOIRE !"
                     : (winnerId == -1 && iAmAlive) ? "ÉGALITÉ" : "DÉFAITE...";
-            ctrl.setStats(title, timeStr, game.getKills(myPlayerId));
+            ctrl.setStats(title, timeStr, me == null ? 0 : me.kills());
 
             StackPane root = (StackPane) gameGrid.getScene().getRoot();
             root.getChildren().add(overlay);
@@ -374,6 +352,7 @@ public class GameBoardController {
     // ── Rendu ────────────────────────────────────────────────────────────────
 
     private void drawMap(GameSnapshot snap) {
+        lastSnapshot = snap;
         CellType[][] grid = snap.getGrid();
         for (int x = 0; x < currentWidth; x++) {
             for (int y = 0; y < currentHeight; y++) {
@@ -556,7 +535,6 @@ public class GameBoardController {
     }
 
     private void handleKeyPress(KeyEvent event) {
-        if (game == null) return;
         if (event.getCode() == KeyCode.SPACE) {
             // Une bombe par appui, même si la touche reste enfoncée
             if (!bombKeyHeld) {

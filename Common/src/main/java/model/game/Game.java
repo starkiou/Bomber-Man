@@ -393,7 +393,11 @@ public class Game implements Runnable {
         }
     }
 
-    /** Checks for a single survivor or full wipe and notifies listeners. */
+    /**
+     * Ends the game when a single survivor remains, when everybody is eliminated,
+     * or when no human player is left alive: bots are not left fighting each
+     * other in front of nobody.
+     */
     private void checkVictory() {
         if (gameOver) return;
 
@@ -401,11 +405,14 @@ public class Game implements Runnable {
                 .filter(p -> !p.isDead())
                 .toList();
 
-        if (alive.size() <= 1) {
+        boolean hasHumans = players.size() > bots.size();
+        boolean humanAlive = alive.stream().anyMatch(p -> !bots.containsKey(p.getId()));
+
+        if (alive.size() <= 1 || (hasHumans && !humanAlive)) {
             gameOver = true;
-            winnerId = alive.isEmpty() ? -1 : alive.get(0).getId();
+            winnerId = (alive.size() == 1) ? alive.get(0).getId() : -1;
             String result = (winnerId == -1)
-                    ? "Draw — all players eliminated."
+                    ? "Draw — no winner."
                     : "Player " + winnerId + " wins!";
             log.info("Game over. " + result);
             notifyGameOver(winnerId);
@@ -441,6 +448,20 @@ public class Game implements Runnable {
                 case PLACE_BOMB -> placeBomb(player);
             }
         }
+    }
+
+    /**
+     * Takes a player out of the game, e.g. after a disconnection.
+     * Nobody is credited with the kill. Safe to call from any thread.
+     */
+    public void eliminatePlayer(int playerId) {
+        synchronized (stateLock) {
+            Player player = players.get(playerId);
+            if (player == null || player.isDead()) return;
+            player.takeDamage(player.getHp());
+            log.warning("Player " + playerId + " left the game.");
+        }
+        notifyPlayerDied(playerId);
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -538,7 +559,7 @@ public class Game implements Runnable {
         synchronized (stateLock) {
             synchronized (activeBombs) {
                 synchronized (activeExplosionCells) {
-                    return GameSnapshot.capture(players.values(), activeBombs, activeExplosionCells, grid, gameOver, winnerId, remainingSeconds);
+                    return GameSnapshot.capture(players.values(), activeBombs, activeExplosionCells, kills, grid, gameOver, winnerId, remainingSeconds);
                 }
             }
         }
