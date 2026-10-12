@@ -82,6 +82,9 @@ public class Game implements Runnable {
     private volatile boolean gameOver = false;
     private volatile int winnerId = -1; // -1 = no winner yet / draw
 
+    /** Number of opponents eliminated by each player's bombs, keyed by player ID. */
+    private final Map<Integer, Integer> kills = new ConcurrentHashMap<>();
+
     // ── AI ──────────────────────────────────────────────────────────
     /** Active bots, keyed by player ID. AIPlayer extends Player so they also live in {@code players}. */
     private final Map<Integer, AIPlayer> bots = new ConcurrentHashMap<>();
@@ -268,15 +271,18 @@ public class Game implements Runnable {
      */
     /**
      * Sprite-type constants for explosion cells (index Z in explosion_Z_F.png).
-     * 0=centre, 1=H-mid, 2=V-mid, 3=top-end, 4=bottom-end, 5=right-end, 6=left-end
+     * 0=centre, 1=right-mid, 2=top-mid, 3=top-end, 4=bottom-end, 5=right-end, 6=left-end,
+     * 7=left-mid, 8=bottom-mid. The arm side lets the renderer orient the flame.
      */
     private static final int EXPL_CENTER     = 0;
-    private static final int EXPL_H_MID      = 1;
-    private static final int EXPL_V_MID      = 2;
+    private static final int EXPL_MID_RIGHT  = 1;
+    private static final int EXPL_MID_TOP    = 2;
     private static final int EXPL_END_TOP    = 3;
     private static final int EXPL_END_BOTTOM = 4;
     private static final int EXPL_END_RIGHT  = 5;
     private static final int EXPL_END_LEFT   = 6;
+    private static final int EXPL_MID_LEFT   = 7;
+    private static final int EXPL_MID_BOTTOM = 8;
 
     private void processExplosion(Bomb bomb) {
         synchronized (stateLock) {
@@ -286,7 +292,7 @@ public class Game implements Runnable {
             // Directions: UP, DOWN, RIGHT, LEFT
             int[][] dirs = {{0, -1}, {0, 1}, {1, 0}, {-1, 0}};
             int[]   endTypes = {EXPL_END_TOP, EXPL_END_BOTTOM, EXPL_END_RIGHT, EXPL_END_LEFT};
-            int[]   midTypes = {EXPL_V_MID,   EXPL_V_MID,    EXPL_H_MID,    EXPL_H_MID};
+            int[]   midTypes = {EXPL_MID_TOP, EXPL_MID_BOTTOM, EXPL_MID_RIGHT, EXPL_MID_LEFT};
 
             List<int[]>  allBlast     = new ArrayList<>();
             List<long[]> blastTyped   = new ArrayList<>();
@@ -339,6 +345,10 @@ public class Game implements Runnable {
                                 + " hit — HP remaining: " + p.getHp());
                         if (p.isDead()) {
                             log.warning("Player " + p.getId() + " eliminated!");
+                            // Se tuer avec sa propre bombe ne compte pas comme un kill
+                            if (p.getId() != bomb.getOwnerID()) {
+                                kills.merge(bomb.getOwnerID(), 1, Integer::sum);
+                            }
                             notifyPlayerDied(p.getId());
                         }
                     }
@@ -559,6 +569,9 @@ public class Game implements Runnable {
 
     public boolean isGameOver() { return gameOver; }
     public int getWinnerId() { return winnerId; }
+
+    /** Returns how many opponents the given player has eliminated so far. */
+    public int getKills(int playerId) { return kills.getOrDefault(playerId, 0); }
 
     /** Returns a defensive copy of the grid. */
     public CellType[][] getGrid() { return deepCopyGrid(grid); }
