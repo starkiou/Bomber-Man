@@ -27,8 +27,10 @@ sae_s4_groupe_b/
 
 ### Tout compiler depuis la racine
 
+Java 25 est requis. Maven n'a pas besoin d'être installé : le projet embarque son wrapper (`mvnw`, ou `mvnw.cmd` sous Windows).
+
 ```bash
-./mvnw clean package -DskipTests
+./mvnw install -DskipTests
 ```
 
 ### Lancer le serveur
@@ -36,16 +38,16 @@ sae_s4_groupe_b/
 Le serveur écoute sur le **port 3000** par défaut.
 
 ```bash
-cd ServerSide
-mvn exec:java -Dexec.mainClass="org.example.Main"
+./mvnw -f ServerSide/pom.xml exec:java -Dexec.mainClass=org.example.Main
 ```
 
 ### Lancer le client
 
 ```bash
-cd ClientSide
-mvn javafx:run
+./mvnw -f ClientSide/pom.xml javafx:run
 ```
+
+`F11` bascule le plein écran.
 
 ---
 
@@ -102,9 +104,11 @@ Trois stratégies basées sur un algorithme BFS pour le pathfinding :
 
 ### Réseau
 - Communication TCP binaire : `[1 byte type][4 bytes length][JSON UTF-8]`.
-- Serveur faisant autorité (gestion des ticks à 60 it/s).
-- 23 types de messages gérant l'état complet de la partie.
-- Gestion des salons (rooms) et des états de préparation.
+- Serveur faisant autorité : la partie est simulée sur le serveur à 60 ticks par seconde, bots compris. Les clients envoient leurs actions et affichent l'état qu'ils reçoivent, 20 fois par seconde.
+- Un client ne commande que son propre personnage, et pas plus vite qu'une case toutes les 120 ms.
+- 20 types de messages.
+- Gestion des salons (rooms) : 4 personnages au plus, bots compris ; seul l'hôte lance la partie.
+- Un joueur qui se déconnecte en pleine partie est éliminé, la partie continue pour les autres.
 
 ---
 
