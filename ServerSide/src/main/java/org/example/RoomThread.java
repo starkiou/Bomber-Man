@@ -56,9 +56,12 @@ public class RoomThread extends Thread {
     private int botCount;
     /** Durée de la partie en secondes, bornée entre 30 s et 10 min. */
     private int durationSeconds;
+    /** Bombes de chaque joueur en début de partie, entre 1 et 10. Les bots en ont toujours une. */
+    private int bombCount;
 
-    public RoomThread(int maxPlayer, int id, String roomName, String mapSize, String difficulty, int botCount, int durationSeconds) {
+    public RoomThread(int maxPlayer, int id, String roomName, String mapSize, String difficulty, int botCount, int durationSeconds, int bombCount) {
         this.durationSeconds = Math.max(30, Math.min(durationSeconds, 600));
+        this.bombCount = Math.max(1, Math.min(bombCount, 10));
         this.id = id;
         this.roomName = roomName;
         this.mapSize = mapSize;
@@ -197,7 +200,7 @@ public class RoomThread extends Thread {
         List<Player> players = new ArrayList<>();
         for (ClientHandler client : snapshot) {
             if (spawn >= spawns.length) break;
-            players.add(new Player(client.getClientId(), spawns[spawn][0], spawns[spawn][1], 3, 1.0, 1));
+            players.add(new Player(client.getClientId(), spawns[spawn][0], spawns[spawn][1], 3, 1.0, bombCount));
             maxId = Math.max(maxId, client.getClientId());
             spawn++;
         }

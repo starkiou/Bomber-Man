@@ -14,6 +14,15 @@ public class RoomCreationMessage implements Message {
 
 	public static final int DEFAULT_DURATION_SECONDS = 180;
 
+	/** Nombre de bombes de chaque joueur en début de partie. */
+	private int bombCount = DEFAULT_BOMB_COUNT;
+
+	public static final int DEFAULT_BOMB_COUNT = 3;
+
+	public RoomCreationMessage(int maxPlayer, String name, String mapSize, String difficulty, int botCount, int durationSeconds, int bombCount) {
+		this(maxPlayer, name, mapSize, difficulty, botCount, durationSeconds);
+		this.bombCount = bombCount;
+	}
 	public RoomCreationMessage(int maxPlayer, String name, String mapSize, String difficulty, int botCount, int durationSeconds) {
 		this(maxPlayer, name, mapSize, difficulty, botCount);
 		this.durationSeconds = durationSeconds;
@@ -35,6 +44,7 @@ public class RoomCreationMessage implements Message {
 		this.difficulty = dataJson.getString("difficulty");
 		this.botCount = dataJson.getInt("botCount");
 		this.durationSeconds = dataJson.optInt("durationSeconds", DEFAULT_DURATION_SECONDS);
+		this.bombCount = dataJson.optInt("bombCount", DEFAULT_BOMB_COUNT);
 	}
 
 	@Override
@@ -46,6 +56,7 @@ public class RoomCreationMessage implements Message {
 		obj.put("difficulty", this.difficulty);
 		obj.put("botCount", this.botCount);
 		obj.put("durationSeconds", this.durationSeconds);
+		obj.put("bombCount", this.bombCount);
 		return obj;
 	}
 
@@ -62,4 +73,5 @@ public class RoomCreationMessage implements Message {
 	public String getDifficulty() { return difficulty; }
 	public int getBotCount() { return botCount; }
 	public int getDurationSeconds() { return durationSeconds; }
+	public int getBombCount() { return bombCount; }
 }

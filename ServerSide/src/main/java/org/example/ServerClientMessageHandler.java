@@ -42,7 +42,7 @@ public class ServerClientMessageHandler {
 				if(sender.getRoom() != null) {
 					sender.addMessage(new RoomRefusedCreationMessage("Client already in a room."));
 				} else {
-					this.serverManager.createRoomAsClient(sender, msg.getMaxPlayer(), msg.getName(), msg.getMapSize(), msg.getDifficulty(), msg.getBotCount(), msg.getDurationSeconds());
+					this.serverManager.createRoomAsClient(sender, msg.getMaxPlayer(), msg.getName(), msg.getMapSize(), msg.getDifficulty(), msg.getBotCount(), msg.getDurationSeconds(), msg.getBombCount());
 					sender.addMessage(new RoomAcceptedCreationMessage(sender.getRoom().getRoomId()));
 				}
 				break;

@@ -8,7 +8,7 @@
   Formulaire de création de room : contenu compact, très centré.
   Padding latéral très large.
 -->
-<VBox alignment="CENTER" spacing="16.0"
+<VBox alignment="CENTER" spacing="10.0"
       xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="clientside.controllers.RoomCreationConfigController"
       maxWidth="Infinity" maxHeight="Infinity"
@@ -16,7 +16,7 @@
       style="-fx-background-color: #faf8f5;">
 
     <padding>
-        <Insets top="40.0" bottom="40.0" left="380.0" right="380.0"/>
+        <Insets top="24.0" bottom="24.0" left="380.0" right="380.0"/>
     </padding>
 
     <Label text="Créer une room" styleClass="title-section"/>
@@ -34,6 +34,9 @@
 
     <Label text="Niveau de difficulté" styleClass="label"/>
     <ComboBox fx:id="difficultyBox" maxWidth="Infinity"/>
+
+    <Label text="Bombes initiales" styleClass="label"/>
+    <Spinner fx:id="bombCountSpinner" maxWidth="Infinity"/>
 
     <Label text="Durée de la partie (secondes)" styleClass="label"/>
     <Spinner fx:id="timeSpinner" maxWidth="Infinity"/>
