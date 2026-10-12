@@ -17,14 +17,14 @@ public class AggressiveAI extends AIPlayer{
     }
 
     @Override
-    public AIAction computeAction(CellType[][] grid, List<Player> players, List<Bomb> bombs) {
+    protected AIAction decide(CellType[][] grid, List<Player> players, List<Bomb> bombs) {
 
         Player enemy = nearestEnemy(players);
 
-        // ── 1. Flee enemies bombs ───────────────────────────────────────
-        Set<String> enemyDanger = computeEnemyDangerZone(grid, bombs);
-        if (isInDanger(getX(), getY(), enemyDanger)) {
-            Direction flee = fleeToSafety(getX(), getY(), grid, enemyDanger);
+        // ── 1. Flee every bomb, its own included ────────────────────────
+        Set<String> danger = computeDangerZone(grid, bombs);
+        if (isInDanger(getX(), getY(), danger)) {
+            Direction flee = fleeToSafety(getX(), getY(), grid, danger);
             if (flee != null){
                 return new AIAction(flee, false);
             }
@@ -48,15 +48,13 @@ public class AggressiveAI extends AIPlayer{
         }
 
         // ── 5. go for ennemies ───────────────────────────────────────────
-        Direction toward = bfsToward(getX(), getY(), ex, ey, grid);
+        if (manhattan(getX(), getY(), ex, ey) <= 1) {
+            return new AIAction(null, false);
+        }
+        Direction toward = bfsFirstStep(getX(), getY(),
+                (x, y) -> (isWalkable(grid, x, y) || (x == ex && y == ey)) && !isInDanger(x, y, danger),
+                (x, y) -> x == ex && y == ey,
+                grid);
         return new AIAction(toward, false);
-    }
-
-    // ─── private utilities ────────────────────────────────────────────────────
-
-
-    private Set<String> computeEnemyDangerZone(CellType[][] grid, List<Bomb> bombs) {
-        var filtered = bombs.stream().filter(b -> b.getOwnerID() != this.getId()).toList();
-        return computeDangerZone(grid, filtered);
     }
 }

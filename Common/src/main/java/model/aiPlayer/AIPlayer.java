@@ -20,7 +20,38 @@ public abstract class AIPlayer extends Player {
 
     // ─── Interface for AI ─────────────────────────────────────────────
 
-    public abstract AIAction computeAction(CellType[][] grid, List<Player> players, List<Bomb> bombs);
+    /** Cellules occupées par une bombe : infranchissables, comme pour les joueurs humains. */
+    private Set<String> bombCells = Set.of();
+
+    /** Cellules occupées par un autre joueur vivant. */
+    private Set<String> occupiedCells = Set.of();
+
+    public final AIAction computeAction(CellType[][] grid, List<Player> players, List<Bomb> bombs) {
+        Set<String> cells = new HashSet<>();
+        for (Bomb b : bombs) {
+            if (!b.isExploded()) cells.add(b.getX() + "," + b.getY());
+        }
+        this.bombCells = cells;
+
+        Set<String> occupied = new HashSet<>();
+        for (Player p : players) {
+            if (p.getId() != this.getId() && !p.isDead()) occupied.add(p.getX() + "," + p.getY());
+        }
+        this.occupiedCells = occupied;
+        return decide(grid, players, bombs);
+    }
+
+    protected abstract AIAction decide(CellType[][] grid, List<Player> players, List<Bomb> bombs);
+
+    /** Case franchissable : ni mur, ni brique, ni bombe. Sert aux fuites, où tout passage compte. */
+    protected boolean isFree(CellType[][] grid, int x, int y) {
+        return grid[y][x] == CellType.EMPTY && !bombCells.contains(x + "," + y);
+    }
+
+    /** Case où un bot accepte d'aller de lui-même : franchissable et sans autre joueur dessus. */
+    protected boolean isWalkable(CellType[][] grid, int x, int y) {
+        return isFree(grid, x, y) && !occupiedCells.contains(x + "," + y);
+    }
 
     // ─── BFS core ────────────────────────────────────────────────────────────
 
@@ -97,9 +128,10 @@ public abstract class AIPlayer extends Player {
     // ─── BFS ─────────────────────────────────────────────────────────────────
 
     protected Direction bfsToward(int startX, int startY, int targetX, int targetY, CellType[][] grid) {
-        if (startX == targetX && startY == targetY) return null;
+        // Au contact de la cible, on ne lui marche pas dessus
+        if (manhattan(startX, startY, targetX, targetY) <= 1) return null;
         return bfsFirstStep(startX, startY,
-                (x, y) -> grid[y][x] == CellType.EMPTY,
+                (x, y) -> isWalkable(grid, x, y) || (x == targetX && y == targetY),
                 (x, y) -> x == targetX && y == targetY,
                 grid);
     }
@@ -121,7 +153,7 @@ public abstract class AIPlayer extends Player {
             if (cell == CellType.WALL) continue;
             visited[nx][ny] = true;
             if (nx == targetX && ny == targetY) return DIR_ENUM[d];
-            if (cell == CellType.EMPTY) queue.add(new int[]{nx, ny, d});
+            if (isWalkable(grid, nx, ny)) queue.add(new int[]{nx, ny, d});
         }
 
         while (!queue.isEmpty()) {
@@ -135,7 +167,7 @@ public abstract class AIPlayer extends Player {
                 if (cell == CellType.WALL) continue;
                 visited[nx][ny] = true;
                 if (nx == targetX && ny == targetY) return DIR_ENUM[firstDir];
-                if (cell == CellType.EMPTY) queue.add(new int[]{nx, ny, firstDir});
+                if (isWalkable(grid, nx, ny)) queue.add(new int[]{nx, ny, firstDir});
             }
         }
         return null;
@@ -163,14 +195,14 @@ public abstract class AIPlayer extends Player {
             return null;
         }
         return bfsFirstStep(startX, startY,
-                (x, y) -> grid[y][x] == CellType.EMPTY,
+                (x, y) -> isFree(grid, x, y),
                 (x, y) -> !isInDanger(x, y, dangerZone),
                 grid);
     }
 
     protected boolean hasEscapeRoute(int x, int y, CellType[][] grid, Set<String> futureDanger) {
         return bfsAnyReachable(x, y,
-                (nx, ny) -> grid[ny][nx] == CellType.EMPTY,
+                (nx, ny) -> isFree(grid, nx, ny),
                 (cx, cy) -> !isInDanger(cx, cy, futureDanger),
                 grid);
     }

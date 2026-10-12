@@ -19,7 +19,7 @@ public class TacticalAI extends AIPlayer{
     }
 
     @Override
-    public AIAction computeAction(CellType[][] grid, List<Player> players, List<Bomb> bombs) {
+    protected AIAction decide(CellType[][] grid, List<Player> players, List<Bomb> bombs) {
 
         Set<String> dangerZone = computeDangerZone(grid, bombs);
 
@@ -111,7 +111,7 @@ public class TacticalAI extends AIPlayer{
             int nx = getX() + DIRS[d][0];
             int ny = getY() + DIRS[d][1];
             if (!inBounds(nx, ny, w, h)) continue;
-            if (grid[ny][nx] != CellType.EMPTY) continue;
+            if (!isWalkable(grid, nx, ny)) continue;
             if (isInDanger(nx, ny, dangerZone)) continue;
 
             Set<String> futureZone = dangerIfBombAt(nx, ny, DEFAULT_BOMB_RADIUS, grid, bombs);
@@ -129,8 +129,9 @@ public class TacticalAI extends AIPlayer{
     // ─── BFS with avoiding danger ────────────────────────────────────────
 
     private Direction bfsTowardAvoidingDanger(int startX, int startY, int targetX, int targetY, CellType[][] grid, Set<String> dangerZone) {
+        if (manhattan(startX, startY, targetX, targetY) <= 1) return null;
         Direction safe = bfsFirstStep(startX, startY,
-                (x, y) -> grid[y][x] == CellType.EMPTY && !isInDanger(x, y, dangerZone),
+                (x, y) -> (isWalkable(grid, x, y) || (x == targetX && y == targetY)) && !isInDanger(x, y, dangerZone),
                 (x, y) -> x == targetX && y == targetY,
                 grid);
         // À défaut d'un chemin sûr, on accepte un chemin quelconque.

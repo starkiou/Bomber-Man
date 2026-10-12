@@ -19,7 +19,7 @@ public class SurvivalistAI extends AIPlayer{
     }
 
     @Override
-    public AIAction computeAction(CellType[][] grid, List<Player> players, List<Bomb> bombs) {
+    protected AIAction decide(CellType[][] grid, List<Player> players, List<Bomb> bombs) {
 
         Set<String> dangerZone = computeDangerZone(grid, bombs);
 
@@ -96,7 +96,7 @@ public class SurvivalistAI extends AIPlayer{
             int nx = getX() + DIRS[d][0];
             int ny = getY() + DIRS[d][1];
             if (!inBounds(nx, ny, w, h)) continue;
-            if (grid[ny][nx] != CellType.EMPTY) continue;
+            if (!isWalkable(grid, nx, ny)) continue;
             if (isInDanger(nx, ny, dangerZone)) continue;
             int dist = manhattan(nx, ny, fx, fy);
             if (dist > bestDist) {
@@ -108,8 +108,9 @@ public class SurvivalistAI extends AIPlayer{
     }
 
     private Direction bfsTowardSafe(int startX, int startY, int targetX, int targetY, CellType[][] grid, Set<String> dangerZone) {
+        if (manhattan(startX, startY, targetX, targetY) <= 1) return null;
         return bfsFirstStep(startX, startY,
-                (x, y) -> grid[y][x] == CellType.EMPTY && !isInDanger(x, y, dangerZone),
+                (x, y) -> (isWalkable(grid, x, y) || (x == targetX && y == targetY)) && !isInDanger(x, y, dangerZone),
                 (x, y) -> x == targetX && y == targetY,
                 grid);
     }
