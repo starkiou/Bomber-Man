@@ -3,6 +3,8 @@ package clientside;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import java.io.IOException;
 
@@ -31,10 +33,13 @@ public class SceneManager {
             // 1. Si on n'a pas encore de scène, on en crée une
             if (stage.getScene() == null) {
                 Scene scene = new Scene(root);
+                scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+                    if (e.getCode() == KeyCode.F11) stage.setFullScreen(!stage.isFullScreen());
+                });
                 stage.setScene(scene);
             } else {
                 // 2. IMPORTANT : On change la racine (root) de la scène EXISTANTE
-                // Cela évite de recréer une fenêtre et de perdre le plein écran
+                // Cela évite de recréer une fenêtre et de perdre sa taille ou le plein écran
                 stage.getScene().setRoot(root);
             }
 
@@ -45,11 +50,6 @@ public class SceneManager {
                 if (!stage.getScene().getStylesheets().contains(css)) {
                     stage.getScene().getStylesheets().add(css);
                 }
-            }
-
-            // 4. On s'assure qu'on est en plein écran (ne fera rien si déjà actif)
-            if (!stage.isFullScreen()) {
-                stage.setFullScreen(true);
             }
 
             stage.show();
