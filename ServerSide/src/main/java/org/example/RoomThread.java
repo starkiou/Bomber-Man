@@ -54,8 +54,11 @@ public class RoomThread extends Thread {
     private String mapSize;
     private String difficulty;
     private int botCount;
+    /** Durée de la partie en secondes, bornée entre 30 s et 10 min. */
+    private int durationSeconds;
 
-    public RoomThread(int maxPlayer, int id, String roomName, String mapSize, String difficulty, int botCount) {
+    public RoomThread(int maxPlayer, int id, String roomName, String mapSize, String difficulty, int botCount, int durationSeconds) {
+        this.durationSeconds = Math.max(30, Math.min(durationSeconds, 600));
         this.id = id;
         this.roomName = roomName;
         this.mapSize = mapSize;
@@ -199,7 +202,7 @@ public class RoomThread extends Thread {
             spawn++;
         }
 
-        Game newGame = new Game(grid, players);
+        Game newGame = new Game(grid, players, durationSeconds);
         // Les bots prennent la suite du plus grand identifiant de joueur
         for (int i = 0; i < botCount && spawn < spawns.length; i++, spawn++) {
             newGame.addBot(AIFactory.create(AIFactory.randomStrategy(difficulty),

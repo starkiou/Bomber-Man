@@ -67,8 +67,8 @@ public class ServerManager {
     	clientHandler.start();
     }
 
-    public synchronized void createRoomAsClient(ClientHandler client, int nbMaxPlayers, String name, String mapSize, String difficulty, int botCount) {
-    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId, name, mapSize, difficulty, botCount);
+    public synchronized void createRoomAsClient(ClientHandler client, int nbMaxPlayers, String name, String mapSize, String difficulty, int botCount, int durationSeconds) {
+    	RoomThread newRoom = new RoomThread(nbMaxPlayers, nextRoomId, name, mapSize, difficulty, botCount, durationSeconds);
     	this.roomMap.put(Integer.valueOf(nextRoomId), newRoom);
     	this.nextRoomId++;
     	newRoom.start();

@@ -25,6 +25,7 @@ public class RoomCreationConfigController {
     @FXML private ComboBox<String> mapSizeBox;
     @FXML private Spinner<Integer> botCountSpinner;
     @FXML private ComboBox<String> difficultyBox;
+    @FXML private Spinner<Integer> timeSpinner;
     @FXML private Label errorLabel;
 
     @FXML
@@ -34,6 +35,7 @@ public class RoomCreationConfigController {
         difficultyBox.getItems().addAll("Facile", "Normal", "Difficile", "Extrême");
         difficultyBox.setValue("Normal");
         botCountSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 3, 1));
+        timeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(30, 600, RoomCreationMessage.DEFAULT_DURATION_SECONDS, 30));
 
         NetworkManager.getInstance().setMessageHandler(this::onMessageReceived);
     }
@@ -60,7 +62,7 @@ public class RoomCreationConfigController {
 
         errorLabel.setText("");
         // 4 personnages au plus sur la carte : chaque bot prend une place de joueur
-        NetworkManager.getInstance().sendMessage(new RoomCreationMessage(4 - botCount, name, mapSize, difficulty, botCount));
+        NetworkManager.getInstance().sendMessage(new RoomCreationMessage(4 - botCount, name, mapSize, difficulty, botCount, timeSpinner.getValue()));
     }
 
     @FXML

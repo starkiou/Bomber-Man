@@ -16,7 +16,7 @@
       style="-fx-background-color: #faf8f5;">
 
     <padding>
-        <Insets top="70.0" bottom="70.0" left="380.0" right="380.0"/>
+        <Insets top="40.0" bottom="40.0" left="380.0" right="380.0"/>
     </padding>
 
     <Label text="Créer une room" styleClass="title-section"/>
@@ -34,6 +34,9 @@
 
     <Label text="Niveau de difficulté" styleClass="label"/>
     <ComboBox fx:id="difficultyBox" maxWidth="Infinity"/>
+
+    <Label text="Durée de la partie (secondes)" styleClass="label"/>
+    <Spinner fx:id="timeSpinner" maxWidth="Infinity"/>
 
     <Label fx:id="errorLabel" styleClass="label-error" text=""/>
 

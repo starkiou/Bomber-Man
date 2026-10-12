@@ -9,6 +9,15 @@ public class RoomCreationMessage implements Message {
 	private String mapSize;
 	private String difficulty;
 	private int botCount;
+	/** Durée de la partie en secondes. */
+	private int durationSeconds = DEFAULT_DURATION_SECONDS;
+
+	public static final int DEFAULT_DURATION_SECONDS = 180;
+
+	public RoomCreationMessage(int maxPlayer, String name, String mapSize, String difficulty, int botCount, int durationSeconds) {
+		this(maxPlayer, name, mapSize, difficulty, botCount);
+		this.durationSeconds = durationSeconds;
+	}
 
 	public RoomCreationMessage(int maxPlayer, String name, String mapSize, String difficulty, int botCount) {
 		this.maxPlayer = maxPlayer;
@@ -25,6 +34,7 @@ public class RoomCreationMessage implements Message {
 		this.mapSize = dataJson.getString("mapSize");
 		this.difficulty = dataJson.getString("difficulty");
 		this.botCount = dataJson.getInt("botCount");
+		this.durationSeconds = dataJson.optInt("durationSeconds", DEFAULT_DURATION_SECONDS);
 	}
 
 	@Override
@@ -35,6 +45,7 @@ public class RoomCreationMessage implements Message {
 		obj.put("mapSize", this.mapSize);
 		obj.put("difficulty", this.difficulty);
 		obj.put("botCount", this.botCount);
+		obj.put("durationSeconds", this.durationSeconds);
 		return obj;
 	}
 
@@ -50,4 +61,5 @@ public class RoomCreationMessage implements Message {
 	public String getMapSize() { return mapSize; }
 	public String getDifficulty() { return difficulty; }
 	public int getBotCount() { return botCount; }
+	public int getDurationSeconds() { return durationSeconds; }
 }
