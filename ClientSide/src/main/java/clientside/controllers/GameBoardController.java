@@ -8,6 +8,7 @@ import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -100,6 +101,7 @@ public class GameBoardController {
     private Scene   boundScene;
     private final EventHandler<KeyEvent> pressFilter   = this::handleKeyPress;
     private final EventHandler<KeyEvent> releaseFilter = this::handleKeyRelease;
+    private final InvalidationListener resizeListener = obs -> resizeBoard();
 
     private boolean gameOverShown = false;
 
@@ -319,6 +321,30 @@ public class GameBoardController {
         tileSize = Math.max(MIN_TILE_SIZE, Math.min(MAX_TILE_SIZE, fit));
     }
 
+    /** Applique la taille de case courante à tout ce qui est déjà affiché. */
+    private void resizeBoard() {
+        int previous = tileSize;
+        fitTileSizeToWindow();
+        if (tileSize == previous || tileViews == null) return;
+
+        for (ImageView[] column : tileViews) {
+            for (ImageView tile : column) { tile.setFitWidth(tileSize); tile.setFitHeight(tileSize); }
+        }
+        for (ImageView view : bombViews.values())      { view.setFitWidth(tileSize); view.setFitHeight(tileSize); }
+        for (ImageView view : explosionViews.values()) { view.setFitWidth(tileSize); view.setFitHeight(tileSize); }
+        for (PlayerVisual pv : playerVisuals.values()) {
+            pv.view.setFitWidth(tileSize);
+            pv.view.setFitHeight(tileSize);
+            // Les positions sont en pixels : on replace le personnage au prochain état reçu
+            pv.transition.stop();
+            pv.isMoving = false;
+            pv.targetX = -1;
+            pv.targetY = -1;
+        }
+        // Bombes et explosions sont repositionnées à chaque image ; on redessine tout de suite
+        if (lastSnapshot != null) drawMap(lastSnapshot);
+    }
+
     private void initBackgroundGrid() {
         fitTileSizeToWindow();
         for (int x = 0; x < currentWidth; x++) {
@@ -532,6 +558,9 @@ public class GameBoardController {
         // les flèches et Espace quand il a le focus, et le jeu ne les recevait plus.
         scene.addEventFilter(KeyEvent.KEY_PRESSED, pressFilter);
         scene.addEventFilter(KeyEvent.KEY_RELEASED, releaseFilter);
+        // La carte suit la taille de la fenêtre pendant la partie
+        scene.widthProperty().addListener(resizeListener);
+        scene.heightProperty().addListener(resizeListener);
 
         // Une touche maintenue déplace à vitesse constante, sans dépendre de la
         // répétition automatique du clavier.
@@ -554,6 +583,8 @@ public class GameBoardController {
         if (boundScene != null) {
             boundScene.removeEventFilter(KeyEvent.KEY_PRESSED, pressFilter);
             boundScene.removeEventFilter(KeyEvent.KEY_RELEASED, releaseFilter);
+            boundScene.widthProperty().removeListener(resizeListener);
+            boundScene.heightProperty().removeListener(resizeListener);
         }
     }
 
