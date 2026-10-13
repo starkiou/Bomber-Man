@@ -38,7 +38,44 @@ public abstract class AIPlayer extends Player {
             if (p.getId() != this.getId() && !p.isDead()) occupied.add(p.getX() + "," + p.getY());
         }
         this.occupiedCells = occupied;
-        return decide(grid, players, bombs);
+
+        AIAction action = decide(grid, players, bombs);
+        Direction aside = stepAside(grid, players, bombs, action);
+        return aside != null ? new AIAction(aside, false) : action;
+    }
+
+    /**
+     * Deux bots de même stratégie posés sur la même case prennent ensuite
+     * exactement les mêmes décisions et restent superposés indéfiniment. Quand
+     * ça arrive (en général après une fuite, où les bots ont le droit de se
+     * croiser), celui qui a le plus grand identifiant s'écarte d'une case.
+     *
+     * @return la direction à prendre pour se séparer, ou {@code null} s'il n'y a rien à faire
+     */
+    private Direction stepAside(CellType[][] grid, List<Player> players, List<Bomb> bombs, AIAction decided) {
+        boolean sharesCellWithLowerId = false;
+        for (Player p : players) {
+            if (!p.isDead() && p.getId() < this.getId() && p.getX() == getX() && p.getY() == getY()) {
+                sharesCellWithLowerId = true;
+                break;
+            }
+        }
+        if (!sharesCellWithLowerId) return null;
+
+        Set<String> danger = computeDangerZone(grid, bombs);
+        // En danger, la fuite passe avant tout : on se séparera une fois à l'abri
+        if (isInDanger(getX(), getY(), danger)) return null;
+
+        int h = grid.length, w = grid[0].length;
+        Direction fallback = null;
+        for (int d = 0; d < 4; d++) {
+            int nx = getX() + DIRS[d][0], ny = getY() + DIRS[d][1];
+            if (!inBounds(nx, ny, w, h) || !isWalkable(grid, nx, ny) || isInDanger(nx, ny, danger)) continue;
+            // L'autre bot va sans doute prendre la direction décidée ici : on en choisit une autre
+            if (DIR_ENUM[d] != decided.move()) return DIR_ENUM[d];
+            fallback = DIR_ENUM[d];
+        }
+        return fallback;
     }
 
     protected abstract AIAction decide(CellType[][] grid, List<Player> players, List<Bomb> bombs);
@@ -194,6 +231,14 @@ public abstract class AIPlayer extends Player {
         if (!isInDanger(startX, startY, dangerZone)) {
             return null;
         }
+        // On vise d'abord un abri libre ; à défaut, n'importe quel abri, quitte à
+        // y rejoindre un autre joueur.
+        Direction toFreeShelter = bfsFirstStep(startX, startY,
+                (x, y) -> isFree(grid, x, y),
+                (x, y) -> !isInDanger(x, y, dangerZone) && isWalkable(grid, x, y),
+                grid);
+        if (toFreeShelter != null) return toFreeShelter;
+
         return bfsFirstStep(startX, startY,
                 (x, y) -> isFree(grid, x, y),
                 (x, y) -> !isInDanger(x, y, dangerZone),

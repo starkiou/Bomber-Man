@@ -98,6 +98,67 @@ public class AIPlayerTest {
         assertNull(bot.computeAction(g, List.of(bot), List.of()).move());
     }
 
+    // ─── Bots superposés ──────────────────────────────────────────────────────
+
+    private static final String[] OPEN = {
+            "#######",
+            "#.....#",
+            "#.....#",
+            "#.....#",
+            "#######"
+    };
+
+    @Test
+    void testStackedTwinBotsSeparate() {
+        // Deux bots tactiques sur la même case prendraient indéfiniment les mêmes décisions
+        AIPlayer first = AIFactory.create(Strategy.TACTICAL, 1, 3, 2, 1, 1.0, 1);
+        AIPlayer twin = AIFactory.create(Strategy.TACTICAL, 2, 3, 2, 1, 1.0, 1);
+        Player far = new Player(3, 1, 1, 1, 1.0, 1);
+        List<Player> players = List.of(first, twin, far);
+
+        AIPlayer.AIAction firstAction = first.computeAction(grid(OPEN), players, List.of());
+        AIPlayer.AIAction twinAction = twin.computeAction(grid(OPEN), players, List.of());
+
+        // Celui qui a le plus grand identifiant s'écarte, dans une autre direction que son jumeau
+        assertNotNull(twinAction.move());
+        assertNotEquals(firstAction.move(), twinAction.move());
+        assertFalse(twinAction.placeBomb());
+    }
+
+    @Test
+    void testBotAloneOnItsCellIsNotDisturbed() {
+        AIPlayer bot = AIFactory.create(Strategy.SURVIVALIST, 2, 5, 3, 1, 1.0, 1);
+        Player a = new Player(1, 1, 1, 1, 1.0, 1);
+        Player b = new Player(3, 1, 2, 1, 1.0, 1);
+        // Survivaliste, deux adversaires loin de lui : il ne bouge pas
+        assertNull(bot.computeAction(grid(OPEN), List.of(a, bot, b), List.of()).move());
+    }
+
+    @Test
+    void testStackedBotsStillFleeFirst() {
+        AIPlayer first = AIFactory.create(Strategy.SURVIVALIST, 1, 2, 1, 1, 1.0, 1);
+        AIPlayer twin = AIFactory.create(Strategy.SURVIVALIST, 2, 2, 1, 1, 1.0, 1);
+        Bomb bomb = new Bomb(1000, 1, 1, 3, 2, 3000);
+        // Sur la ligne du haut, dans le souffle : la fuite passe avant la séparation
+        AIPlayer.AIAction action = twin.computeAction(grid(OPEN), List.of(first, twin), List.of(bomb));
+        assertEquals(Direction.DOWN, action.move());
+    }
+
+    @Test
+    void testFleeingBotPrefersAnEmptyShelter() {
+        // Deux abris à égale distance : (2,2) est occupé, le bot choisit l'autre
+        AIPlayer bot = AIFactory.create(Strategy.SURVIVALIST, 1, 2, 1, 1, 1.0, 1);
+        Player onShelter = new Player(2, 2, 2, 1, 1.0, 1);
+        Bomb bomb = new Bomb(1000, 1, 1, 3, 2, 3000);
+        CellType[][] g = grid(
+                "######",
+                "#....#",
+                "##.#.#",
+                "######");
+        // Souffle : (1,1) (2,1) (3,1). Abris : (2,2) à 1 pas mais occupé, (4,1) à 2 pas et libre
+        assertEquals(Direction.RIGHT, bot.computeAction(g, List.of(bot, onShelter), List.of(bomb)).move());
+    }
+
     // ─── Stratégies ───────────────────────────────────────────────────────────
 
     @Test
