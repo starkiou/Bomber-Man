@@ -2,6 +2,8 @@
 
 Jeu Bomberman multijoueur en temps réel, développé en Java 25 / JavaFX 21. Projet d'équipe de 2e année de BUT Informatique (SAÉ S4, IUT de Caen).
 
+![Une partie en solo contre trois bots](docs/partie.gif)
+
 ## Présentation
 
 Clone personnalisé de Bomberman jouable en solo contre des IA ou en ligne contre d'autres joueurs via une connexion TCP. Le projet est structuré en trois modules Maven et intègre plusieurs design patterns (Singleton, Factory, Strategy, Observer, Chaîne de responsabilité).
