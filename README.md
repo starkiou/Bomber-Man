@@ -1,155 +1,76 @@
 # Bomberman
 
-Jeu Bomberman multijoueur en temps réel, développé en Java 25 / JavaFX 21. Projet d'équipe de 2e année de BUT Informatique (SAÉ S4, IUT de Caen).
+Un Bomberman multijoueur en temps réel, en Java 25 et JavaFX 21 : en solo contre des bots, ou en ligne jusqu'à quatre. Projet d'équipe de 2e année de BUT Informatique (SAÉ S4, IUT de Caen) ; ce dépôt est ma copie personnelle.
 
 ![Une partie en solo contre trois bots](docs/partie.gif)
 
-## Présentation
-
-Clone personnalisé de Bomberman jouable en solo contre des IA ou en ligne contre d'autres joueurs via une connexion TCP. Le projet est structuré en trois modules Maven et intègre plusieurs design patterns (Singleton, Factory, Strategy, Observer, Chaîne de responsabilité).
-
-## Prérequis
-
-- Java 25+
-- Maven n'a pas besoin d'être installé : le wrapper `mvnw` est fourni
-- JavaFX 21.0.6 (fourni via les dépendances Maven)
-
-## Architecture
-
-```
-sae_s4_groupe_b/
-├── Common/     # Modèle partagé : entités, IA, labyrinthe, réseau, logger
-├── ServerSide/ # Serveur TCP : gestion des rooms, boucle de jeu, synchronisation
-└── ClientSide/ # Interface JavaFX : vues FXML, réseau client, rendu sprites
-```
-
----
-
-## Compilation et lancement
-
-### Tout compiler depuis la racine
-
-Java 25 est requis. Maven n'a pas besoin d'être installé : le projet embarque son wrapper (`mvnw`, ou `mvnw.cmd` sous Windows).
-
-```bash
-./mvnw install -DskipTests
-```
-
-### Lancer le serveur
-
-Le serveur écoute sur le **port 3000** par défaut.
-
-```bash
-./mvnw -f ServerSide/pom.xml exec:java -Dexec.mainClass=org.example.Main
-```
-
-### Lancer le client
-
-```bash
-./mvnw -f ClientSide/pom.xml javafx:run
-```
-
-`F11` bascule le plein écran.
-
----
-
-## Contrôles du jeu
-
-| Action | Touche |
-| :--- | :--- |
-| **Se déplacer** | Flèches directionnelles ($\uparrow, \downarrow, \leftarrow, \rightarrow$) |
-| **Poser une bombe** | Barre d'espace (`Espace`) |
-
----
-
-## Modes de jeu
-
-### Mode solo (hors ligne)
-
-Aucun serveur requis.
-
-1. Lancer le client → **Play** → **Play Offline**
-2. Configurer la partie : taille de la carte, nombre de bombes, durée limite, difficulté des bots
-3. La partie se joue localement avec des bots IA
-
-### Mode en ligne
-
-1. Démarrer le serveur
-2. Lancer le client → **Play** → renseigner IP, port (3000), pseudo
-3. **Play Online** → liste des rooms disponibles
-4. Créer ou rejoindre une room, indiquer "Prêt", attendre le countdown de 10s
-5. La partie se lance automatiquement
-
----
-
-## Fonctionnalités implémentées
+## Fonctionnalités
 
 ### Gameplay
-- **Mouvements** : Déplacement dans 4 directions avec gestion des collisions (murs et bombes).
-- **Bombes** : Placement avec la touche Espace. Stock limité, rechargement automatique toutes les 5 s.
-- **Explosions** : Radiales (rayon : 2 cases, délai : 3 s). Arrêtées par les murs, détruisent les briques.
-- **Santé** : Système de HP (1 HP par défaut). Mort immédiate au contact d'une explosion.
-- **Victoire** : Mode "Battle Royale", le dernier survivant l'emporte.
+- Déplacements dans les quatre directions, bloqués par les murs et les bombes.
+- Stock de bombes limité, rechargé toutes les 5 secondes.
+- Explosions en croix (rayon de 2 cases, au bout de 3 secondes), arrêtées par les murs, qui détruisent les briques.
+- Le dernier survivant gagne.
+- 35 personnages au choix, sprites animés pour les déplacements, les bombes et les explosions.
 
-### Intelligence artificielle
-Trois stratégies basées sur un algorithme BFS pour le pathfinding :
+### Bots
+Trois stratégies, toutes appuyées sur une recherche de chemin par parcours en largeur :
 
 | Stratégie | Comportement |
-|-----------|-------------|
-| **Aggressive** | Chasse le joueur proche, pose des bombes si aligné, fuit les explosions. |
-| **Survivalist** | Fuit les ennemis au début, devient agressif en 1v1. |
-| **Tactical** | Privilégie la destruction de briques et vérifie toujours son chemin d'évasion. |
+|---|---|
+| Agressive | Chasse le joueur le plus proche, pose une bombe quand il est aligné, fuit les explosions. |
+| Survivante | Fuit les adversaires en début de partie, devient agressive en un contre un. |
+| Tactique | Détruit d'abord les briques et vérifie toujours qu'elle a une issue avant de poser. |
 
-### Labyrinthes procéduraux
-- **Exhaustive** : Backtracking récursif couplé à un remplissage aléatoire (60% briques).
-- **Random Fusion** : Utilisation de l'algorithme Union-Find pour fusionner des chemins.
+### Labyrinthes générés
+- **Exhaustif** : backtracking récursif, puis 60 % de briques réparties au hasard.
+- **Fusion aléatoire** : chemins fusionnés avec une structure Union-Find.
 
-### Réseau
-- Communication TCP binaire : `[1 byte type][4 bytes length][JSON UTF-8]`.
-- Serveur faisant autorité : la partie est simulée sur le serveur à 60 ticks par seconde, bots compris. Les clients envoient leurs actions et affichent l'état qu'ils reçoivent, 20 fois par seconde.
-- Un client ne commande que son propre personnage, et pas plus vite qu'une case toutes les 120 ms.
-- 20 types de messages.
-- Gestion des salons (rooms) : 4 personnages au plus, bots compris ; seul l'hôte lance la partie.
-- Trois tailles de carte au choix à la création d'une room, et un chat dans la salle d'attente.
+### En ligne
+- Salons de quatre personnages au plus, bots compris ; seul l'hôte lance la partie.
+- Taille de carte, durée et nombre de bombes réglables, chat dans la salle d'attente.
 - Un joueur qui se déconnecte en pleine partie est éliminé, la partie continue pour les autres.
 
----
+## Lancer le projet
 
-## Design patterns utilisés
+Il faut Java 25. Maven n'a pas besoin d'être installé : le projet embarque son wrapper (`mvnw`, ou `mvnw.cmd` sous Windows), et JavaFX arrive avec les dépendances.
 
-| Pattern | Utilisation |
-|---------|---------|
-| **Singleton** | Gestionnaires uniques : `ServerManager`, `NetworkManager`, `SceneManager`. |
-| **Factory** | Instanciation dynamique : `MazeFactory`, `AIFactory`, `MessageFactory`. |
-| **Strategy** | Comportements interchangeables des IA (`AIPlayer`). |
-| **Observer** | Diffusion des snapshots du jeu aux clients via `GameStateListener`. |
-| **Chaîne de responsabilité** | Système de logs hiérarchique (`ConsoleLogger` → `FileLogger`). |
+```bash
+./mvnw install -DskipTests                                                  # tout compiler
+./mvnw -f ServerSide/pom.xml exec:java -Dexec.mainClass=org.example.Main    # serveur, port 3000
+./mvnw -f ClientSide/pom.xml javafx:run                                     # client
+```
 
----
+- **Solo** : dans le client, Play puis Play Offline, régler la partie, jouer. Aucun serveur n'est nécessaire.
+- **En ligne** : démarrer le serveur, puis dans chaque client Play, renseigner l'IP, le port 3000 et un pseudo, puis Play Online pour créer ou rejoindre un salon.
 
-## Paramètres techniques
+Commandes : flèches pour se déplacer, Espace pour poser une bombe, F11 pour le plein écran.
 
-- **Grille par défaut** : 15 × 11 cases (40 px / case).
-- **Capacité** : Jusqu'à 4 joueurs par room.
-- **Personnalisation** : 35 skins de personnages disponibles.
-- **Animations** : Sprites directionnels (3 frames), bombes (28 frames), explosions (14 frames).
+## Comment c'est fait
 
----
+```
+Common/      Modèle partagé : entités, bots, labyrinthes, messages réseau, logs
+ServerSide/  Serveur TCP : salons, boucle de jeu, diffusion de l'état
+ClientSide/  Interface JavaFX : vues FXML, réseau client, rendu des sprites
+```
 
-## Équipe
+- **Serveur faisant autorité** : la partie est simulée sur le serveur à 60 ticks par seconde, bots compris. Les clients envoient leurs actions et affichent l'état qu'ils reçoivent 20 fois par seconde. Un client ne commande que son propre personnage, et pas plus vite qu'une case toutes les 120 ms.
+- **Protocole** : messages binaires `[1 octet de type][4 octets de longueur][JSON en UTF-8]`, 20 types de messages.
+- **Design patterns** : Singleton (`ServerManager`, `NetworkManager`, `SceneManager`), Factory (`MazeFactory`, `AIFactory`, `MessageFactory`), Strategy (stratégies des bots), Observer (diffusion de l'état aux clients), Chaîne de responsabilité (logs console puis fichier).
+- **Tests** : `./mvnw verify` compile les trois modules et lance les tests ; GitHub Actions fait de même à chaque push.
 
-Groupe B — SAÉ S4 — IUT Informatique de Caen. Le jeu a été écrit en équipe en quatre jours, du 29 mars au 2 avril 2026.
+Le sujet de la SAÉ est dans [docs/sujet.md](docs/sujet.md).
 
-## Ma contribution
+## Équipe et ma contribution
 
-Ce dépôt est ma copie personnelle du projet.
+Groupe B de la SAÉ S4, IUT Informatique de Caen. Le jeu a été écrit en équipe en quatre jours, du 29 mars au 2 avril 2026.
 
-**Pendant le projet**, je me suis occupé des entités du jeu (joueur, bombes, collisions, explosions) et de tout le module d'IA : les trois stratégies et leur recherche de chemin par parcours en largeur.
+**Pendant le projet**, je me suis occupé des entités du jeu (joueur, bombes, collisions, explosions) et de tout le module des bots : les trois stratégies et leur recherche de chemin.
 
 **Après le rendu**, j'ai repris le projet pour l'auditer et le corriger :
 
-- **Juin 2026** : correction de bugs de réseau et de concurrence, factorisation du BFS des bots, suppression de messages dupliqués, remise en état des tests.
+- **Juin 2026** : correction de bugs de réseau et de concurrence, factorisation du parcours en largeur des bots, suppression de messages dupliqués, remise en état des tests.
 - **Octobre 2026** : la partie est désormais simulée par le serveur. Avant, il se contentait de relayer les touches et chaque client simulait sa propre partie, si bien que les écrans divergeaient.
 - Corrections de jeu : bots qui contournent les bombes et fuient les leurs, vitesse de déplacement constante, sprites mal associés, écran de fin, clavier inopérant en ligne.
 - Salons : hôte seul à lancer la partie, quatre personnages au plus, taille de carte, durée, nombre de bombes et chat.
-- Tests ajoutés sur l'IA, le décompte des kills et la sérialisation de l'état de jeu.
+- Tests ajoutés sur les bots, le décompte des éliminations et la sérialisation de l'état de jeu.
